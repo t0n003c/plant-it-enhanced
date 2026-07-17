@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.13.1 - 2026-07-17 - Cache compatibility fix
+
+- Scope Redis cache keys to the application version so serialized catalog and plant data from an older release
+  cannot be read by an incompatible newer model.
+- Fix common-name search failures reporting that cached values could not be deserialized after upgrading from
+  0.12.0 to 0.13.0.
+
 ## 0.13.0 - 2026-07-17 - Care intelligence v1
 
 - Add camera and gallery plant identification through a server-side Pl@ntNet integration.
