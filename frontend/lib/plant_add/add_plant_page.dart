@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:plant_it/app_exception.dart';
 import 'package:plant_it/back_button.dart';
 import 'package:plant_it/dto/plant_dto.dart';
@@ -14,11 +15,13 @@ import 'package:plant_it/toast/toast_manager.dart';
 class AddPlantPage extends StatefulWidget {
   final SpeciesDTO species;
   final Environment env;
+  final XFile? identificationImage;
 
   const AddPlantPage({
     super.key,
     required this.species,
     required this.env,
+    this.identificationImage,
   });
 
   @override
@@ -61,6 +64,8 @@ class _AddPlantPageState extends State<AddPlantPage> {
       SpeciesDTO? updatedSpecies;
       if (widget.species.id == null) {
         updatedSpecies = await _createSpecies();
+      } else if (widget.species.care.allNull == true) {
+        updatedSpecies = await _refreshCareGuide(widget.species);
       }
       _toCreate.speciesId = updatedSpecies?.id ?? speciesId;
       _toCreate.info.state = "PURCHASED";
@@ -72,7 +77,19 @@ class _AddPlantPageState extends State<AddPlantPage> {
         if (!mounted) return;
         throw AppException(AppLocalizations.of(context).errorCreatingPlant);
       }
-      widget.env.plants.add(PlantDTO.fromJson(responseBody));
+      final PlantDTO createdPlant = PlantDTO.fromJson(responseBody);
+      widget.env.plants.add(createdPlant);
+      if (widget.identificationImage != null && createdPlant.id != null) {
+        final imageResponse = await widget.env.http.uploadImage(
+          widget.identificationImage!,
+          createdPlant.id!,
+        );
+        if (imageResponse.statusCode != 200) {
+          widget.env.logger.warning(
+            'Plant was created, but its identification photo could not be saved',
+          );
+        }
+      }
       widget.env.logger.info("Plant successfully created");
       if (!mounted) return;
       widget.env.toastManager.showToast(context, ToastNotificationType.success,
@@ -96,11 +113,35 @@ class _AddPlantPageState extends State<AddPlantPage> {
         throw AppException(AppLocalizations.of(context).errorCreatingSpecies);
       }
       widget.env.logger.info("Species successfully created");
-      return SpeciesDTO.fromJson(responseBody);
+      return _refreshCareGuide(SpeciesDTO.fromJson(responseBody));
     } catch (e, st) {
       widget.env.logger.error(e, st);
       throw AppException.withInnerException(e as Exception);
     }
+  }
+
+  Future<SpeciesDTO> _refreshCareGuide(SpeciesDTO species) async {
+    if (species.id == null) return species;
+    try {
+      final careResponse = await widget.env.http.post(
+        'botanical-info/${species.id}/care/refresh',
+        {},
+      );
+      if (careResponse.statusCode == 200) {
+        return SpeciesDTO.fromJson(
+          json.decode(utf8.decode(careResponse.bodyBytes)),
+        );
+      }
+      widget.env.logger.warning(
+        'Species is available, but its care guide could not be enriched',
+      );
+    } catch (error, stackTrace) {
+      widget.env.logger.warning(
+        'Species is available, but its care guide could not be enriched: $error',
+      );
+      widget.env.logger.debug(stackTrace);
+    }
+    return species;
   }
 
   @override
@@ -142,6 +183,7 @@ class _AddPlantPageState extends State<AddPlantPage> {
                         child: AddPlantImageHeader(
                           species: widget.species,
                           env: widget.env,
+                          localImage: widget.identificationImage,
                         ),
                       ),
                       AddPlantBody(toCreate: _toCreate),

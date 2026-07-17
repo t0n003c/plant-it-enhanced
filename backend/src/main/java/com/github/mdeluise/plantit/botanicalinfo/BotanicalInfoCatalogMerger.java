@@ -215,6 +215,9 @@ public final class BotanicalInfoCatalogMerger {
         if (target.getHumidity() == null) {
             target.setHumidity(source.getHumidity());
         }
+        if (target.getSoilHumidity() == null) {
+            target.setSoilHumidity(source.getSoilHumidity());
+        }
         if (target.getMinTemp() == null) {
             target.setMinTemp(source.getMinTemp());
         }
@@ -226,6 +229,11 @@ public final class BotanicalInfoCatalogMerger {
         }
         if (target.getPhMax() == null) {
             target.setPhMax(source.getPhMax());
+        }
+        if (target.getSource() == null && source.getSource() != null) {
+            target.setSource(source.getSource());
+            target.setSourceReference(source.getSourceReference());
+            target.setLastVerifiedAt(source.getLastVerifiedAt());
         }
     }
 

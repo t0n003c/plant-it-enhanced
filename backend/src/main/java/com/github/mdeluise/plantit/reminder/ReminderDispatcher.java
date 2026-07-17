@@ -1,6 +1,5 @@
 package com.github.mdeluise.plantit.reminder;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -14,7 +13,6 @@ import com.github.mdeluise.plantit.notification.dispatcher.NotificationDispatche
 import com.github.mdeluise.plantit.notification.dispatcher.NotificationDispatcherName;
 import com.github.mdeluise.plantit.notification.dispatcher.config.AbstractNotificationDispatcherConfig;
 import com.github.mdeluise.plantit.notification.dispatcher.config.NotificationDispatcherConfigImplRepository;
-import com.github.mdeluise.plantit.reminder.frequency.Frequency;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,17 +25,20 @@ public class ReminderDispatcher {
     private final NotificationDispatcherConfigImplRepository notificationDispatcherConfigImplRepository;
     private final ReminderRepository reminderRepository;
     private final DiaryEntryService diaryEntryService;
+    private final ReminderScheduleCalculator scheduleCalculator;
     private final Logger logger = LoggerFactory.getLogger(ReminderDispatcher.class);
 
 
     @Autowired
     public ReminderDispatcher(List<NotificationDispatcher> notificationsDispatchers,
                               NotificationDispatcherConfigImplRepository notificationDispatcherConfigImplRepository,
-                              ReminderRepository reminderRepository, DiaryEntryService diaryEntryService) {
+                              ReminderRepository reminderRepository, DiaryEntryService diaryEntryService,
+                              ReminderScheduleCalculator scheduleCalculator) {
         this.notificationsDispatchers = notificationsDispatchers;
         this.notificationDispatcherConfigImplRepository = notificationDispatcherConfigImplRepository;
         this.reminderRepository = reminderRepository;
         this.diaryEntryService = diaryEntryService;
+        this.scheduleCalculator = scheduleCalculator;
     }
 
 
@@ -57,42 +58,28 @@ public class ReminderDispatcher {
     private boolean isToNotify(Reminder reminder) {
         final Optional<DiaryEntry> lastEntry =
             diaryEntryService.getLast(reminder.getTarget().getId(), reminder.getAction());
-        final Date now = new Date();
-        if (reminder.getStart().after(now)) {
+        final Date now = scheduleCalculator.now();
+        if (reminder.getStart().after(now) ||
+                reminder.getEnd() != null && reminder.getEnd().before(now)) {
             return false;
         }
-
-        if (lastEntry.isPresent() &&
-                (new Date(lastEntry.get().getDate().getTime() + calculateMilliseconds(reminder.getFrequency()))).after(
-                    new Date())) {
+        final Date lastCompletedAt = lastEntry.map(DiaryEntry::getDate).orElse(null);
+        final Date dueAt = scheduleCalculator.calculateDueAt(reminder, lastCompletedAt);
+        if (reminder.getEnd() != null && dueAt.after(reminder.getEnd())) {
             return false;
         }
-
-        // Case 1: No last entry, start date is before now, and no last notification
-        if (lastEntry.isEmpty() && reminder.getLastNotified() == null) {
+        final Date actionAt = scheduleCalculator.calculateActionAt(reminder, dueAt);
+        if (actionAt.after(now)) {
+            return false;
+        }
+        if (reminder.getLastNotified() == null || reminder.getLastNotified().before(dueAt)) {
             return true;
         }
-
-        // Case 2: No last entry, start date is before now, and last notification is before repeatAfter time
-        if (lastEntry.isEmpty() && reminder.getStart().before(now) && reminder.getLastNotified() != null && new Date(
-            reminder.getLastNotified().getTime() + calculateMilliseconds(reminder.getRepeatAfter())).before(now)) {
-            return true;
-        }
-
-        // Case 3: Last entry exists, but time since last entry is greater than frequency
-        return lastEntry.map(entry -> {
-            if (isEntryOlderThanFrequency(entry, reminder.getFrequency())) {
-                // No last notification
-                if (reminder.getLastNotified() == null) {
-                    return true;
-                }
-                // Time since last notification is greater than frequency
-                return new Date(
-                    reminder.getLastNotified().getTime() + calculateMilliseconds(reminder.getRepeatAfter())).before(
-                    now);
-            }
+        if (reminder.getRepeatAfter() == null) {
             return false;
-        }).orElse(false);
+        }
+        final Date repeatAt = scheduleCalculator.add(reminder.getLastNotified(), reminder.getRepeatAfter());
+        return !repeatAt.after(now);
     }
 
 
@@ -120,7 +107,7 @@ public class ReminderDispatcher {
                 );
             }
         });
-        reminder.setLastNotified(new Date());
+        reminder.setLastNotified(scheduleCalculator.now());
         reminderRepository.save(reminder);
     }
 
@@ -131,33 +118,5 @@ public class ReminderDispatcher {
         return notificationsDispatchers.stream().filter(NotificationDispatcher::isEnabled).filter(
                                            notificationDispatcher -> userNotificationDispatchers.contains(notificationDispatcher.getName()))
                                        .collect(Collectors.toSet());
-    }
-
-
-    private boolean isEntryOlderThanFrequency(DiaryEntry entry, Frequency frequency) {
-        final Date now = new Date();
-        final Date lastEntryDate = entry.getDate();
-        final long millisSinceLastEntry = now.getTime() - lastEntryDate.getTime();
-        final long millisInFrequency = calculateMilliseconds(frequency);
-        return millisSinceLastEntry > millisInFrequency;
-    }
-
-
-    private long calculateMilliseconds(Frequency frequency) {
-        long millisInUnit = switch (frequency.getUnit()) {
-            case DAYS -> 24L * 60 * 60 * 1000;
-            case WEEKS -> 7L * 24 * 60 * 60 * 1000;
-            case MONTHS -> {
-                final Calendar calendar = Calendar.getInstance();
-                calendar.add(Calendar.MONTH, frequency.getQuantity());
-                yield calendar.getTimeInMillis();
-            }
-            case YEARS -> {
-                final Calendar calendar = Calendar.getInstance();
-                calendar.add(Calendar.YEAR, frequency.getQuantity());
-                yield calendar.getTimeInMillis();
-            }
-        };
-        return millisInUnit * frequency.getQuantity();
     }
 }

@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.13.0 - 2026-07-17 - Care intelligence v1
+
+- Add camera and gallery plant identification through a server-side Pl@ntNet integration.
+- Reuse an existing taxon when a photo matches the trusted catalog and preserve the selected photo when adding it.
+- Add attributable Trefle care enrichment with light, humidity, soil moisture, temperature, and pH data.
+- Present plain-language sun and watering guidance while keeping raw care values editable.
+- Add a Today workflow for completing, snoozing, and skipping due plant-care reminders.
+- Record completed care tasks in the plant diary.
+- Make daily, weekly, monthly, and yearly recurrence calendar-aware across DST and month boundaries.
+- Add additive migrations for reminder workflow state and care-data provenance.
+- Add focused provider, recurrence, and Today workflow tests.
+
 ## 0.12.0 - 2026-07-17 - Catalog v1
 
 - Add a durable GBIF-backed canonical taxon identity.

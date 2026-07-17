@@ -1,5 +1,6 @@
 package com.github.mdeluise.plantit.unit.component;
 
+import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -19,6 +20,7 @@ import com.github.mdeluise.plantit.plant.Plant;
 import com.github.mdeluise.plantit.reminder.Reminder;
 import com.github.mdeluise.plantit.reminder.ReminderDispatcher;
 import com.github.mdeluise.plantit.reminder.ReminderRepository;
+import com.github.mdeluise.plantit.reminder.ReminderScheduleCalculator;
 import com.github.mdeluise.plantit.reminder.frequency.Frequency;
 import com.github.mdeluise.plantit.reminder.frequency.Unit;
 import org.junit.jupiter.api.DisplayName;
@@ -39,6 +41,8 @@ public class ReminderDispatcherUnitTests {
     @Mock
     private NotificationDispatcherConfigImplRepository notificationDispatcherConfigImplRepository;
     private ReminderDispatcher reminderDispatcher;
+    private final ReminderScheduleCalculator scheduleCalculator =
+        new ReminderScheduleCalculator(Clock.systemDefaultZone());
 
 
     @Test
@@ -50,7 +54,7 @@ public class ReminderDispatcherUnitTests {
         final NotificationDispatcher dispatcher = Mockito.mock(ConsoleNotificationDispatcher.class);
         final List<NotificationDispatcher> dispatchers = new ArrayList<>(Collections.singleton(dispatcher));
         reminderDispatcher = new ReminderDispatcher(dispatchers, notificationDispatcherConfigImplRepository,
-                                                    reminderRepository, diaryEntryService);
+                                                    reminderRepository, diaryEntryService, scheduleCalculator);
         Mockito.when(reminderRepository.findAllByEnabledTrue()).thenReturn(Collections.singletonList(reminder));
         Mockito.when(diaryEntryService.getLast(Mockito.any(), Mockito.any())).thenReturn(Optional.empty());
 
@@ -73,7 +77,7 @@ public class ReminderDispatcherUnitTests {
         reminder.setStart(new Date(System.currentTimeMillis() - 10000));
         final List<NotificationDispatcher> dispatchers = new ArrayList<>(Collections.singleton(dispatcher));
         reminderDispatcher = new ReminderDispatcher(dispatchers, notificationDispatcherConfigImplRepository,
-                                                    reminderRepository, diaryEntryService);
+                                                    reminderRepository, diaryEntryService, scheduleCalculator);
         Mockito.when(dispatcher.getName()).thenReturn(NotificationDispatcherName.CONSOLE);
         Mockito.when(dispatcher.isEnabled()).thenReturn(true);
         Mockito.when(reminderRepository.findAllByEnabledTrue()).thenReturn(Collections.singletonList(reminder));
@@ -105,7 +109,7 @@ public class ReminderDispatcherUnitTests {
         reminder.setRepeatAfter(frequency);
         final List<NotificationDispatcher> dispatchers = new ArrayList<>(Collections.singleton(dispatcher));
         reminderDispatcher = new ReminderDispatcher(dispatchers, notificationDispatcherConfigImplRepository,
-                                                    reminderRepository, diaryEntryService);
+                                                    reminderRepository, diaryEntryService, scheduleCalculator);
         Mockito.when(dispatcher.getName()).thenReturn(NotificationDispatcherName.CONSOLE);
         Mockito.when(dispatcher.isEnabled()).thenReturn(true);
         Mockito.when(reminderRepository.findAllByEnabledTrue()).thenReturn(Collections.singletonList(reminder));
@@ -144,7 +148,7 @@ public class ReminderDispatcherUnitTests {
         reminder.setRepeatAfter(repeatAfter);
         final List<NotificationDispatcher> dispatchers = new ArrayList<>(Collections.singleton(dispatcher));
         reminderDispatcher = new ReminderDispatcher(dispatchers, notificationDispatcherConfigImplRepository,
-                                                    reminderRepository, diaryEntryService);
+                                                    reminderRepository, diaryEntryService, scheduleCalculator);
         Mockito.when(dispatcher.getName()).thenReturn(NotificationDispatcherName.CONSOLE);
         Mockito.when(dispatcher.isEnabled()).thenReturn(true);
         Mockito.when(reminderRepository.findAllByEnabledTrue()).thenReturn(Collections.singletonList(reminder));
@@ -182,7 +186,7 @@ public class ReminderDispatcherUnitTests {
         reminder.setRepeatAfter(repeatAfter);
         final List<NotificationDispatcher> dispatchers = new ArrayList<>(Collections.singleton(dispatcher));
         reminderDispatcher = new ReminderDispatcher(dispatchers, notificationDispatcherConfigImplRepository,
-                                                    reminderRepository, diaryEntryService);
+                                                    reminderRepository, diaryEntryService, scheduleCalculator);
         Mockito.when(dispatcher.getName()).thenReturn(NotificationDispatcherName.CONSOLE);
         Mockito.when(dispatcher.isEnabled()).thenReturn(true);
         Mockito.when(reminderRepository.findAllByEnabledTrue()).thenReturn(Collections.singletonList(reminder));
@@ -221,7 +225,7 @@ public class ReminderDispatcherUnitTests {
         reminder.setLastNotified(new Date(System.currentTimeMillis() - 172800000)); // 2 days ago
         final List<NotificationDispatcher> dispatchers = new ArrayList<>(Collections.singleton(dispatcher));
         reminderDispatcher = new ReminderDispatcher(dispatchers, notificationDispatcherConfigImplRepository,
-                                                    reminderRepository, diaryEntryService);
+                                                    reminderRepository, diaryEntryService, scheduleCalculator);
         Mockito.when(dispatcher.getName()).thenReturn(NotificationDispatcherName.CONSOLE);
         Mockito.when(dispatcher.isEnabled()).thenReturn(true);
         Mockito.when(reminderRepository.findAllByEnabledTrue()).thenReturn(Collections.singletonList(reminder));
@@ -260,7 +264,7 @@ public class ReminderDispatcherUnitTests {
         reminder.setLastNotified(new Date(System.currentTimeMillis() - 86400000)); // 1 day ago
         final List<NotificationDispatcher> dispatchers = new ArrayList<>(Collections.singleton(dispatcher));
         reminderDispatcher = new ReminderDispatcher(dispatchers, notificationDispatcherConfigImplRepository,
-                                                    reminderRepository, diaryEntryService);
+                                                    reminderRepository, diaryEntryService, scheduleCalculator);
         Mockito.when(dispatcher.getName()).thenReturn(NotificationDispatcherName.CONSOLE);
         Mockito.when(dispatcher.isEnabled()).thenReturn(true);
         Mockito.when(reminderRepository.findAllByEnabledTrue()).thenReturn(Collections.singletonList(reminder));

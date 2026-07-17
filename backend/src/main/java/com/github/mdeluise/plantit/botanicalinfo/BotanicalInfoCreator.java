@@ -6,4 +6,5 @@ public enum BotanicalInfoCreator {
     FLORA_CODEX,
     INATURALIST,
     GBIF,
+    PLANTNET,
 }

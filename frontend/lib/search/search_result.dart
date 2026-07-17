@@ -1,6 +1,9 @@
+import 'dart:typed_data';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cached_network_image_platform_interface/cached_network_image_platform_interface.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:plant_it/commons.dart';
 import 'package:plant_it/dto/species_dto.dart';
 import 'package:plant_it/environment.dart';
@@ -15,6 +18,7 @@ class SearchResultCard extends StatefulWidget {
   final Environment env;
   final List<SpeciesDTO> result;
   final Function(SpeciesDTO) updateSpeciesLocally;
+  final XFile? identificationImage;
 
   const SearchResultCard({
     super.key,
@@ -22,6 +26,7 @@ class SearchResultCard extends StatefulWidget {
     required this.env,
     required this.result,
     required this.updateSpeciesLocally,
+    this.identificationImage,
   });
 
   @override
@@ -30,6 +35,7 @@ class SearchResultCard extends StatefulWidget {
 
 class _SearchResultCardState extends State<SearchResultCard> {
   String? _url;
+  Future<Uint8List>? _identificationImageBytes;
 
   Widget _buildPlantLabels(BuildContext context) {
     final Locale locale = Localizations.localeOf(context);
@@ -44,6 +50,11 @@ class _SearchResultCardState extends State<SearchResultCard> {
         if (widget.species.creator == "USER")
           TagChip(
             tag: AppLocalizations.of(context).custom.toUpperCase(),
+          ),
+        if (widget.species.identificationConfidence != null)
+          TagChip(
+            tag:
+                '${widget.species.identificationProvider ?? 'AI'} ${(widget.species.identificationConfidence! * 100).round()}%',
           ),
         Text(
           hasCommonName ? commonName : widget.species.scientificName,
@@ -75,6 +86,9 @@ class _SearchResultCardState extends State<SearchResultCard> {
   @override
   void initState() {
     super.initState();
+    if (widget.identificationImage != null) {
+      _identificationImageBytes = widget.identificationImage!.readAsBytes();
+    }
     if (widget.species.id != null) {
       _url =
           "${widget.env.http.backendUrl}image/content/${widget.species.imageId}";
@@ -86,6 +100,20 @@ class _SearchResultCardState extends State<SearchResultCard> {
 
   @override
   Widget build(BuildContext context) {
+    if (_identificationImageBytes != null) {
+      return FutureBuilder<Uint8List>(
+        future: _identificationImageBytes,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const SizedBox(
+              height: 280,
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
+          return _buildLocalImageCard(context, snapshot.data!);
+        },
+      );
+    }
     return CachedNetworkImage(
       imageUrl:
           _url ?? "${widget.env.http.backendUrl}image/content/non-existing-id",
@@ -118,6 +146,7 @@ class _SearchResultCardState extends State<SearchResultCard> {
               species: widget.species,
               env: widget.env,
               updateSpeciesLocally: widget.updateSpeciesLocally,
+              identificationImage: widget.identificationImage,
             ),
           ),
           child: Stack(
@@ -164,6 +193,7 @@ class _SearchResultCardState extends State<SearchResultCard> {
               species: widget.species,
               env: widget.env,
               updateSpeciesLocally: widget.updateSpeciesLocally,
+              identificationImage: widget.identificationImage,
             ),
           ),
           child: Stack(
@@ -228,6 +258,54 @@ class _SearchResultCardState extends State<SearchResultCard> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildLocalImageCard(BuildContext context, Uint8List imageBytes) {
+    return GestureDetector(
+      onTap: () => goToPageSlidingUp(
+        context,
+        SpeciesDetailsPage(
+          species: widget.species,
+          env: widget.env,
+          updateSpeciesLocally: widget.updateSpeciesLocally,
+          identificationImage: widget.identificationImage,
+        ),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height * .4,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Image.memory(imageBytes, fit: BoxFit.cover),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Container(
+                  height: 100,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.transparent,
+                        Colors.black.withOpacity(.9),
+                      ],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: 10,
+                left: 10,
+                right: 10,
+                child: _buildPlantLabels(context),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

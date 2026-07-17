@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+
+    <changeSet id="careTasksAddSnoozeAndSkipState" author="t0n003c">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="reminders"/>
+        </preConditions>
+        <addColumn tableName="reminders">
+            <column name="snoozed_until" type="datetime(6)"/>
+            <column name="last_skipped_occurrence" type="datetime(6)"/>
+        </addColumn>
+    </changeSet>
+
+
+    <changeSet id="careProfilesAddSourceAndSoilMoisture" author="t0n003c">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="botanical_infos"/>
+        </preConditions>
+        <addColumn tableName="botanical_infos">
+            <column name="soil_humidity" type="int"/>
+            <column name="care_source" type="varchar(32)"/>
+            <column name="care_source_reference" type="varchar(128)"/>
+            <column name="care_last_verified_at" type="datetime(6)"/>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>
