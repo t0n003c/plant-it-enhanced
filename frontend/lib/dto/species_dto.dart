@@ -7,6 +7,7 @@ class SpeciesDTO {
   String? preferredCommonName;
   List<BotanicalCommonNameDTO> commonNames;
   Map<String, String> externalReferences;
+  String? canonicalTaxonKey;
   DateTime? lastVerifiedAt;
   String? family;
   String? genus;
@@ -26,6 +27,7 @@ class SpeciesDTO {
     this.preferredCommonName,
     this.commonNames = const [],
     this.externalReferences = const {},
+    this.canonicalTaxonKey,
     this.lastVerifiedAt,
     this.family,
     this.genus,
@@ -54,6 +56,7 @@ class SpeciesDTO {
       externalReferences:
           (json['externalReferences'] as Map<String, dynamic>? ?? {})
               .map((key, value) => MapEntry(key, value.toString())),
+      canonicalTaxonKey: json['canonicalTaxonKey'],
       lastVerifiedAt: json['lastVerifiedAt'] == null
           ? null
           : DateTime.parse(json['lastVerifiedAt']),
@@ -79,6 +82,7 @@ class SpeciesDTO {
         'preferredCommonName': preferredCommonName,
       'commonNames': commonNames.map((name) => name.toMap()).toList(),
       'externalReferences': externalReferences,
+      if (canonicalTaxonKey != null) 'canonicalTaxonKey': canonicalTaxonKey,
       if (lastVerifiedAt != null)
         'lastVerifiedAt': lastVerifiedAt!.toIso8601String(),
       if (family != null) 'family': family,
@@ -92,6 +96,39 @@ class SpeciesDTO {
       'creator': creator,
       if (externalId != null) 'externalId': externalId,
     };
+  }
+
+  String? preferredCommonNameFor(String language, {String? region}) {
+    final String normalizedLanguage = language.toLowerCase();
+    final String? normalizedRegion = region?.toUpperCase();
+
+    BotanicalCommonNameDTO? findName(
+        bool Function(BotanicalCommonNameDTO) matches) {
+      for (final name in commonNames) {
+        if (name.name.trim().isNotEmpty && matches(name)) return name;
+      }
+      return null;
+    }
+
+    bool matchesLanguage(BotanicalCommonNameDTO name) =>
+        name.language?.toLowerCase() == normalizedLanguage;
+    bool matchesRegion(BotanicalCommonNameDTO name) =>
+        normalizedRegion != null &&
+        name.region?.toUpperCase() == normalizedRegion;
+
+    final BotanicalCommonNameDTO? localized = findName((name) =>
+            name.preferred && matchesLanguage(name) && matchesRegion(name)) ??
+        findName((name) => matchesLanguage(name) && matchesRegion(name)) ??
+        findName((name) => name.preferred && matchesLanguage(name)) ??
+        findName(matchesLanguage);
+    if (localized != null) return localized.name.trim();
+
+    final String? serverPreferred = preferredCommonName?.trim();
+    if (serverPreferred != null && serverPreferred.isNotEmpty) {
+      return serverPreferred;
+    }
+    return findName((name) => name.preferred)?.name.trim() ??
+        findName((name) => true)?.name.trim();
   }
 }
 

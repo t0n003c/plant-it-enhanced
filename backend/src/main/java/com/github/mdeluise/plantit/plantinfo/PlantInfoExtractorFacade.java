@@ -54,4 +54,17 @@ public class PlantInfoExtractorFacade {
         logger.debug(String.format("Extract botanical info matching %s (size %s)", normalizedSearchTerm, size));
         return chainHead.extractPlants(normalizedSearchTerm, size);
     }
+
+
+    @Cacheable(
+        value = "botanical-info",
+        key = "{'localized-common-name-v1', #searchTerm, #size, #locale, #region, " +
+                  "@authenticatedUserService.getAuthenticatedUser().id}"
+    )
+    public List<BotanicalInfo> extractPlants(String searchTerm, int size, String locale, String region) {
+        final String normalizedSearchTerm = searchTerm.isBlank() ? "*" : searchTerm.trim();
+        logger.debug("Extract botanical info matching {} (size {}, locale {}, region {})",
+                     normalizedSearchTerm, size, locale, region);
+        return chainHead.extractPlants(normalizedSearchTerm, size, locale, region);
+    }
 }

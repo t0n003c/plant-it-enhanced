@@ -40,6 +40,10 @@ public interface BotanicalInfoRepository extends JpaRepository<BotanicalInfo, Lo
 
     List<BotanicalInfo> findAllBySpecies(String species);
 
+    List<BotanicalInfo> findAllBySpeciesIgnoreCase(String species);
+
+    List<BotanicalInfo> findAllByCanonicalTaxonKey(String canonicalTaxonKey);
+
     List<BotanicalInfo> findAllByCreatorAndExternalId(BotanicalInfoCreator creator, String externalId);
 
     boolean existsBySpeciesAndCreatorAndUserCreator(String species, BotanicalInfoCreator creator, User userCreator);

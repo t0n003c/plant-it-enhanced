@@ -21,7 +21,8 @@ public class LocalPlantInfoExtractorStep extends AbstractPlantInfoExtractorStep 
 
 
     @Override
-    protected Set<BotanicalInfo> extractPlantsInternal(String partialPlantScientificName, int size) {
+    protected Set<BotanicalInfo> extractPlantsInternal(String partialPlantScientificName, int size,
+                                                        String locale, String region) {
         return botanicalInfoService.getByPartialScientificName(partialPlantScientificName, size);
     }
 

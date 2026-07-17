@@ -25,6 +25,9 @@ public class BotanicalInfoDTO {
     private Set<BotanicalCommonNameDTO> commonNames = new LinkedHashSet<>();
     @Schema(description = "Provider identifiers used to verify this taxon.")
     private Map<String, String> externalReferences = new HashMap<>();
+    @Schema(description = "Stable accepted GBIF taxon key used to merge provider records.",
+            accessMode = Schema.AccessMode.READ_ONLY)
+    private String canonicalTaxonKey;
     @Schema(description = "Last time external taxonomy was verified.")
     private Instant lastVerifiedAt;
     @Schema(description = "Family of the botanical info.")
@@ -106,6 +109,16 @@ public class BotanicalInfoDTO {
 
     public void setExternalReferences(Map<String, String> externalReferences) {
         this.externalReferences = externalReferences;
+    }
+
+
+    public String getCanonicalTaxonKey() {
+        return canonicalTaxonKey;
+    }
+
+
+    public void setCanonicalTaxonKey(String canonicalTaxonKey) {
+        this.canonicalTaxonKey = canonicalTaxonKey;
     }
 
 

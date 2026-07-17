@@ -7,5 +7,7 @@ import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfo;
 public interface PlantInfoExtractorStep extends ChainElement<PlantInfoExtractorStep> {
     List<BotanicalInfo> extractPlants(String partialPlantScientificName, int size);
 
+    List<BotanicalInfo> extractPlants(String partialPlantScientificName, int size, String locale, String region);
+
     List<BotanicalInfo> getAll(int size);
 }

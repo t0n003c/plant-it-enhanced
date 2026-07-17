@@ -49,6 +49,21 @@ class SystemVersionServiceUnitTests {
 
 
     @Test
+    @DisplayName("Should treat a release tag prefix as the same application version")
+    void shouldNormalizeReleaseTagPrefix() throws IOException, InterruptedException {
+        final GitHubReleaseInfo releaseInfo = new GitHubReleaseInfo();
+        releaseInfo.setTagName("v0.12.0");
+        releaseInfo.setBody("Catalog v1");
+        Mockito.when(gitHubSystemVersionService.getLatestVersion()).thenReturn(releaseInfo);
+        systemVersionService = new SystemVersionService("0.12.0", activeProfiles, gitHubSystemVersionService);
+
+        final SystemVersionInfo result = systemVersionService.getLatestVersion();
+
+        Assertions.assertThat(result.isLatest()).isTrue();
+    }
+
+
+    @Test
     @DisplayName("Should get dummy version when in dev profile")
     void shouldGetDummyVersionWhenInDevProfile() throws IOException, InterruptedException {
         this.systemVersionService = new SystemVersionService(version, "dev", gitHubSystemVersionService);

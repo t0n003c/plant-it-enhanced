@@ -74,8 +74,10 @@ public class BotanicalInfoController {
     )
     public ResponseEntity<List<BotanicalInfoDTO>> search(
         @RequestParam(defaultValue = "5", required = false) Integer size,
-        @RequestParam String q) {
-        final Collection<BotanicalInfo> result = plantInfoExtractorFacade.extractPlants(q, size);
+        @RequestParam String q,
+        @RequestParam(required = false) String locale,
+        @RequestParam(required = false) String region) {
+        final Collection<BotanicalInfo> result = plantInfoExtractorFacade.extractPlants(q, size, locale, region);
         final List<BotanicalInfoDTO> convertedResult =
             result.stream().map(botanicalInfoDtoConverter::convertToDTO).collect(Collectors.toList());
         return ResponseEntity.ok(convertedResult);

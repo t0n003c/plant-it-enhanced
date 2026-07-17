@@ -6,4 +6,5 @@
 
     <include file="/dblogs/changelog/changes/v1-0-0.xml"/>
     <include file="/dblogs/changelog/changes/v1-1-0-common-name-search.xml"/>
+    <include file="/dblogs/changelog/changes/v1-2-0-catalog-identity.xml"/>
 </databaseChangeLog>

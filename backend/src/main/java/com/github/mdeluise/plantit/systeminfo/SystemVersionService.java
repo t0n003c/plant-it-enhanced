@@ -40,7 +40,7 @@ public class SystemVersionService {
             final GitHubReleaseInfo latestGithubVersion = gitHubSystemVersionService.getLatestVersion();
             result.setLatestVersion(latestGithubVersion.getTagName());
             result.setLatestReleaseNote(latestGithubVersion.getBody());
-            result.setLatest(version.equals(latestGithubVersion.getTagName()));
+            result.setLatest(normalizeVersion(version).equals(normalizeVersion(latestGithubVersion.getTagName())));
         }
         return result;
     }
@@ -54,5 +54,14 @@ public class SystemVersionService {
             }
         }
         return false;
+    }
+
+
+    private String normalizeVersion(String value) {
+        if (value == null) {
+            return "";
+        }
+        final String normalized = value.trim();
+        return normalized.startsWith("v") ? normalized.substring(1) : normalized;
     }
 }

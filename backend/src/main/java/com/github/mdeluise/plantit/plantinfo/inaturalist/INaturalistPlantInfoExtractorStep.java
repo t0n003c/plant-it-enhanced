@@ -34,12 +34,12 @@ public class INaturalistPlantInfoExtractorStep extends AbstractPlantInfoExtracto
 
 
     @Override
-    protected Set<BotanicalInfo> extractPlantsInternal(String searchTerm, int size) {
+    protected Set<BotanicalInfo> extractPlantsInternal(String searchTerm, int size, String locale, String region) {
         if (!enabled || searchTerm.isBlank() || "*".equals(searchTerm)) {
             return new LinkedHashSet<>();
         }
         try {
-            final List<BotanicalInfo> result = requestMaker.search(searchTerm, size).stream()
+            final List<BotanicalInfo> result = requestMaker.search(searchTerm, size, locale, region).stream()
                                                             .filter(info -> !existsLocally(info))
                                                             .toList();
             return new LinkedHashSet<>(result);
@@ -57,7 +57,8 @@ public class INaturalistPlantInfoExtractorStep extends AbstractPlantInfoExtracto
 
 
     private boolean existsLocally(BotanicalInfo botanicalInfo) {
-        return botanicalInfoService.existsExternalId(BotanicalInfoCreator.INATURALIST,
+        return botanicalInfoService.existsCanonicalTaxon(botanicalInfo.getCanonicalTaxonKey()) ||
+                   botanicalInfoService.existsExternalId(BotanicalInfoCreator.INATURALIST,
                                                       botanicalInfo.getExternalId()) ||
                    botanicalInfoService.existsSpecies(botanicalInfo.getSpecies());
     }

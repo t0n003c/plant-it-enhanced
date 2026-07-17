@@ -13,6 +13,7 @@ import com.github.mdeluise.plantit.plantinfo.config.INaturalistProperties;
 import com.github.mdeluise.plantit.plantinfo.config.PlantSearchProperties;
 import com.github.mdeluise.plantit.plantinfo.gbif.GbifTaxonomyVerifier;
 import com.github.mdeluise.plantit.plantinfo.inaturalist.INaturalistRequestMaker;
+import com.github.mdeluise.plantit.plantinfo.inaturalist.INaturalistRequestThrottle;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import org.junit.jupiter.api.AfterEach;
@@ -109,12 +110,35 @@ class INaturalistRequestMakerUnitTests {
     }
 
 
+    @Test
+    @DisplayName("Should use the requesting user's locale without applying a different regional place")
+    void shouldUseRequestedLocaleAndRegion() {
+        final AtomicReference<String> naturalistQuery = new AtomicReference<>();
+        server.createContext("/v1/taxa/autocomplete", exchange -> {
+            naturalistQuery.set(exchange.getRequestURI().getRawQuery());
+            respond(exchange, AUTOCOMPLETE_RESPONSE);
+        });
+        server.createContext("/v2/species/match", exchange -> respond(exchange, GBIF_RESPONSE));
+        server.start();
+
+        final List<BotanicalInfo> results = createRequestMaker().search("snake plant", 5, "de", "DE");
+
+        Assertions.assertTrue(naturalistQuery.get().contains("locale=de"));
+        Assertions.assertFalse(naturalistQuery.get().contains("preferred_place_id"));
+        Assertions.assertTrue(results.get(0).getCommonNames().stream()
+                                     .allMatch(name -> "de".equals(name.getLanguage()) &&
+                                                           "DE".equals(name.getRegion())));
+    }
+
+
     private INaturalistRequestMaker createRequestMaker() {
         final INaturalistProperties naturalistProperties = Mockito.mock(INaturalistProperties.class);
         final GbifProperties gbifProperties = Mockito.mock(GbifProperties.class);
         final PlantSearchProperties searchProperties = Mockito.mock(PlantSearchProperties.class);
         Mockito.when(naturalistProperties.getUrl()).thenReturn(serverUrl);
         Mockito.when(naturalistProperties.getPreferredPlaceId()).thenReturn(1);
+        Mockito.when(naturalistProperties.getRequestsPerSecond()).thenReturn(1);
+        Mockito.when(naturalistProperties.getRequestBurst()).thenReturn(2);
         Mockito.when(gbifProperties.getUrl()).thenReturn(serverUrl);
         Mockito.when(gbifProperties.getMinimumConfidence()).thenReturn(90);
         Mockito.when(searchProperties.getLocale()).thenReturn("en");
@@ -122,7 +146,8 @@ class INaturalistRequestMakerUnitTests {
         Mockito.when(searchProperties.getUserAgent()).thenReturn("Plant-it unit test");
         final HttpClient client = HttpClient.newHttpClient();
         final GbifTaxonomyVerifier verifier = new GbifTaxonomyVerifier(client, gbifProperties, searchProperties);
-        return new INaturalistRequestMaker(client, verifier, naturalistProperties, searchProperties);
+        final INaturalistRequestThrottle throttle = new INaturalistRequestThrottle(naturalistProperties);
+        return new INaturalistRequestMaker(client, verifier, throttle, naturalistProperties, searchProperties);
     }
 
 
