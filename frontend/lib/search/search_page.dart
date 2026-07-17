@@ -7,6 +7,7 @@ import 'package:plant_it/dto/species_dto.dart';
 import 'package:plant_it/environment.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:plant_it/search/add_custom.dart';
+import 'package:plant_it/search/photo_source_sheet.dart';
 import 'package:plant_it/search/search_result.dart';
 
 class SeachPage extends StatefulWidget {
@@ -153,32 +154,14 @@ class _SeachPageState extends State<SeachPage> {
   void _showPhotoOptions() {
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: const Color.fromRGBO(24, 44, 37, 1),
-      builder: (context) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                AppLocalizations.of(context).photoIdentificationPrivacy,
-                style: const TextStyle(color: Colors.grey),
-              ),
-              const SizedBox(height: 8),
-              ListTile(
-                leading: const Icon(Icons.camera_alt_outlined),
-                title: Text(AppLocalizations.of(context).takePlantPhoto),
-                onTap: () => _identifyFromPhoto(ImageSource.camera),
-              ),
-              ListTile(
-                leading: const Icon(Icons.photo_library_outlined),
-                title: Text(AppLocalizations.of(context).choosePlantPhoto),
-                onTap: () => _identifyFromPhoto(ImageSource.gallery),
-              ),
-            ],
-          ),
-        ),
+      backgroundColor: PhotoSourceSheet.backgroundColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+      ),
+      clipBehavior: Clip.antiAlias,
+      builder: (context) => PhotoSourceSheet(
+        onCamera: () => _identifyFromPhoto(ImageSource.camera),
+        onGallery: () => _identifyFromPhoto(ImageSource.gallery),
       ),
     );
   }

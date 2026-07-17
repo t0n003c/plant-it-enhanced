@@ -1,0 +1,169 @@
+{
+  "verifiedAt": "2026-07-17T00:00:00Z",
+  "profiles": [
+    {
+      "scientificNames": ["Monstera deliciosa"],
+      "light": 6,
+      "humidity": 8,
+      "soilHumidity": 6,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/monstera-deliciosa/"
+    },
+    {
+      "scientificNames": ["Epipremnum aureum"],
+      "light": 4,
+      "soilHumidity": 4,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/epipremnum-aureum/"
+    },
+    {
+      "scientificNames": ["Dracaena trifasciata", "Sansevieria trifasciata"],
+      "light": 5,
+      "soilHumidity": 3,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/dracaena-trifasciata/"
+    },
+    {
+      "scientificNames": ["Chlorophytum comosum"],
+      "light": 4,
+      "soilHumidity": 6,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/chlorophytum-comosum/"
+    },
+    {
+      "scientificNames": ["Spathiphyllum", "Spathiphyllum wallisii"],
+      "light": 4,
+      "humidity": 7,
+      "soilHumidity": 7,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/spathiphyllum/"
+    },
+    {
+      "scientificNames": ["Zamioculcas zamiifolia"],
+      "light": 4,
+      "soilHumidity": 3,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/zamioculcas-zamiifolia/"
+    },
+    {
+      "scientificNames": ["Aloe vera"],
+      "light": 7,
+      "soilHumidity": 3,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/aloe-vera/"
+    },
+    {
+      "scientificNames": ["Philodendron hederaceum"],
+      "light": 4,
+      "soilHumidity": 6,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/philodendron-hederaceum/"
+    },
+    {
+      "scientificNames": ["Ocimum basilicum"],
+      "light": 7,
+      "soilHumidity": 6,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/ocimum-basilicum/"
+    },
+    {
+      "scientificNames": ["Salvia rosmarinus", "Rosmarinus officinalis"],
+      "light": 9,
+      "soilHumidity": 4,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/salvia-rosmarinus/"
+    },
+    {
+      "scientificNames": ["Thymus vulgaris"],
+      "light": 9,
+      "soilHumidity": 4,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/thymus-vulgaris/"
+    },
+    {
+      "scientificNames": ["Mentha spicata"],
+      "light": 7,
+      "soilHumidity": 7,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/mentha-spicata/"
+    },
+    {
+      "scientificNames": ["Origanum vulgare"],
+      "light": 7,
+      "soilHumidity": 5,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/origanum-vulgare/"
+    },
+    {
+      "scientificNames": ["Zea mays"],
+      "light": 9,
+      "soilHumidity": 8,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/zea-mays/"
+    },
+    {
+      "scientificNames": ["Solanum lycopersicum"],
+      "light": 9,
+      "soilHumidity": 7,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/solanum-lycopersicum/"
+    },
+    {
+      "scientificNames": ["Capsicum annuum"],
+      "light": 9,
+      "soilHumidity": 6,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/capsicum-annuum/"
+    },
+    {
+      "scientificNames": ["Cucumis sativus"],
+      "light": 9,
+      "soilHumidity": 7,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/cucumis-sativus/"
+    },
+    {
+      "scientificNames": ["Lactuca sativa"],
+      "light": 7,
+      "soilHumidity": 7,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/lactuca-sativa/"
+    },
+    {
+      "scientificNames": ["Helianthus annuus"],
+      "light": 9,
+      "soilHumidity": 5,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/helianthus-annuus/"
+    },
+    {
+      "scientificNames": ["Lavandula angustifolia"],
+      "light": 8,
+      "soilHumidity": 3,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/lavandula-angustifolia/"
+    },
+    {
+      "scientificNames": [
+        "Rosa",
+        "Rosa spp.",
+        "Rosa canina",
+        "Rosa chinensis",
+        "Rosa gallica",
+        "Rosa multiflora",
+        "Rosa rubiginosa",
+        "Rosa rugosa",
+        "Rosa hybrida",
+        "Rosa x hybrida",
+        "Rosa × hybrida"
+      ],
+      "light": 9,
+      "soilHumidity": 6,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/rosa/"
+    },
+    {
+      "scientificNames": ["Tagetes erecta"],
+      "light": 8,
+      "soilHumidity": 4,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/tagetes-erecta/"
+    },
+    {
+      "scientificNames": ["Phaseolus vulgaris"],
+      "light": 9,
+      "soilHumidity": 6,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/phaseolus-vulgaris/"
+    },
+    {
+      "scientificNames": ["Cucurbita pepo"],
+      "light": 9,
+      "soilHumidity": 7,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/cucurbita-pepo/"
+    },
+    {
+      "scientificNames": ["Fragaria × ananassa", "Fragaria x ananassa"],
+      "light": 8,
+      "soilHumidity": 6,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/fragaria-x-ananassa/"
+    }
+  ]
+}

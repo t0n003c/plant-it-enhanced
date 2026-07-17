@@ -8,4 +8,5 @@ public enum BotanicalInfoCreator {
     GBIF,
     PLANTNET,
     PERENUAL,
+    CURATED_CATALOG,
 }

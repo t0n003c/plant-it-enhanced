@@ -209,6 +209,9 @@ class _SpeciesDetailsTabState extends State<SpeciesDetailsTab> {
     if (widget.species.care.source == 'TREFLE') {
       return AppLocalizations.of(context).careDataProvidedByTrefle;
     }
+    if (widget.species.care.source == 'CURATED_CATALOG') {
+      return AppLocalizations.of(context).careDataProvidedByCuratedCatalog;
+    }
     if (widget.species.care.source == 'PERENUAL') {
       return AppLocalizations.of(context).careDataProvidedByPerenual;
     }
