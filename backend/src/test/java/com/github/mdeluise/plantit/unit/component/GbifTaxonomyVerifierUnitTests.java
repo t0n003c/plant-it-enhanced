@@ -79,6 +79,7 @@ class GbifTaxonomyVerifierUnitTests {
         Assertions.assertEquals("Asparagaceae", result.getFamily());
         Assertions.assertTrue(result.getSynonyms().contains("Sansevieria trifasciata"));
         Assertions.assertEquals("11041822", result.getExternalReferences().get("GBIF"));
+        Assertions.assertEquals("11041822", result.getCanonicalTaxonKey());
         Assertions.assertNotNull(result.getLastVerifiedAt());
     }
 

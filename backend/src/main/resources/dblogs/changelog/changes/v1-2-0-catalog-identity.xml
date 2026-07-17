@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+
+    <changeSet id="catalogV1AddCanonicalTaxonKey" author="t0n003c">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="botanical_infos" columnName="canonical_taxon_key"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="botanical_infos">
+            <column name="canonical_taxon_key" type="varchar(64)"
+                    remarks="Accepted GBIF taxon key used to merge records from multiple providers">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+
+    <changeSet id="catalogV1BackfillCanonicalTaxonKey" author="t0n003c">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <columnExists tableName="botanical_infos" columnName="canonical_taxon_key"/>
+                <tableExists tableName="botanical_external_references"/>
+            </and>
+        </preConditions>
+        <sql>
+            UPDATE botanical_infos
+            SET canonical_taxon_key = (
+                SELECT MAX(external_id)
+                FROM botanical_external_references
+                WHERE botanical_info_id = botanical_infos.id
+                  AND provider = 'GBIF'
+            )
+            WHERE canonical_taxon_key IS NULL
+              AND EXISTS (
+                  SELECT 1
+                  FROM botanical_external_references
+                  WHERE botanical_info_id = botanical_infos.id
+                    AND provider = 'GBIF'
+              )
+        </sql>
+    </changeSet>
+
+
+    <changeSet id="catalogV1IndexCanonicalTaxonKey" author="t0n003c">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="botanical_infos" indexName="idx_botanical_info_canonical_taxon"/>
+            </not>
+        </preConditions>
+        <createIndex tableName="botanical_infos" indexName="idx_botanical_info_canonical_taxon">
+            <column name="canonical_taxon_key"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

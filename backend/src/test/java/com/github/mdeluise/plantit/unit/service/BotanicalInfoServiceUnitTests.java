@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.github.mdeluise.plantit.authentication.User;
+import com.github.mdeluise.plantit.botanicalinfo.BotanicalCommonName;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfo;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoCreator;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoRepository;
@@ -179,6 +180,45 @@ class BotanicalInfoServiceUnitTests {
         Assertions.assertThat(botanicalInfoToSave).isEqualTo(result);
         Mockito.verify(authenticatedUserService, Mockito.times(1)).getAuthenticatedUser();
         Mockito.verify(botanicalInfoRepository, Mockito.times(1)).save(botanicalInfoToSave);
+    }
+
+
+    @Test
+    @DisplayName("Should merge another provider into an existing canonical catalog entry")
+    void shouldMergeCanonicalCatalogEntry() throws MalformedURLException {
+        final BotanicalInfo existing = new BotanicalInfo();
+        existing.setId(1L);
+        existing.setCreator(BotanicalInfoCreator.FLORA_CODEX);
+        existing.setExternalId("flora-1");
+        existing.setCanonicalTaxonKey("11041822");
+        existing.setSpecies("Dracaena trifasciata");
+        existing.getExternalReferences().put("GBIF", "11041822");
+        existing.getExternalReferences().put("FLORA_CODEX", "flora-1");
+
+        final BotanicalInfo incoming = new BotanicalInfo();
+        incoming.setCreator(BotanicalInfoCreator.INATURALIST);
+        incoming.setExternalId("inat-1");
+        incoming.setCanonicalTaxonKey("11041822");
+        incoming.setSpecies("Dracaena trifasciata");
+        incoming.getExternalReferences().put("GBIF", "11041822");
+        incoming.getExternalReferences().put("INATURALIST", "inat-1");
+        incoming.getCommonNames().add(new BotanicalCommonName(
+            "Snake Plant", "en", "US", true, BotanicalInfoCreator.INATURALIST
+        ));
+
+        Mockito.when(botanicalInfoRepository.findAllByCanonicalTaxonKey("11041822"))
+               .thenReturn(List.of(existing));
+        Mockito.when(botanicalInfoRepository.findAllBySpeciesIgnoreCase("Dracaena trifasciata"))
+               .thenReturn(List.of(existing));
+        Mockito.when(botanicalInfoRepository.save(existing)).thenReturn(existing);
+
+        final BotanicalInfo result = botanicalInfoService.save(incoming);
+
+        Assertions.assertThat(result).isSameAs(existing);
+        Assertions.assertThat(result.getExternalReferences()).containsEntry("FLORA_CODEX", "flora-1")
+                                                              .containsEntry("INATURALIST", "inat-1");
+        Assertions.assertThat(result.getPreferredCommonName()).isEqualTo("Snake Plant");
+        Mockito.verify(botanicalInfoRepository, Mockito.times(1)).save(existing);
     }
 
 
@@ -424,12 +464,12 @@ class BotanicalInfoServiceUnitTests {
         final String species = "species";
         final BotanicalInfo botanicalInfo = new BotanicalInfo();
         botanicalInfo.setId(1L);
-        Mockito.when(botanicalInfoRepository.findAllBySpecies(species)).thenReturn(List.of(botanicalInfo));
+        Mockito.when(botanicalInfoRepository.findAllBySpeciesIgnoreCase(species)).thenReturn(List.of(botanicalInfo));
 
         final boolean result = botanicalInfoService.existsSpecies(species);
 
         Assertions.assertThat(result).isTrue();
-        Mockito.verify(botanicalInfoRepository, Mockito.times(1)).findAllBySpecies(species);
+        Mockito.verify(botanicalInfoRepository, Mockito.times(1)).findAllBySpeciesIgnoreCase(species);
     }
 
 
@@ -447,12 +487,13 @@ class BotanicalInfoServiceUnitTests {
         existingBotanicalInfo.setSpecies("species");
 
         Mockito.when(authenticatedUserService.getAuthenticatedUser()).thenReturn(authenticatedUser);
-        Mockito.when(botanicalInfoRepository.findAllBySpecies(species)).thenReturn(List.of(existingBotanicalInfo));
+        Mockito.when(botanicalInfoRepository.findAllBySpeciesIgnoreCase(species))
+               .thenReturn(List.of(existingBotanicalInfo));
 
         final boolean result = botanicalInfoService.existsSpecies(species);
 
         Assertions.assertThat(result).isFalse();
         Mockito.verify(authenticatedUserService, Mockito.times(1)).getAuthenticatedUser();
-        Mockito.verify(botanicalInfoRepository, Mockito.times(1)).findAllBySpecies(species);
+        Mockito.verify(botanicalInfoRepository, Mockito.times(1)).findAllBySpeciesIgnoreCase(species);
     }
 }

@@ -113,6 +113,7 @@ public class GbifTaxonomyVerifier {
         final String gbifKey = readString(usage, "key");
         if (gbifKey != null) {
             candidate.getExternalReferences().put(BotanicalInfoCreator.GBIF.name(), gbifKey);
+            candidate.setCanonicalTaxonKey(gbifKey);
         }
         applyClassification(candidate, response.get("classification"));
         candidate.setLastVerifiedAt(Instant.now());

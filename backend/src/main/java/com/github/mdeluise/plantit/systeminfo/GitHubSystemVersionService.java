@@ -11,18 +11,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class GitHubSystemVersionService {
-    private final String gitHubApiUrl = "https://api.github.com/repos/MDeLuise/plant-it/releases/latest";
+    private final String gitHubApiUrl;
     private final HttpClient httpClient;
     private final Logger logger = LoggerFactory.getLogger(GitHubSystemVersionService.class);
 
 
     @Autowired
-    public GitHubSystemVersionService(HttpClient httpClient) {
+    public GitHubSystemVersionService(HttpClient httpClient,
+                                      @Value("${app.github-repository}") String gitHubRepository) {
         this.httpClient = httpClient;
+        this.gitHubApiUrl = "https://api.github.com/repos/" + gitHubRepository + "/releases/latest";
     }
 
 

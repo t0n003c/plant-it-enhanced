@@ -32,7 +32,11 @@ class _SearchResultCardState extends State<SearchResultCard> {
   String? _url;
 
   Widget _buildPlantLabels(BuildContext context) {
-    final String? commonName = widget.species.preferredCommonName?.trim();
+    final Locale locale = Localizations.localeOf(context);
+    final String? commonName = widget.species.preferredCommonNameFor(
+      locale.languageCode,
+      region: locale.countryCode,
+    );
     final bool hasCommonName = commonName != null && commonName.isNotEmpty;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

@@ -106,22 +106,61 @@ public class BotanicalInfoService {
     @CacheEvict(cacheNames = "botanical-info", allEntries = true)
     @Transactional
     public BotanicalInfo save(BotanicalInfo toSave) throws MalformedURLException {
-        checkSpeciesNotDuplicatedForSameCreator(toSave);
         if (toSave.isUserCreated()) {
             toSave.setUserCreator(authenticatedUserService.getAuthenticatedUser());
         }
         removeDuplicatedCaseInsensitiveSynonyms(toSave);
         removeInvalidCommonNames(toSave);
+        BotanicalInfoCatalogMerger.prepareCanonicalIdentity(toSave);
         final BotanicalInfoImage imageToSave = toSave.getImage();
         toSave.setImage(null);
-        final BotanicalInfo result = botanicalInfoRepository.save(toSave);
+        // Repeated submissions from the same source retain the API's duplicate
+        // rejection semantics. Catalog merging is reserved for equivalent taxa
+        // contributed by different providers.
+        checkSpeciesNotDuplicatedForSameCreator(toSave);
+        final BotanicalInfo result;
+        final Optional<BotanicalInfo> mergeTarget = findCatalogMergeTarget(toSave);
+        if (mergeTarget.isPresent()) {
+            final BotanicalInfo existing = mergeTarget.get();
+            logger.info("Merging {} provider data into catalog taxon {}", toSave.getCreator(),
+                        existing.getScientificName());
+            BotanicalInfoCatalogMerger.mergeInto(existing, toSave);
+            result = botanicalInfoRepository.save(existing);
+        } else {
+            result = botanicalInfoRepository.save(toSave);
+        }
         try {
-            linkNewImage(imageToSave, result);
+            if (result.getImage() == null) {
+                linkNewImage(imageToSave, result);
+            }
         } catch (MalformedURLException e) {
             logger.error("Error while setting the image for the new species", e);
             throw e;
         }
         return result;
+    }
+
+
+    private Optional<BotanicalInfo> findCatalogMergeTarget(BotanicalInfo candidate) {
+        if (candidate.isUserCreated()) {
+            return Optional.empty();
+        }
+        final Set<BotanicalInfo> possibleMatches = new LinkedHashSet<>();
+        if (candidate.getCanonicalTaxonKey() != null && !candidate.getCanonicalTaxonKey().isBlank()) {
+            possibleMatches.addAll(botanicalInfoRepository.findAllByCanonicalTaxonKey(
+                candidate.getCanonicalTaxonKey()));
+        }
+        if (candidate.getExternalId() != null && !candidate.getExternalId().isBlank()) {
+            possibleMatches.addAll(botanicalInfoRepository.findAllByCreatorAndExternalId(
+                candidate.getCreator(), candidate.getExternalId()));
+        }
+        if (candidate.getSpecies() != null && !candidate.getSpecies().isBlank()) {
+            possibleMatches.addAll(botanicalInfoRepository.findAllBySpeciesIgnoreCase(candidate.getSpecies()));
+        }
+        return possibleMatches.stream()
+                              .filter(existing -> !existing.isUserCreated())
+                              .filter(existing -> BotanicalInfoCatalogMerger.describesSameTaxon(existing, candidate))
+                              .findFirst();
     }
 
 
@@ -266,6 +305,7 @@ public class BotanicalInfoService {
         toUpdate.setSynonyms(new HashSet<>(updated.getSynonyms()));
         toUpdate.setCommonNames(new LinkedHashSet<>(updated.getCommonNames()));
         toUpdate.setExternalReferences(new HashMap<>(updated.getExternalReferences()));
+        toUpdate.setCanonicalTaxonKey(updated.getCanonicalTaxonKey());
         toUpdate.setLastVerifiedAt(updated.getLastVerifiedAt());
         return botanicalInfoRepository.save(toUpdate);
     }
@@ -281,6 +321,7 @@ public class BotanicalInfoService {
         userCreatedCopy.setSynonyms(new HashSet<>(toCopy.getSynonyms()));
         userCreatedCopy.setCommonNames(new LinkedHashSet<>(toCopy.getCommonNames()));
         userCreatedCopy.setExternalReferences(new HashMap<>(toCopy.getExternalReferences()));
+        userCreatedCopy.setCanonicalTaxonKey(toCopy.getCanonicalTaxonKey());
         userCreatedCopy.setLastVerifiedAt(toCopy.getLastVerifiedAt());
 
         userCreatedCopy = save(userCreatedCopy);
@@ -308,7 +349,16 @@ public class BotanicalInfoService {
 
 
     public boolean existsSpecies(String species) {
-        return botanicalInfoRepository.findAllBySpecies(species).stream().anyMatch(
+        return botanicalInfoRepository.findAllBySpeciesIgnoreCase(species).stream().anyMatch(
+            botanicalInfo -> botanicalInfo.isAccessibleToUser(authenticatedUserService.getAuthenticatedUser()));
+    }
+
+
+    public boolean existsCanonicalTaxon(String canonicalTaxonKey) {
+        if (canonicalTaxonKey == null || canonicalTaxonKey.isBlank()) {
+            return false;
+        }
+        return botanicalInfoRepository.findAllByCanonicalTaxonKey(canonicalTaxonKey).stream().anyMatch(
             botanicalInfo -> botanicalInfo.isAccessibleToUser(authenticatedUserService.getAuthenticatedUser()));
     }
 

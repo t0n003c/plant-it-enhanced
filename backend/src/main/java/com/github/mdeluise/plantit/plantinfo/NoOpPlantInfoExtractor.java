@@ -11,7 +11,8 @@ class NoOpPlantInfoExtractor extends AbstractPlantInfoExtractorStep {
 
 
     @Override
-    public Set<BotanicalInfo> extractPlantsInternal(String partialPlantScientificName, int size) {
+    public Set<BotanicalInfo> extractPlantsInternal(String partialPlantScientificName, int size,
+                                                    String locale, String region) {
         return Set.of();
     }
 

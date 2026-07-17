@@ -41,6 +41,7 @@ public class INaturalistRequestMaker {
     private static final String PLANTAE_TAXON_ID = "47126";
     private final HttpClient client;
     private final GbifTaxonomyVerifier gbifTaxonomyVerifier;
+    private final INaturalistRequestThrottle requestThrottle;
     private final String baseEndpoint;
     private final String locale;
     private final String region;
@@ -51,10 +52,12 @@ public class INaturalistRequestMaker {
     @Autowired
     public INaturalistRequestMaker(HttpClient client,
                                    GbifTaxonomyVerifier gbifTaxonomyVerifier,
+                                   INaturalistRequestThrottle requestThrottle,
                                    INaturalistProperties naturalistProperties,
                                    PlantSearchProperties searchProperties) {
         this.client = client;
         this.gbifTaxonomyVerifier = gbifTaxonomyVerifier;
+        this.requestThrottle = requestThrottle;
         this.baseEndpoint = removeTrailingSlash(naturalistProperties.getUrl());
         this.locale = searchProperties.getLocale();
         this.region = searchProperties.getRegion();
@@ -64,14 +67,27 @@ public class INaturalistRequestMaker {
 
 
     public List<BotanicalInfo> search(String searchTerm, int size) {
+        return search(searchTerm, size, null, null);
+    }
+
+
+    public List<BotanicalInfo> search(String searchTerm, int size, String requestedLocale, String requestedRegion) {
+        if (!requestThrottle.tryAcquire()) {
+            throw new InfoExtractionException("iNaturalist request limit reached; using cached or fallback data");
+        }
+        final String effectiveLocale = fallback(requestedLocale, locale);
+        final String effectiveRegion = fallback(requestedRegion, region);
         final int candidateCount = Math.min(MAXIMUM_CANDIDATES,
                                             Math.max(MINIMUM_CANDIDATES, size * CANDIDATE_MULTIPLIER));
         final String encodedSearchTerm = URLEncoder.encode(searchTerm, StandardCharsets.UTF_8);
-        final String url = String.format(
-            "%s/v1/taxa/autocomplete?q=%s&rank=species&taxon_id=%s&is_active=true&per_page=%s&locale=%s&preferred_place_id=%s",
+        String url = String.format(
+            "%s/v1/taxa/autocomplete?q=%s&rank=species&taxon_id=%s&is_active=true&per_page=%s&locale=%s",
             baseEndpoint, encodedSearchTerm, PLANTAE_TAXON_ID, candidateCount,
-            URLEncoder.encode(locale, StandardCharsets.UTF_8), preferredPlaceId
+            URLEncoder.encode(effectiveLocale, StandardCharsets.UTF_8)
         );
+        if (shouldUseConfiguredPlace(requestedRegion)) {
+            url += "&preferred_place_id=" + preferredPlaceId;
+        }
         final HttpRequest request = HttpRequest.newBuilder()
                                                .uri(URI.create(url))
                                                .header("Accept", "application/json")
@@ -84,7 +100,7 @@ public class INaturalistRequestMaker {
             throw new InfoExtractionException("iNaturalist returned HTTP " + response.statusCode());
         }
         try {
-            return parseResponse(searchTerm, size, response.body());
+            return parseResponse(searchTerm, size, response.body(), effectiveLocale, effectiveRegion);
         } catch (JsonParseException | IllegalStateException | UnsupportedOperationException | NullPointerException |
                  NumberFormatException e) {
             throw new InfoExtractionException(e);
@@ -92,11 +108,12 @@ public class INaturalistRequestMaker {
     }
 
 
-    private List<BotanicalInfo> parseResponse(String searchTerm, int size, String responseBody) {
+    private List<BotanicalInfo> parseResponse(String searchTerm, int size, String responseBody,
+                                              String effectiveLocale, String effectiveRegion) {
         final JsonObject responseJson = JsonParser.parseString(responseBody).getAsJsonObject();
         final List<RankedCandidate> candidates = new ArrayList<>();
         responseJson.get("results").getAsJsonArray().forEach(result -> addCandidate(
-            searchTerm, result.getAsJsonObject(), candidates
+            searchTerm, result.getAsJsonObject(), candidates, effectiveLocale, effectiveRegion
         ));
         candidates.sort(candidateComparator());
 
@@ -115,7 +132,8 @@ public class INaturalistRequestMaker {
     }
 
 
-    private void addCandidate(String searchTerm, JsonObject result, List<RankedCandidate> candidates) {
+    private void addCandidate(String searchTerm, JsonObject result, List<RankedCandidate> candidates,
+                              String effectiveLocale, String effectiveRegion) {
         if (!"species".equalsIgnoreCase(readString(result, "rank")) ||
                 !"Plantae".equalsIgnoreCase(readString(result, "iconic_taxon_name"))) {
             return;
@@ -135,7 +153,7 @@ public class INaturalistRequestMaker {
         final String commonName = readString(result, "preferred_common_name");
         if (commonName != null) {
             botanicalInfo.getCommonNames().add(new BotanicalCommonName(
-                commonName, locale, region, true, BotanicalInfoCreator.INATURALIST
+                commonName, effectiveLocale, effectiveRegion, true, BotanicalInfoCreator.INATURALIST
             ));
             botanicalInfo.getSynonyms().add(commonName);
         }
@@ -190,6 +208,17 @@ public class INaturalistRequestMaker {
 
     private long readLong(JsonObject object, String key) {
         return object.has(key) && !object.get(key).isJsonNull() ? object.get(key).getAsLong() : 0;
+    }
+
+
+    private boolean shouldUseConfiguredPlace(String requestedRegion) {
+        return preferredPlaceId > 0 &&
+                   (requestedRegion == null || requestedRegion.isBlank() || requestedRegion.equalsIgnoreCase(region));
+    }
+
+
+    private String fallback(String requested, String configured) {
+        return requested == null || requested.isBlank() ? configured : requested.trim();
     }
 
 

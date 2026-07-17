@@ -109,6 +109,23 @@ class BotanicalInfoControllerUnitTests {
 
 
     @Test
+    @DisplayName("Test localized common-name search")
+    void testLocalizedCommonNameSearch() {
+        final BotanicalInfo botanicalInfo = new BotanicalInfo();
+        final BotanicalInfoDTO dto = new BotanicalInfoDTO();
+        Mockito.when(plantInfoExtractorFacade.extractPlants("snake plant", 5, "de", "DE"))
+               .thenReturn(List.of(botanicalInfo));
+        Mockito.when(botanicalInfoDtoConverter.convertToDTO(botanicalInfo)).thenReturn(dto);
+
+        final ResponseEntity<List<BotanicalInfoDTO>> response =
+            botanicalInfoController.search(5, "snake plant", "de", "DE");
+
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+        Assertions.assertEquals(List.of(dto), response.getBody());
+    }
+
+
+    @Test
     @DisplayName("Test count plants for a botanical info")
     void testCountPlantsForBotanicalInfo() {
         final long botanicalInfoId = 1L;

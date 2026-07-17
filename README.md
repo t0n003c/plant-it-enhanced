@@ -8,12 +8,12 @@
 > focused on accurate everyday-name plant search and reliable self-hosted deployment.
 > It remains available under the original GPLv3 license.
 
-<p align="center"><i><b>[Project under "active" development, some features may be unstable or change in the future. A first release version is planned to be packed soon].</b></i></p>
+<p align="center"><i><b>Maintained self-hosted release line; database changes are applied through additive migrations.</b></i></p>
 <p align="center">Plant-it is a <b>self-hosted gardening companion app.</b><br>Useful for keeping track of plant care, receiving notifications about when to water plants, uploading plant images, and more.</p>
 
 <p align="center"><a href="https://docs.plant-it.org/latest/">Explore the documentation</a></p>
 
-<p align="center"><a href="https://github.com/MDeLuise/plant-it/#why">Why?</a> • <a href="https://github.com/MDeLuise/plant-it/#features-highlight">Features highlights</a> • <a href="https://github.com/MDeLuise/plant-it/#quickstart">Quickstart</a> • <a href="https://github.com/MDeLuise/plant-it/#support-the-project">Support</a> • <a href="https://github.com/MDeLuise/plant-it/#contribute">Contribute</a></p>
+<p align="center"><a href="#why">Why?</a> • <a href="#features-highlight">Features highlights</a> • <a href="#quickstart">Quickstart</a> • <a href="#support-the-project">Support</a> • <a href="#contribute">Contribute</a></p>
 
 <p align="center">
   <img src="/images/banner.png" width="100%" />
@@ -37,6 +37,18 @@ Plant-it helps you remember the last time you did a treatment of your plants, wh
 * Upload photos of your plants
 * Set reminders for some actions on your plants (e.g. notify if not watered every 4 days)
 
+## Trusted plant catalog
+
+Plant-it Enhanced treats the accepted GBIF taxon key as a stable identity. Results from
+iNaturalist, FloraCodex, and future providers are combined into one catalog entry instead
+of creating a new copy for each provider. Scientific synonyms, localized common names,
+provider references, and missing care values are merged while existing values are
+preserved. Personal `USER` entries remain private copies and are never auto-merged.
+
+The web app sends its current language and region with each search. `PLANT_SEARCH_LOCALE`
+and `PLANT_SEARCH_REGION` are fallbacks for older clients. Outbound iNaturalist traffic is
+also throttled with a small interactive burst; repeated searches continue to use Redis.
+
 ## Quickstart
 ### Server
 The maintained AMD64/ARM64 image is published from this repository to
@@ -58,6 +70,26 @@ The web app is available at `http://localhost:3000`; the API is available at
 `http://localhost:8080/api`. MySQL and Redis share an internal-only network, while
 the server has a separate network for outbound plant-data requests.
 
+### Safe upgrades
+
+Back up the application database before pulling a new image. `--no-tablespaces` allows
+the regular application user to create the backup without MySQL's `PROCESS` privilege:
+
+```bash
+mkdir -p backups
+docker compose exec -T db sh -c \
+  'MYSQL_PWD="$MYSQL_PASSWORD" exec mysqldump --no-tablespaces -u"$MYSQL_USER" "$MYSQL_DATABASE"' \
+  > "backups/plant-it-$(date +%Y%m%d-%H%M%S).sql"
+
+docker compose pull server
+docker compose up -d --no-deps server
+docker compose logs --since=5m server
+```
+
+The Catalog v1 migration adds and indexes a nullable canonical taxon key, then backfills
+it from existing GBIF references. It does not delete plants, diaries, reminders, images,
+users, or custom species.
+
 <a href="https://docs.plant-it.org/latest/server-installation/#configuration">Take a look at the documentation</a> in order to understand the available configurations.
 
 ## App
@@ -66,9 +98,9 @@ You can access the Plant-it service using the web app at `http://<server_ip>:300
 For Android users, the app is also available as an APK, which can be downloaded either from the GitHub releases assets or from F-Droid.
 
 ### Download
-- **GitHub Releases**: You can download the latest APK from the [GitHub releases page](https://github.com/MDeLuise/plant-it/releases/latest).
+- **GitHub Releases**: You can download the latest enhanced APK from the [GitHub releases page](https://github.com/t0n003c/plant-it-enhanced/releases/latest).
   <p align="center">
-    <a href="https://github.com/MDeLuise/plant-it/releases/latest"><img src="https://raw.githubusercontent.com/Kunzisoft/Github-badge/main/get-it-on-github.png" alt="Get it on GitHub" height="60" style="max-width: 200px"></a>
+    <a href="https://github.com/t0n003c/plant-it-enhanced/releases/latest"><img src="https://raw.githubusercontent.com/Kunzisoft/Github-badge/main/get-it-on-github.png" alt="Get it on GitHub" height="60" style="max-width: 200px"></a>
   </p>
 
 - **F-Droid**: Alternatively, you can get the app from [F-Droid](https://f-droid.org/packages/com.github.mdeluise.plantit/).
@@ -105,10 +137,10 @@ If you're interested in contributing transactions to enhance the app, you can ge
 | Spanish Castilian | app_es.arb | 87% |
 
 ### Bug Report, Feature Request and Question
-You can submit any of this in the [issues](https://github.com/MDeLuise/plant-it/issues/new/choose) section of the repository. Choose the right template and then fill in the required info.
+You can submit any of this in the [issues](https://github.com/t0n003c/plant-it-enhanced/issues/new/choose) section of the repository. Choose the right template and then fill in the required info.
 
 ### Feature development
-Let's discuss first possible solutions for the development before start working on that, please open a [feature request issue](https://github.com/MDeLuise/plant-it/issues/new?assignees=&labels=Status:+Created,Type:+Feature+Request&projects=&template=feature_request.yml).
+Let's discuss possible solutions before starting development; open a [feature request issue](https://github.com/t0n003c/plant-it-enhanced/issues/new/choose).
 
 ### How to contribute
 If you want to make some changes and test them locally <a href="https://docs.plant-it.org/latest/support/#contributing">take a look at the documentation</a>.

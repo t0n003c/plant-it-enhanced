@@ -37,7 +37,8 @@ public class FloraCodexPlantInfoExtractorStep extends AbstractPlantInfoExtractor
 
 
     @Override
-    protected Set<BotanicalInfo> extractPlantsInternal(String partialPlantScientificName, int size) {
+    protected Set<BotanicalInfo> extractPlantsInternal(String partialPlantScientificName, int size,
+                                                        String locale, String region) {
         try {
             final Page<BotanicalInfo> result =
                 floraCodexRequestMaker.fetchInfoFromPartial(partialPlantScientificName, Pageable.ofSize(size));
@@ -72,7 +73,9 @@ public class FloraCodexPlantInfoExtractorStep extends AbstractPlantInfoExtractor
 
 
     private boolean existAlreadyALocalVersion(BotanicalInfo botanicalInfo) {
-        return botanicalInfoService.existsExternalId(BotanicalInfoCreator.FLORA_CODEX, botanicalInfo.getExternalId()) ||
+        return botanicalInfoService.existsCanonicalTaxon(botanicalInfo.getCanonicalTaxonKey()) ||
+                   botanicalInfoService.existsExternalId(BotanicalInfoCreator.FLORA_CODEX,
+                                                           botanicalInfo.getExternalId()) ||
                    botanicalInfoService.existsSpecies(botanicalInfo.getSpecies());
     }
 }

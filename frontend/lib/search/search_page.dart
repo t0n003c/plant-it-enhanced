@@ -46,12 +46,21 @@ class _SeachPageState extends State<SeachPage> {
       _loading = true;
       _errorMessage = null;
     });
-    final String url = normalizedTerm.isEmpty
-        ? "botanical-info"
-        : Uri(
-            path: "botanical-info/search",
-            queryParameters: {"q": normalizedTerm},
-          ).toString();
+    final String url;
+    if (normalizedTerm.isEmpty) {
+      url = "botanical-info";
+    } else {
+      final Locale locale = Localizations.localeOf(context);
+      url = Uri(
+        path: "botanical-info/search",
+        queryParameters: {
+          "q": normalizedTerm,
+          "locale": locale.languageCode,
+          if (locale.countryCode != null && locale.countryCode!.isNotEmpty)
+            "region": locale.countryCode!,
+        },
+      ).toString();
+    }
     try {
       final response = await widget.env.http.get(url);
       if (!mounted || requestId != _requestSequence) return;

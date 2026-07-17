@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfo;
-import com.github.mdeluise.plantit.plantinfo.search.PlantNameNormalizer;
+import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoCatalogMerger;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -20,20 +20,25 @@ public abstract class AbstractPlantInfoExtractorStep implements PlantInfoExtract
 
 
     public List<BotanicalInfo> extractPlants(String partialPlantScientificName, int size) {
-        final Set<BotanicalInfo> result =
-            new LinkedHashSet<>(extractPlantsInternal(partialPlantScientificName, size));
+        return extractPlants(partialPlantScientificName, size, null, null);
+    }
+
+
+    @Override
+    public List<BotanicalInfo> extractPlants(String partialPlantScientificName, int size, String locale, String region) {
+        final Set<BotanicalInfo> result = new LinkedHashSet<>();
+        extractPlantsInternal(partialPlantScientificName, size, locale, region)
+            .forEach(candidate -> addOrMerge(result, candidate));
         if (result.size() < size && next != null) {
-            next.extractPlants(partialPlantScientificName, size).forEach(candidate -> {
-                if (!containsSpecies(result, candidate)) {
-                    result.add(candidate);
-                }
-            });
+            next.extractPlants(partialPlantScientificName, size, locale, region)
+                .forEach(candidate -> addOrMerge(result, candidate));
         }
         return new ArrayList<>(new ArrayList<>(result).subList(0, Math.min(size, result.size())));
     }
 
 
-    protected abstract Set<BotanicalInfo> extractPlantsInternal(String partialPlantScientificName, int size);
+    protected abstract Set<BotanicalInfo> extractPlantsInternal(String partialPlantScientificName, int size,
+                                                                 String locale, String region);
 
 
     public List<BotanicalInfo> getAll(int size) {
@@ -48,11 +53,16 @@ public abstract class AbstractPlantInfoExtractorStep implements PlantInfoExtract
     protected abstract Set<BotanicalInfo> getAllInternal(int size);
 
 
-    private boolean containsSpecies(Set<BotanicalInfo> botanicalInfos, BotanicalInfo candidate) {
-        final String candidateSpecies = PlantNameNormalizer.normalize(candidate.getSpecies());
-        return botanicalInfos.stream()
-                             .map(BotanicalInfo::getSpecies)
-                             .map(PlantNameNormalizer::normalize)
-                             .anyMatch(candidateSpecies::equals);
+    private void addOrMerge(Set<BotanicalInfo> botanicalInfos, BotanicalInfo candidate) {
+        final BotanicalInfo existing = botanicalInfos.stream()
+                                                       .filter(saved -> BotanicalInfoCatalogMerger.describesSameTaxon(
+                                                           saved, candidate))
+                                                       .findFirst()
+                                                       .orElse(null);
+        if (existing == null) {
+            botanicalInfos.add(candidate);
+            return;
+        }
+        BotanicalInfoCatalogMerger.mergeInto(existing, candidate);
     }
 }

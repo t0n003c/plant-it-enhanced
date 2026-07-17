@@ -56,6 +56,8 @@ public class BotanicalInfo implements Serializable, ImageTarget {
     @MapKeyColumn(name = "provider", length = 32)
     @Column(name = "external_id")
     private Map<String, String> externalReferences = new HashMap<>();
+    @Column(name = "canonical_taxon_key", length = 64)
+    private String canonicalTaxonKey;
     private Instant lastVerifiedAt;
     private String family;
     private String genus;
@@ -131,6 +133,16 @@ public class BotanicalInfo implements Serializable, ImageTarget {
 
     public void setExternalReferences(Map<String, String> externalReferences) {
         this.externalReferences = externalReferences;
+    }
+
+
+    public String getCanonicalTaxonKey() {
+        return canonicalTaxonKey;
+    }
+
+
+    public void setCanonicalTaxonKey(String canonicalTaxonKey) {
+        this.canonicalTaxonKey = canonicalTaxonKey;
     }
 
 

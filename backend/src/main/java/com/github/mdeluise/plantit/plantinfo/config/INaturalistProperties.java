@@ -11,6 +11,10 @@ public class INaturalistProperties {
     private boolean enabled;
     @Value("${inaturalist.preferred-place-id}")
     private int preferredPlaceId;
+    @Value("${inaturalist.requests-per-second}")
+    private int requestsPerSecond;
+    @Value("${inaturalist.request-burst}")
+    private int requestBurst;
 
 
     public String getUrl() {
@@ -25,5 +29,15 @@ public class INaturalistProperties {
 
     public int getPreferredPlaceId() {
         return preferredPlaceId;
+    }
+
+
+    public int getRequestsPerSecond() {
+        return requestsPerSecond;
+    }
+
+
+    public int getRequestBurst() {
+        return requestBurst;
     }
 }
