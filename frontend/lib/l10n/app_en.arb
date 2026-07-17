@@ -142,6 +142,7 @@
   "careDataSource": "Care data source",
   "careDataLastVerified": "Care data checked",
   "careDataProvidedByTrefle": "Trefle (general reference data)",
+  "careDataProvidedByCuratedCatalog": "Plant-it curated catalog (Extension-sourced)",
   "careDataProvidedByPerenual": "Perenual (watering and sunlight data)",
   "careGuidanceDisclaimer": "General guidance only. Check the soil and your plant before watering.",
   "refreshCareGuide": "Refresh care guide",

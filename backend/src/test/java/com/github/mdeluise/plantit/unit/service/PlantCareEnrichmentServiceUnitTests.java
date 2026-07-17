@@ -5,9 +5,9 @@ import java.util.Optional;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfo;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoService;
 import com.github.mdeluise.plantit.botanicalinfo.care.PlantCareInfo;
-import com.github.mdeluise.plantit.exception.CareProviderNotConfiguredException;
 import com.github.mdeluise.plantit.exception.CareProviderUnavailableException;
 import com.github.mdeluise.plantit.exception.InfoExtractionException;
+import com.github.mdeluise.plantit.plantinfo.care.CuratedCareProvider;
 import com.github.mdeluise.plantit.plantinfo.care.PerenualCareProvider;
 import com.github.mdeluise.plantit.plantinfo.care.PlantCareEnrichmentService;
 import com.github.mdeluise.plantit.plantinfo.care.TrefleCareProvider;
@@ -21,6 +21,7 @@ import org.mockito.Mockito;
 class PlantCareEnrichmentServiceUnitTests {
     private BotanicalInfoService botanicalInfoService;
     private TrefleCareProvider trefleCareProvider;
+    private CuratedCareProvider curatedCareProvider;
     private PerenualCareProvider perenualCareProvider;
     private PlantCareEnrichmentService service;
     private BotanicalInfo botanicalInfo;
@@ -30,9 +31,10 @@ class PlantCareEnrichmentServiceUnitTests {
     void setUp() {
         botanicalInfoService = Mockito.mock(BotanicalInfoService.class);
         trefleCareProvider = Mockito.mock(TrefleCareProvider.class);
+        curatedCareProvider = Mockito.mock(CuratedCareProvider.class);
         perenualCareProvider = Mockito.mock(PerenualCareProvider.class);
         service = new PlantCareEnrichmentService(
-            botanicalInfoService, trefleCareProvider, perenualCareProvider);
+            botanicalInfoService, trefleCareProvider, curatedCareProvider, perenualCareProvider);
         botanicalInfo = new BotanicalInfo();
         botanicalInfo.setId(42L);
         botanicalInfo.setSpecies("Monstera deliciosa");
@@ -41,36 +43,52 @@ class PlantCareEnrichmentServiceUnitTests {
 
 
     @Test
-    @DisplayName("Should use Perenual when Trefle has no usable care values")
+    @DisplayName("Should use curated care before calling a paid fallback")
+    void shouldUseCuratedCareBeforePerenual() {
+        final PlantCareInfo curatedCare = careFrom("CURATED_CATALOG");
+        Mockito.when(trefleCareProvider.isConfigured()).thenReturn(true);
+        Mockito.when(trefleCareProvider.fetch("Monstera deliciosa")).thenReturn(Optional.empty());
+        Mockito.when(curatedCareProvider.fetch("Monstera deliciosa")).thenReturn(Optional.of(curatedCare));
+        Mockito.when(botanicalInfoService.updateCareInfo(42L, curatedCare)).thenReturn(botanicalInfo);
+
+        final BotanicalInfo result = service.refresh(42L);
+
+        Assertions.assertSame(botanicalInfo, result);
+        Mockito.verify(botanicalInfoService).updateCareInfo(42L, curatedCare);
+        Mockito.verifyNoInteractions(perenualCareProvider);
+    }
+
+
+    @Test
+    @DisplayName("Should preview curated care without requiring a saved catalog record")
+    void shouldPreviewCareForUnsavedSearchResult() {
+        final PlantCareInfo curatedCare = careFrom("CURATED_CATALOG");
+        Mockito.when(trefleCareProvider.isConfigured()).thenReturn(true);
+        Mockito.when(trefleCareProvider.fetch("Monstera deliciosa")).thenReturn(Optional.empty());
+        Mockito.when(curatedCareProvider.fetch("Monstera deliciosa")).thenReturn(Optional.of(curatedCare));
+
+        final PlantCareInfo result = service.preview("Monstera deliciosa");
+
+        Assertions.assertSame(curatedCare, result);
+        Mockito.verify(botanicalInfoService, Mockito.never())
+               .updateCareInfo(Mockito.anyLong(), Mockito.any());
+    }
+
+
+    @Test
+    @DisplayName("Should use Perenual when Trefle and curated care have no values")
     void shouldFallBackToPerenual() {
         final PlantCareInfo perenualCare = careFrom("PERENUAL");
         Mockito.when(trefleCareProvider.isConfigured()).thenReturn(true);
         Mockito.when(perenualCareProvider.isConfigured()).thenReturn(true);
         Mockito.when(trefleCareProvider.fetch("Monstera deliciosa")).thenReturn(Optional.empty());
+        Mockito.when(curatedCareProvider.fetch("Monstera deliciosa")).thenReturn(Optional.empty());
         Mockito.when(perenualCareProvider.fetch("Monstera deliciosa")).thenReturn(Optional.of(perenualCare));
         Mockito.when(botanicalInfoService.updateCareInfo(42L, perenualCare)).thenReturn(botanicalInfo);
 
-        final BotanicalInfo result = service.refresh(42L);
+        service.refresh(42L);
 
-        Assertions.assertSame(botanicalInfo, result);
         Mockito.verify(botanicalInfoService).updateCareInfo(42L, perenualCare);
-    }
-
-
-    @Test
-    @DisplayName("Should preview fallback care without requiring a saved catalog record")
-    void shouldPreviewCareForUnsavedSearchResult() {
-        final PlantCareInfo perenualCare = careFrom("PERENUAL");
-        Mockito.when(trefleCareProvider.isConfigured()).thenReturn(true);
-        Mockito.when(perenualCareProvider.isConfigured()).thenReturn(true);
-        Mockito.when(trefleCareProvider.fetch("Monstera deliciosa")).thenReturn(Optional.empty());
-        Mockito.when(perenualCareProvider.fetch("Monstera deliciosa")).thenReturn(Optional.of(perenualCare));
-
-        final PlantCareInfo result = service.preview("Monstera deliciosa");
-
-        Assertions.assertSame(perenualCare, result);
-        Mockito.verify(botanicalInfoService, Mockito.never())
-               .updateCareInfo(Mockito.anyLong(), Mockito.any());
     }
 
 
@@ -79,41 +97,44 @@ class PlantCareEnrichmentServiceUnitTests {
     void shouldPreserveTreflePriority() {
         final PlantCareInfo trefleCare = careFrom("TREFLE");
         Mockito.when(trefleCareProvider.isConfigured()).thenReturn(true);
-        Mockito.when(perenualCareProvider.isConfigured()).thenReturn(true);
         Mockito.when(trefleCareProvider.fetch("Monstera deliciosa")).thenReturn(Optional.of(trefleCare));
         Mockito.when(botanicalInfoService.updateCareInfo(42L, trefleCare)).thenReturn(botanicalInfo);
 
         service.refresh(42L);
 
         Mockito.verify(botanicalInfoService).updateCareInfo(42L, trefleCare);
-        Mockito.verifyNoInteractions(perenualCareProvider);
+        Mockito.verifyNoInteractions(curatedCareProvider, perenualCareProvider);
     }
 
 
     @Test
-    @DisplayName("Should continue to Perenual when Trefle is unavailable")
+    @DisplayName("Should recover with curated care when Trefle is unavailable")
     void shouldRecoverFromTrefleFailure() {
-        final PlantCareInfo perenualCare = careFrom("PERENUAL");
+        final PlantCareInfo curatedCare = careFrom("CURATED_CATALOG");
         Mockito.when(trefleCareProvider.isConfigured()).thenReturn(true);
-        Mockito.when(perenualCareProvider.isConfigured()).thenReturn(true);
         Mockito.when(trefleCareProvider.fetch("Monstera deliciosa"))
                .thenThrow(new InfoExtractionException("Trefle returned HTTP 503"));
-        Mockito.when(perenualCareProvider.fetch("Monstera deliciosa")).thenReturn(Optional.of(perenualCare));
-        Mockito.when(botanicalInfoService.updateCareInfo(42L, perenualCare)).thenReturn(botanicalInfo);
+        Mockito.when(curatedCareProvider.fetch("Monstera deliciosa")).thenReturn(Optional.of(curatedCare));
+        Mockito.when(botanicalInfoService.updateCareInfo(42L, curatedCare)).thenReturn(botanicalInfo);
 
         service.refresh(42L);
 
-        Mockito.verify(botanicalInfoService).updateCareInfo(42L, perenualCare);
+        Mockito.verify(botanicalInfoService).updateCareInfo(42L, curatedCare);
     }
 
 
     @Test
-    @DisplayName("Should distinguish missing configuration from missing species data")
-    void shouldReportMissingConfiguration() {
+    @DisplayName("Should work without external provider configuration")
+    void shouldWorkWithoutExternalProviderConfiguration() {
+        final PlantCareInfo curatedCare = careFrom("CURATED_CATALOG");
         Mockito.when(trefleCareProvider.isConfigured()).thenReturn(false);
         Mockito.when(perenualCareProvider.isConfigured()).thenReturn(false);
+        Mockito.when(curatedCareProvider.fetch("Monstera deliciosa")).thenReturn(Optional.of(curatedCare));
+        Mockito.when(botanicalInfoService.updateCareInfo(42L, curatedCare)).thenReturn(botanicalInfo);
 
-        Assertions.assertThrows(CareProviderNotConfiguredException.class, () -> service.refresh(42L));
+        service.refresh(42L);
+
+        Mockito.verify(botanicalInfoService).updateCareInfo(42L, curatedCare);
     }
 
 
@@ -124,17 +145,19 @@ class PlantCareEnrichmentServiceUnitTests {
         Mockito.when(perenualCareProvider.isConfigured()).thenReturn(false);
         Mockito.when(trefleCareProvider.fetch("Monstera deliciosa"))
                .thenThrow(new InfoExtractionException("Trefle returned HTTP 503"));
+        Mockito.when(curatedCareProvider.fetch("Monstera deliciosa")).thenReturn(Optional.empty());
 
         Assertions.assertThrows(CareProviderUnavailableException.class, () -> service.refresh(42L));
     }
 
 
     @Test
-    @DisplayName("Should return an empty preview when configured providers have no species data")
+    @DisplayName("Should return an empty preview when all providers have no species data")
     void shouldReturnEmptyPreviewWhenProvidersHaveNoData() {
         Mockito.when(trefleCareProvider.isConfigured()).thenReturn(true);
         Mockito.when(perenualCareProvider.isConfigured()).thenReturn(true);
         Mockito.when(trefleCareProvider.fetch("Monstera deliciosa")).thenReturn(Optional.empty());
+        Mockito.when(curatedCareProvider.fetch("Monstera deliciosa")).thenReturn(Optional.empty());
         Mockito.when(perenualCareProvider.fetch("Monstera deliciosa")).thenReturn(Optional.empty());
 
         Assertions.assertTrue(service.preview("Monstera deliciosa").isAllNull());

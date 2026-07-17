@@ -7,7 +7,6 @@ import java.util.Optional;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfo;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoService;
 import com.github.mdeluise.plantit.botanicalinfo.care.PlantCareInfo;
-import com.github.mdeluise.plantit.exception.CareProviderNotConfiguredException;
 import com.github.mdeluise.plantit.exception.CareProviderUnavailableException;
 import com.github.mdeluise.plantit.exception.InfoExtractionException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,15 +17,18 @@ import org.springframework.stereotype.Service;
 public class PlantCareEnrichmentService {
     private final BotanicalInfoService botanicalInfoService;
     private final TrefleCareProvider trefleCareProvider;
+    private final CuratedCareProvider curatedCareProvider;
     private final PerenualCareProvider perenualCareProvider;
 
 
     @Autowired
     public PlantCareEnrichmentService(BotanicalInfoService botanicalInfoService,
                                       TrefleCareProvider trefleCareProvider,
+                                      CuratedCareProvider curatedCareProvider,
                                       PerenualCareProvider perenualCareProvider) {
         this.botanicalInfoService = botanicalInfoService;
         this.trefleCareProvider = trefleCareProvider;
+        this.curatedCareProvider = curatedCareProvider;
         this.perenualCareProvider = perenualCareProvider;
     }
 
@@ -47,11 +49,11 @@ public class PlantCareEnrichmentService {
 
 
     private Optional<PlantCareInfo> findCare(String scientificName) {
-        if (!trefleCareProvider.isConfigured() && !perenualCareProvider.isConfigured()) {
-            throw new CareProviderNotConfiguredException();
-        }
         final List<InfoExtractionException> failures = new ArrayList<>();
         Optional<PlantCareInfo> refreshed = fetchFromTrefle(scientificName, failures);
+        if (refreshed.isEmpty()) {
+            refreshed = curatedCareProvider.fetch(scientificName);
+        }
         if (refreshed.isEmpty()) {
             refreshed = fetchFromPerenual(scientificName, failures);
         }

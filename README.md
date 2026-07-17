@@ -54,13 +54,15 @@ also throttled with a small interactive burst; repeated searches continue to use
 
 ## Photo identification and care guides
 
-These integrations are optional. Normal common-name search continues to work when either key
-is blank. API credentials remain in the server environment and are never shipped to the browser
-or mobile app.
+These integrations are optional. Normal common-name search and the bundled care catalog continue
+to work when every key is blank. API credentials remain in the server environment and are never
+shipped to the browser or mobile app.
 
 1. Create a free [Pl@ntNet API key](https://my.plantnet.org/) for photo identification.
 2. Create a [Trefle access token](https://trefle.io/) for structured care data.
-3. Create a [Perenual API key](https://www.perenual.com/docs/api) for watering and sunlight fallback data.
+3. Optionally create a [Perenual API key](https://www.perenual.com/docs/api) for additional
+   watering and sunlight fallback data. Its free plan provides detail records only for a limited
+   species-ID range, so broader coverage can require a paid plan.
 4. Add the values to the same `.env` file used by Docker Compose:
 
 ```dotenv
@@ -78,14 +80,20 @@ docker compose up -d --no-deps --force-recreate server
 In Search, use the camera button, photograph one plant in clear light, compare the ranked
 suggestions, and select the best match. Opening a search result loads a cached care preview without
 saving the species. When the plant is added, Plant-it keeps the photo in your own upload directory
-and attaches the preview to the saved catalog entry. Plant-it checks Trefle first and uses Perenual
-when Trefle returns no usable care values. Care values are stored in your MySQL catalog with their
-source and verification time and can still be edited manually.
+and attaches the preview to the saved catalog entry. Plant-it checks Trefle first, then its bundled
+Extension-sourced catalog, and finally optional Perenual. The bundled catalog covers 25 frequently
+grown plant profiles, including common scientific synonyms, and requires no API key. Exact
+scientific-name matching prevents care from being attached to the wrong species. Care values are
+stored in your MySQL catalog with their source link and verification time and can still be edited
+manually.
 
 Identification suggestions are provided by [Pl@ntNet](https://plantnet.org/). Structured care
-data is provided by [Trefle](https://trefle.io/) and [Perenual](https://www.perenual.com/) under
-their published terms. Always treat automated identification and generalized care guidance as
-suggestions.
+data is provided by [Trefle](https://trefle.io/), the bundled catalog mapped from
+[NC State Extension Plant Toolbox](https://plants.ces.ncsu.edu/), and optional
+[Perenual](https://www.perenual.com/) under their published terms. In your Pl@ntNet account, keep
+**Expose my API key** disabled for normal server-side requests; if you choose IP restrictions,
+authorize the NAS's public outbound IP. Always treat automated identification and generalized care
+guidance as suggestions.
 
 ## Quickstart
 ### Server

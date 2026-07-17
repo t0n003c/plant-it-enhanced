@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.13.3 - 2026-07-17 - Reliable common-plant care
+
+- Add a bundled, source-attributed care catalog covering 25 common houseplant, herb, vegetable,
+  and flower profiles without requiring a paid API plan.
+- Resolve care in the order Trefle, bundled curated catalog, then optional Perenual, using exact
+  scientific names and synonyms to avoid attaching guidance to the wrong plant.
+- Cover Monstera deliciosa, corn, sunflower, lavender, and roses with practical light and soil-
+  moisture guidance mapped from Extension references.
+- Display the curated source link and verification date with each matching care guide.
+- Replace the photo picker choices with high-contrast, full-width actions and 64-pixel minimum
+  touch targets for clearer camera and gallery selection on mobile.
+
 ## 0.13.2 - 2026-07-17 - Care coverage fallback
 
 - Add optional Perenual enrichment when Trefle has no usable care values for a species.
