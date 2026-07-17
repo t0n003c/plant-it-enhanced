@@ -7,4 +7,5 @@ public enum BotanicalInfoCreator {
     INATURALIST,
     GBIF,
     PLANTNET,
+    PERENUAL,
 }

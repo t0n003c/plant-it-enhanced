@@ -37,11 +37,48 @@ class _SpeciesDetailsPageState extends State<SpeciesDetailsPage> {
   void initState() {
     super.initState();
     _species = widget.species;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadCarePreview());
   }
 
   void _updateSpeciesLocally(SpeciesDTO species) {
     widget.updateSpeciesLocally(species);
     fetchAndSetPlants(context, widget.env);
+  }
+
+  Future<void> _loadCarePreview() async {
+    if (_species.care.allNull != true ||
+        _species.scientificName.trim().isEmpty) {
+      return;
+    }
+    setState(() => _refreshingCare = true);
+    try {
+      final String url = Uri(
+        path: 'plant-care/preview',
+        queryParameters: {'scientificName': _species.scientificName},
+      ).toString();
+      final response = await widget.env.http.get(url);
+      final dynamic body = json.decode(utf8.decode(response.bodyBytes));
+      if (!mounted) return;
+      if (response.statusCode != 200) {
+        _showCareProviderError(body);
+        return;
+      }
+      setState(() {
+        _species.care =
+            SpeciesCareInfoDTO.fromJson(body as Map<String, dynamic>);
+      });
+    } catch (error, stackTrace) {
+      widget.env.logger.error(error, stackTrace);
+      if (mounted) {
+        widget.env.toastManager.showToast(
+          context,
+          ToastNotificationType.error,
+          AppLocalizations.of(context).generalError,
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _refreshingCare = false);
+    }
   }
 
   Future<void> _refreshCareGuide() async {
@@ -54,7 +91,9 @@ class _SpeciesDetailsPageState extends State<SpeciesDetailsPage> {
       );
       final dynamic body = json.decode(utf8.decode(response.bodyBytes));
       if (response.statusCode != 200) {
-        throw Exception(body is Map ? body['message'] : 'Care refresh failed');
+        if (!mounted) return;
+        _showCareProviderError(body);
+        return;
       }
       final SpeciesDTO refreshed =
           SpeciesDTO.fromJson(body as Map<String, dynamic>);
@@ -81,6 +120,23 @@ class _SpeciesDetailsPageState extends State<SpeciesDetailsPage> {
     } finally {
       if (mounted) setState(() => _refreshingCare = false);
     }
+  }
+
+  void _showCareProviderError(dynamic body) {
+    final String? errorCode =
+        body is Map ? body['errorCode']?.toString() : null;
+    final String message = switch (errorCode) {
+      'CARE_PROVIDER_NOT_CONFIGURED' =>
+        AppLocalizations.of(context).careProviderNotConfigured,
+      'CARE_PROVIDER_UNAVAILABLE' =>
+        AppLocalizations.of(context).careProviderUnavailable,
+      _ => AppLocalizations.of(context).generalError,
+    };
+    widget.env.toastManager.showToast(
+      context,
+      ToastNotificationType.error,
+      message,
+    );
   }
 
   @override

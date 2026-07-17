@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.13.2 - 2026-07-17 - Care coverage fallback
+
+- Add optional Perenual enrichment when Trefle has no usable care values for a species.
+- Map attributable Perenual watering and sunlight categories onto Plant-it's existing care scale.
+- Require an exact scientific-name match before attaching fallback care data.
+- Load cached care previews while viewing unsaved search and photo-identification results.
+- Distinguish missing provider configuration and upstream provider failures during manual refresh.
+- Correctly treat Trefle temperature objects containing only null measurements as missing data.
+
 ## 0.13.1 - 2026-07-17 - Cache compatibility fix
 
 - Scope Redis cache keys to the application version so serialized catalog and plant data from an older release

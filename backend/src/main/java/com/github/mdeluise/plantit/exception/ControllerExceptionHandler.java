@@ -34,6 +34,28 @@ public class ControllerExceptionHandler {
     }
 
 
+    @ExceptionHandler(CareProviderNotConfiguredException.class)
+    public ResponseEntity<ErrorMessage> careProviderNotConfiguredException(CareProviderNotConfiguredException ex) {
+        final ErrorMessage message = new ErrorMessage(
+            HttpStatus.SERVICE_UNAVAILABLE.value(),
+            ErrorCode.CARE_PROVIDER_NOT_CONFIGURED,
+            ex.getMessage()
+        );
+        return new ResponseEntity<>(message, HttpStatus.SERVICE_UNAVAILABLE);
+    }
+
+
+    @ExceptionHandler(CareProviderUnavailableException.class)
+    public ResponseEntity<ErrorMessage> careProviderUnavailableException(CareProviderUnavailableException ex) {
+        final ErrorMessage message = new ErrorMessage(
+            HttpStatus.BAD_GATEWAY.value(),
+            ErrorCode.CARE_PROVIDER_UNAVAILABLE,
+            ex.getMessage()
+        );
+        return new ResponseEntity<>(message, HttpStatus.BAD_GATEWAY);
+    }
+
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorMessage> globalExceptionHandler(Exception ex) {
         final ErrorMessage message = new ErrorMessage(

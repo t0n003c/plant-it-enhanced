@@ -41,6 +41,11 @@ public class TrefleCareProvider {
     }
 
 
+    public boolean isConfigured() {
+        return properties.isConfigured();
+    }
+
+
     public Optional<PlantCareInfo> fetch(String scientificName) {
         Optional<PlantCareInfo> result = Optional.empty();
         if (properties.isConfigured()) {

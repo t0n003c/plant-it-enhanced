@@ -13,6 +13,7 @@ import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfo;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoCreator;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoRepository;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoService;
+import com.github.mdeluise.plantit.botanicalinfo.care.PlantCareInfo;
 import com.github.mdeluise.plantit.common.AuthenticatedUserService;
 import com.github.mdeluise.plantit.exception.ResourceNotFoundException;
 import com.github.mdeluise.plantit.exception.UnauthorizedException;
@@ -238,6 +239,30 @@ class BotanicalInfoServiceUnitTests {
         Assertions.assertThat(botanicalInfo).isEqualTo(result);
         Mockito.verify(botanicalInfoRepository, Mockito.times(1)).findById(botanicalInfoId);
         Mockito.verify(authenticatedUserService, Mockito.times(1)).getAuthenticatedUser();
+    }
+
+
+    @Test
+    @DisplayName("Should retain the care provider reference when updating care data")
+    void shouldRetainCareProviderReference() {
+        final Long botanicalInfoId = 1L;
+        final User authenticatedUser = new User();
+        authenticatedUser.setId(1L);
+        final BotanicalInfo botanicalInfo = new BotanicalInfo();
+        botanicalInfo.setId(botanicalInfoId);
+        final PlantCareInfo careInfo = new PlantCareInfo();
+        careInfo.setSource("PERENUAL");
+        careInfo.setSourceReference("155");
+        careInfo.setLight(6);
+        Mockito.when(botanicalInfoRepository.findById(botanicalInfoId)).thenReturn(Optional.of(botanicalInfo));
+        Mockito.when(authenticatedUserService.getAuthenticatedUser()).thenReturn(authenticatedUser);
+        Mockito.when(botanicalInfoRepository.save(botanicalInfo)).thenReturn(botanicalInfo);
+
+        final BotanicalInfo result = botanicalInfoService.updateCareInfo(botanicalInfoId, careInfo);
+
+        Assertions.assertThat(result.getPlantCareInfo()).isSameAs(careInfo);
+        Assertions.assertThat(result.getExternalReferences()).containsEntry("PERENUAL", "155");
+        Mockito.verify(botanicalInfoRepository).save(botanicalInfo);
     }
 
 
