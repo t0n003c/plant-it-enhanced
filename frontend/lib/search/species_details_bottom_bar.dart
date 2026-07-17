@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:plant_it/app_exception.dart';
 import 'package:plant_it/app_http_client.dart';
 import 'package:plant_it/dto/species_dto.dart';
@@ -17,6 +18,7 @@ class SpeciesDetailsBottomActionBar extends StatelessWidget {
   final SpeciesDTO species;
   final Environment env;
   final Function(SpeciesDTO) updateSpeciesLocally;
+  final XFile? identificationImage;
 
   const SpeciesDetailsBottomActionBar({
     super.key,
@@ -25,6 +27,7 @@ class SpeciesDetailsBottomActionBar extends StatelessWidget {
     required this.species,
     required this.env,
     required this.updateSpeciesLocally,
+    this.identificationImage,
   });
 
   void _removeSpeciesWithConfirm(BuildContext context) async {
@@ -99,6 +102,7 @@ class SpeciesDetailsBottomActionBar extends StatelessWidget {
                     builder: (context) => AddPlantPage(
                       env: env,
                       species: species,
+                      identificationImage: identificationImage,
                     ),
                   ),
                 ).then((speciesCreated) {

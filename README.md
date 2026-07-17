@@ -5,7 +5,7 @@
 <h1 align="center">Plant-it Enhanced</h1>
 
 > This is a maintained fork of [MDeLuise/plant-it](https://github.com/MDeLuise/plant-it),
-> focused on accurate everyday-name plant search and reliable self-hosted deployment.
+> focused on accurate everyday-name search, practical care workflows, and reliable self-hosting.
 > It remains available under the original GPLv3 license.
 
 <p align="center"><i><b>Maintained self-hosted release line; database changes are applied through additive migrations.</b></i></p>
@@ -22,8 +22,8 @@
 ## Why?
 Plant-it is a gardening companion app that helps you take care of your plants.
 
-It does not recommend you about which action to take, instead it is designed to log the activity you are doing.
-This is on purpose, I strongly believe that the only one in charge of knowing when to water your plants, when to fertilize them, etc. is you (with the help of multiple online sources).
+Plant-it keeps you in control of care decisions. Its sun and water guidance is reference
+information—not a substitute for checking the soil, the plant, and the conditions in your home.
 
 Plant-it helps you remember the last time you did a treatment of your plants, which plants you have, collects photos of your plants, and notifies you about the time passed since the last action on them.
 
@@ -31,7 +31,10 @@ Plant-it helps you remember the last time you did a treatment of your plants, wh
 ## Features highlight
 * Add existing plants or user created plants to your collection
 * Search by everyday common names, aliases, reordered words, and minor typos
+* Take or select a photo to identify a plant and add it with that photo
 * Verify accepted scientific taxonomy through GBIF, with iNaturalist discovery and FloraCodex fallback
+* View source-backed light, moisture, temperature, and pH guidance
+* Work through due, overdue, snoozed, and upcoming care in a Today list
 * Log events like watering, fertilizing, biostimulating, etc. for your plants
 * View all the logged events, filtering by plant and event type
 * Upload photos of your plants
@@ -48,6 +51,36 @@ preserved. Personal `USER` entries remain private copies and are never auto-merg
 The web app sends its current language and region with each search. `PLANT_SEARCH_LOCALE`
 and `PLANT_SEARCH_REGION` are fallbacks for older clients. Outbound iNaturalist traffic is
 also throttled with a small interactive burst; repeated searches continue to use Redis.
+
+## Photo identification and care guides
+
+These integrations are optional. Normal common-name search continues to work when either key
+is blank. API credentials remain in the server environment and are never shipped to the browser
+or mobile app.
+
+1. Create a free [Pl@ntNet API key](https://my.plantnet.org/) for photo identification.
+2. Create a [Trefle access token](https://trefle.io/) for structured care data.
+3. Add both values to the same `.env` file used by Docker Compose:
+
+```dotenv
+PLANTNET_API_KEY=replace-with-your-plantnet-key
+TREFLE_TOKEN=replace-with-your-trefle-token
+```
+
+Redeploy only the server after changing these values:
+
+```bash
+docker compose up -d --no-deps --force-recreate server
+```
+
+In Search, use the camera button, photograph one plant in clear light, compare the ranked
+suggestions, and select the best match. When the plant is added, Plant-it keeps the photo in your
+own upload directory and attempts to attach a care guide automatically. Care values are stored in
+your MySQL catalog with their source and verification time and can still be edited manually.
+
+Identification suggestions are provided by [Pl@ntNet](https://plantnet.org/). Structured care
+data is provided by [Trefle](https://trefle.io/) under its published terms. Always treat automated
+identification and generalized care guidance as suggestions.
 
 ## Quickstart
 ### Server
@@ -86,9 +119,9 @@ docker compose up -d --no-deps server
 docker compose logs --since=5m server
 ```
 
-The Catalog v1 migration adds and indexes a nullable canonical taxon key, then backfills
-it from existing GBIF references. It does not delete plants, diaries, reminders, images,
-users, or custom species.
+The Catalog v1 and Care Intelligence v1 migrations add catalog identity, care provenance,
+soil-moisture, snooze, and skip-state columns. They do not delete plants, diaries, reminders,
+images, users, or custom species.
 
 <a href="https://docs.plant-it.org/latest/server-installation/#configuration">Take a look at the documentation</a> in order to understand the available configurations.
 

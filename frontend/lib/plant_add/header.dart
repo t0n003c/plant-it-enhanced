@@ -1,6 +1,9 @@
+import 'dart:typed_data';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cached_network_image_platform_interface/cached_network_image_platform_interface.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:plant_it/dto/species_dto.dart';
 import 'package:plant_it/environment.dart';
 import 'package:plant_it/theme.dart';
@@ -9,11 +12,13 @@ import 'package:skeletonizer/skeletonizer.dart';
 class AddPlantImageHeader extends StatefulWidget {
   final SpeciesDTO species;
   final Environment env;
+  final XFile? localImage;
 
   const AddPlantImageHeader({
     super.key,
     required this.species,
     required this.env,
+    this.localImage,
   });
 
   @override
@@ -22,10 +27,14 @@ class AddPlantImageHeader extends StatefulWidget {
 
 class _AddPlantImageHeaderState extends State<AddPlantImageHeader> {
   String? _url;
+  Future<Uint8List>? _localImageBytes;
 
   @override
   void initState() {
     super.initState();
+    if (widget.localImage != null) {
+      _localImageBytes = widget.localImage!.readAsBytes();
+    }
     if (widget.species.id != null) {
       _url =
           "${widget.env.http.backendUrl}image/content/${widget.species.imageId}";
@@ -37,6 +46,17 @@ class _AddPlantImageHeaderState extends State<AddPlantImageHeader> {
 
   @override
   Widget build(BuildContext context) {
+    if (_localImageBytes != null) {
+      return FutureBuilder<Uint8List>(
+        future: _localImageBytes,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return Image.memory(snapshot.data!, fit: BoxFit.cover);
+          }
+          return const Center(child: CircularProgressIndicator());
+        },
+      );
+    }
     return CachedNetworkImage(
       imageUrl:
           _url ?? "${widget.env.http.backendUrl}image/content/non-existing-id",

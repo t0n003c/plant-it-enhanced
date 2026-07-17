@@ -96,7 +96,32 @@ class AppHttpClient {
   }
 
   MediaType _getMediaType(String imageName) {
-    return MediaType.parse("image/${imageName.split('.').last.toLowerCase()}");
+    final String extension = imageName.split('.').last.toLowerCase();
+    if (extension == 'jpg' || extension == 'jpeg') {
+      return MediaType('image', 'jpeg');
+    }
+    return MediaType('image', extension);
+  }
+
+  Future<http.Response> identifyPlant(XFile image, String language) async {
+    final imageBytes = await image.readAsBytes();
+    final uri = _prependBackendURL('plant-identification').replace(
+      queryParameters: {
+        'language': language,
+      },
+    );
+    final request = http.MultipartRequest('POST', uri);
+    request.files.add(
+      http.MultipartFile.fromBytes(
+        'image',
+        imageBytes,
+        filename: image.name,
+        contentType: _getMediaType(image.name),
+      ),
+    );
+    if (key != null) request.headers['Key'] = key!;
+    if (jwt != null) request.headers['Authorization'] = 'Bearer $jwt';
+    return http.Response.fromStream(await request.send());
   }
 
   Future<http.Response> uploadImage(XFile image, int plantId) async {
@@ -106,12 +131,8 @@ class AppHttpClient {
       _prependBackendURL('image/entity/$plantId'),
     );
     request.files.add(
-      http.MultipartFile.fromBytes(
-        'image',
-        imageBytes,
-        filename: image.name,
-        contentType: _getMediaType(image.name)
-      ),
+      http.MultipartFile.fromBytes('image', imageBytes,
+          filename: image.name, contentType: _getMediaType(image.name)),
     );
     if (key != null) {
       request.headers['Key'] = key!;

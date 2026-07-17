@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:plant_it/dto/species_dto.dart';
 import 'package:plant_it/environment.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -29,6 +30,8 @@ class _SeachPageState extends State<SeachPage> {
   bool _loading = true;
   String? _errorMessage;
   int _requestSequence = 0;
+  XFile? _identificationImage;
+  bool _identificationMode = false;
 
   Future<void> _fetchAndSetResult(String searchTerm) async {
     final String normalizedTerm = searchTerm.trim();
@@ -91,6 +94,95 @@ class _SeachPageState extends State<SeachPage> {
     }
   }
 
+  Future<void> _identifyFromPhoto(ImageSource source) async {
+    Navigator.of(context).pop();
+    final XFile? image = await ImagePicker().pickImage(
+      source: source,
+      imageQuality: 88,
+      maxWidth: 2048,
+      maxHeight: 2048,
+    );
+    if (image == null || !mounted) return;
+    _debounce?.cancel();
+    final int requestId = ++_requestSequence;
+    final Locale locale = Localizations.localeOf(context);
+    setState(() {
+      _loading = true;
+      _errorMessage = null;
+      _identificationMode = true;
+      _identificationImage = image;
+      _searchController.clear();
+    });
+    try {
+      final response = await widget.env.http.identifyPlant(
+        image,
+        locale.languageCode,
+      );
+      if (!mounted || requestId != _requestSequence) return;
+      final dynamic body = json.decode(utf8.decode(response.bodyBytes));
+      if (response.statusCode != 200) {
+        throw Exception(
+          body is Map
+              ? body['message'] ?? 'Plant identification failed'
+              : 'Plant identification failed',
+        );
+      }
+      setState(() {
+        _result = (body as List<dynamic>)
+            .map((candidate) =>
+                SpeciesDTO.fromJson(candidate as Map<String, dynamic>))
+            .toList();
+        if (_result.isEmpty) {
+          _errorMessage = AppLocalizations.of(context).noIdentificationMatch;
+        }
+      });
+    } catch (error, stackTrace) {
+      if (!mounted || requestId != _requestSequence) return;
+      widget.env.logger.error(error, stackTrace);
+      setState(() {
+        _result = [];
+        _errorMessage = error.toString().replaceFirst('Exception: ', '');
+      });
+    } finally {
+      if (mounted && requestId == _requestSequence) {
+        setState(() => _loading = false);
+      }
+    }
+  }
+
+  void _showPhotoOptions() {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: const Color.fromRGBO(24, 44, 37, 1),
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                AppLocalizations.of(context).photoIdentificationPrivacy,
+                style: const TextStyle(color: Colors.grey),
+              ),
+              const SizedBox(height: 8),
+              ListTile(
+                leading: const Icon(Icons.camera_alt_outlined),
+                title: Text(AppLocalizations.of(context).takePlantPhoto),
+                onTap: () => _identifyFromPhoto(ImageSource.camera),
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library_outlined),
+                title: Text(AppLocalizations.of(context).choosePlantPhoto),
+                onTap: () => _identifyFromPhoto(ImageSource.gallery),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -116,34 +208,63 @@ class _SeachPageState extends State<SeachPage> {
             const SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  hintText: AppLocalizations.of(context).searchNewGreenFriends,
-                  prefixIcon: const Icon(Icons.search_outlined),
-                  suffixIcon: _searchController.text.isNotEmpty
-                      ? GestureDetector(
-                          onTap: () {
-                            _debounce?.cancel();
-                            _searchController.clear();
-                            setState(() {});
-                            _fetchAndSetResult("");
-                          },
-                          child: const Icon(Icons.close_outlined),
-                        )
-                      : null,
-                  border: const OutlineInputBorder(),
-                ),
-                onChanged: (value) {
-                  _requestSequence++;
-                  setState(() {});
-                  if (_debounce?.isActive ?? false) _debounce!.cancel();
-                  _debounce = Timer(_searchDelay, () {
-                    _fetchAndSetResult(value);
-                  });
-                },
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        hintText:
+                            AppLocalizations.of(context).searchNewGreenFriends,
+                        prefixIcon: const Icon(Icons.search_outlined),
+                        suffixIcon: _searchController.text.isNotEmpty
+                            ? GestureDetector(
+                                onTap: () {
+                                  _debounce?.cancel();
+                                  _searchController.clear();
+                                  setState(() {
+                                    _identificationMode = false;
+                                    _identificationImage = null;
+                                  });
+                                  _fetchAndSetResult("");
+                                },
+                                child: const Icon(Icons.close_outlined),
+                              )
+                            : null,
+                        border: const OutlineInputBorder(),
+                      ),
+                      onChanged: (value) {
+                        _requestSequence++;
+                        setState(() {
+                          _identificationMode = false;
+                          _identificationImage = null;
+                        });
+                        if (_debounce?.isActive ?? false) _debounce!.cancel();
+                        _debounce = Timer(_searchDelay, () {
+                          _fetchAndSetResult(value);
+                        });
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton.filled(
+                    onPressed: _loading ? null : _showPhotoOptions,
+                    tooltip: AppLocalizations.of(context).identifyByPhoto,
+                    icon: const Icon(Icons.camera_alt_outlined),
+                  ),
+                ],
               ),
             ),
+            if (_identificationMode && !_loading && _errorMessage == null)
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                child: Text(
+                  AppLocalizations.of(context).identificationCandidates,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.grey),
+                ),
+              ),
             if (_loading)
               const CircularProgressIndicator()
             else if (_errorMessage != null)
@@ -167,6 +288,9 @@ class _SeachPageState extends State<SeachPage> {
                             species: r,
                             env: widget.env,
                             result: _result,
+                            identificationImage: _identificationMode
+                                ? _identificationImage
+                                : null,
                             updateSpeciesLocally: (s) =>
                                 _fetchAndSetResult(_searchController.text),
                           ),
@@ -176,12 +300,13 @@ class _SeachPageState extends State<SeachPage> {
                         ],
                       ),
                     ),
-                    AddCustomCard(
-                      env: widget.env,
-                      species: _searchController.text,
-                      updateSpeciesLocally: (s) =>
-                          _fetchAndSetResult(_searchController.text),
-                    ),
+                    if (!_identificationMode)
+                      AddCustomCard(
+                        env: widget.env,
+                        species: _searchController.text,
+                        updateSpeciesLocally: (s) =>
+                            _fetchAndSetResult(_searchController.text),
+                      ),
                   ],
                 ),
               ),

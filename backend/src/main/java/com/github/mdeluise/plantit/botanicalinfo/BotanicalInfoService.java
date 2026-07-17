@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.github.mdeluise.plantit.authentication.User;
+import com.github.mdeluise.plantit.botanicalinfo.care.PlantCareInfo;
 import com.github.mdeluise.plantit.common.AuthenticatedUserService;
 import com.github.mdeluise.plantit.exception.ResourceNotFoundException;
 import com.github.mdeluise.plantit.exception.UnauthorizedException;
@@ -164,6 +165,15 @@ public class BotanicalInfoService {
     }
 
 
+    public Optional<BotanicalInfo> findCatalogMatch(BotanicalInfo candidate) {
+        if (candidate == null || candidate.isUserCreated()) {
+            return Optional.empty();
+        }
+        return findCatalogMergeTarget(candidate)
+                   .filter(existing -> existing.isAccessibleToUser(authenticatedUserService.getAuthenticatedUser()));
+    }
+
+
     private void linkNewImage(BotanicalInfoImage toSave, BotanicalInfo toUpdate) throws MalformedURLException {
         if (toSave == null) {
             logger.debug("Species {} does not have a linked image", toUpdate.getSpecies());
@@ -210,6 +220,18 @@ public class BotanicalInfoService {
 
     public BotanicalInfo getInternal(String scientificName) {
         return botanicalInfoRepository.getBySpeciesOrSynonym(scientificName).get(0);
+    }
+
+
+    @Transactional
+    @CacheEvict(cacheNames = "botanical-info", allEntries = true)
+    public BotanicalInfo updateCareInfo(Long id, PlantCareInfo careInfo) {
+        final BotanicalInfo result = get(id);
+        result.setPlantCareInfo(careInfo);
+        if (careInfo.getSourceReference() != null) {
+            result.getExternalReferences().put(BotanicalInfoCreator.TREFLE.name(), careInfo.getSourceReference());
+        }
+        return botanicalInfoRepository.save(result);
     }
 
 

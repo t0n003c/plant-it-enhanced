@@ -50,6 +50,13 @@ public class BotanicalInfoDTO {
     private String creator;
     @Schema(description = "ID of the botanical info in the creator service")
     private String externalId;
+    @Schema(description = "Confidence assigned by a photo-identification provider.",
+            accessMode = Schema.AccessMode.READ_ONLY)
+    private Double identificationConfidence;
+    @Schema(description = "Photo-identification provider.", accessMode = Schema.AccessMode.READ_ONLY)
+    private String identificationProvider;
+    @Schema(description = "Photo-identification model version.", accessMode = Schema.AccessMode.READ_ONLY)
+    private String identificationModel;
 
 
     public Long getId() {
@@ -229,6 +236,36 @@ public class BotanicalInfoDTO {
 
     public void setExternalId(String externalId) {
         this.externalId = externalId;
+    }
+
+
+    public Double getIdentificationConfidence() {
+        return identificationConfidence;
+    }
+
+
+    public void setIdentificationConfidence(Double identificationConfidence) {
+        this.identificationConfidence = identificationConfidence;
+    }
+
+
+    public String getIdentificationProvider() {
+        return identificationProvider;
+    }
+
+
+    public void setIdentificationProvider(String identificationProvider) {
+        this.identificationProvider = identificationProvider;
+    }
+
+
+    public String getIdentificationModel() {
+        return identificationModel;
+    }
+
+
+    public void setIdentificationModel(String identificationModel) {
+        this.identificationModel = identificationModel;
     }
 
 

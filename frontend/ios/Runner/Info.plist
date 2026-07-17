@@ -47,7 +47,9 @@
 	<true/>
 
 	<key>NSPhotoLibraryUsageDescription</key>
-    <string>Privacy - Photo Library Usage Description</string>
+    <string>Plant-it uses your photo library to identify plants and save plant photos.</string>
+	<key>NSCameraUsageDescription</key>
+    <string>Plant-it uses the camera to identify plants and save plant photos.</string>
     <key>NSMotionUsageDescription</key>
     <string>Motion usage description</string>
     <key>NSPhotoLibraryAddUsageDescription</key>

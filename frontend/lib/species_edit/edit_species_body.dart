@@ -70,20 +70,27 @@ class _EditSpeciesBodyState extends State<EditSpeciesBody> {
               children: [
                 EditableSimpleInfoEntry(
                   title: AppLocalizations.of(context).light,
-                  value: widget.species.care.light.toString(),
+                  value: widget.species.care.light?.toString(),
                   onChanged: (l) => widget.species.care.light = int.parse(l),
                   onlyNumber: true,
                   numberDecimal: false,
                 ),
                 EditableSimpleInfoEntry(
                   title: AppLocalizations.of(context).humidity,
-                  value: widget.species.care.humidity.toString(),
+                  value: widget.species.care.humidity?.toString(),
                   onChanged: (h) => widget.species.care.humidity = int.parse(h),
                   onlyNumber: true,
                 ),
                 EditableSimpleInfoEntry(
+                  title: AppLocalizations.of(context).soilMoisture,
+                  value: widget.species.care.soilHumidity?.toString(),
+                  onChanged: (h) =>
+                      widget.species.care.soilHumidity = int.parse(h),
+                  onlyNumber: true,
+                ),
+                EditableSimpleInfoEntry(
                   title: AppLocalizations.of(context).minTemp,
-                  value: widget.species.care.minTemp.toString(),
+                  value: widget.species.care.minTemp?.toString(),
                   onChanged: (t) =>
                       widget.species.care.minTemp = double.parse(t),
                   onlyNumber: true,
@@ -92,7 +99,7 @@ class _EditSpeciesBodyState extends State<EditSpeciesBody> {
                 ),
                 EditableSimpleInfoEntry(
                   title: AppLocalizations.of(context).maxTemp,
-                  value: widget.species.care.maxTemp.toString(),
+                  value: widget.species.care.maxTemp?.toString(),
                   onChanged: (t) =>
                       widget.species.care.maxTemp = double.parse(t),
                   onlyNumber: true,
@@ -101,13 +108,13 @@ class _EditSpeciesBodyState extends State<EditSpeciesBody> {
                 ),
                 EditableSimpleInfoEntry(
                   title: AppLocalizations.of(context).minPh,
-                  value: widget.species.care.phMin.toString(),
+                  value: widget.species.care.phMin?.toString(),
                   onChanged: (p) => widget.species.care.phMin = double.parse(p),
                   onlyNumber: true,
                 ),
                 EditableSimpleInfoEntry(
                   title: AppLocalizations.of(context).maxPh,
-                  value: widget.species.care.phMax.toString(),
+                  value: widget.species.care.phMax?.toString(),
                   onChanged: (p) => widget.species.care.phMax = double.parse(p),
                   onlyNumber: true,
                 ),

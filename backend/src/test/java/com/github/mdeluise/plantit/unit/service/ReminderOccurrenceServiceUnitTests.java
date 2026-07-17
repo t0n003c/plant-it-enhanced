@@ -1,5 +1,6 @@
 package com.github.mdeluise.plantit.unit.service;
 
+import java.time.Clock;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -9,6 +10,7 @@ import com.github.mdeluise.plantit.diary.entry.DiaryEntryService;
 import com.github.mdeluise.plantit.diary.entry.DiaryEntryType;
 import com.github.mdeluise.plantit.plant.Plant;
 import com.github.mdeluise.plantit.reminder.Reminder;
+import com.github.mdeluise.plantit.reminder.ReminderScheduleCalculator;
 import com.github.mdeluise.plantit.reminder.frequency.Frequency;
 import com.github.mdeluise.plantit.reminder.frequency.Unit;
 import com.github.mdeluise.plantit.reminder.occurrence.ReminderOccurrence;
@@ -17,9 +19,9 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
@@ -27,8 +29,14 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 public class ReminderOccurrenceServiceUnitTests {
     @Mock
     private DiaryEntryService diaryEntryService;
-    @InjectMocks
     private ReminderOccurrenceService service;
+
+
+    @BeforeEach
+    void setUp() {
+        service = new ReminderOccurrenceService(
+            diaryEntryService, new ReminderScheduleCalculator(Clock.systemDefaultZone()));
+    }
 
 
     @Test
@@ -144,6 +152,36 @@ public class ReminderOccurrenceServiceUnitTests {
         final Collection<ReminderOccurrence> occurrences = service.getOccurrences(reminder, start, end);
 
         Assertions.assertThat(occurrences).hasSize(1);
+    }
+
+
+    @Test
+    @DisplayName("Should not show calendar occurrences after the reminder end date")
+    void shouldNotShowOccurrencesAfterReminderEndDate() {
+        final Date reminderStartDate = addToDate(new Date(), Calendar.DATE, -2);
+        final Date reminderEndDate = addToDate(reminderStartDate, Calendar.DATE, 1);
+        final Date start = addToDate(reminderStartDate, Calendar.MINUTE, -1);
+        final Date end = addToDate(reminderStartDate, Calendar.DATE, 4);
+        final Frequency frequency = new Frequency();
+        frequency.setUnit(Unit.DAYS);
+        frequency.setQuantity(1);
+        final Plant target = new Plant();
+        target.setId(42L);
+        final Reminder reminder = new Reminder();
+        reminder.setStart(reminderStartDate);
+        reminder.setEnd(reminderEndDate);
+        reminder.setFrequency(frequency);
+        reminder.setEnabled(true);
+        reminder.setAction(DiaryEntryType.WATERING);
+        reminder.setTarget(target);
+        Mockito.when(diaryEntryService.getLast(42L, DiaryEntryType.WATERING))
+               .thenReturn(Optional.empty());
+
+        final Collection<ReminderOccurrence> occurrences = service.getOccurrences(reminder, start, end);
+
+        Assertions.assertThat(occurrences).hasSize(2);
+        Assertions.assertThat(occurrences)
+                  .allMatch(occurrence -> !occurrence.getDate().after(reminderEndDate));
     }
 
 

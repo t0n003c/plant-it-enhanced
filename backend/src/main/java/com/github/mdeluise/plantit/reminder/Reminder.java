@@ -49,6 +49,10 @@ public class Reminder {
     })
     private Frequency repeatAfter;
     private Date lastNotified;
+    @Column(name = "snoozed_until")
+    private Date snoozedUntil;
+    @Column(name = "last_skipped_occurrence")
+    private Date lastSkippedOccurrence;
     @NotNull
     @Enumerated(EnumType.STRING)
     private DiaryEntryType action;
@@ -112,6 +116,26 @@ public class Reminder {
 
     public void setLastNotified(Date lastNotified) {
         this.lastNotified = lastNotified;
+    }
+
+
+    public Date getSnoozedUntil() {
+        return snoozedUntil;
+    }
+
+
+    public void setSnoozedUntil(Date snoozedUntil) {
+        this.snoozedUntil = snoozedUntil;
+    }
+
+
+    public Date getLastSkippedOccurrence() {
+        return lastSkippedOccurrence;
+    }
+
+
+    public void setLastSkippedOccurrence(Date lastSkippedOccurrence) {
+        this.lastSkippedOccurrence = lastSkippedOccurrence;
     }
 
 

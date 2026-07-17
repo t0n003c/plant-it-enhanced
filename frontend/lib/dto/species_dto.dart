@@ -19,6 +19,9 @@ class SpeciesDTO {
   String? imageContentType;
   String creator;
   String? externalId;
+  double? identificationConfidence;
+  String? identificationProvider;
+  String? identificationModel;
 
   SpeciesDTO({
     this.id,
@@ -39,6 +42,9 @@ class SpeciesDTO {
     this.imageContentType,
     required this.creator,
     this.externalId,
+    this.identificationConfidence,
+    this.identificationProvider,
+    this.identificationModel,
   });
 
   factory SpeciesDTO.fromJson(Map<String, dynamic> json) {
@@ -70,6 +76,10 @@ class SpeciesDTO {
       imageContentType: json['imageContentType'],
       creator: json['creator'],
       externalId: json['externalId'],
+      identificationConfidence:
+          (json['identificationConfidence'] as num?)?.toDouble(),
+      identificationProvider: json['identificationProvider'],
+      identificationModel: json['identificationModel'],
     );
   }
 
@@ -171,31 +181,51 @@ class BotanicalCommonNameDTO {
 class SpeciesCareInfoDTO {
   int? light;
   int? humidity;
+  int? soilHumidity;
   double? minTemp;
   double? maxTemp;
   double? phMin;
   double? phMax;
   bool? allNull;
+  String? lightRequirement;
+  String? waterRequirement;
+  String? source;
+  String? sourceReference;
+  DateTime? lastVerifiedAt;
 
   SpeciesCareInfoDTO({
     this.light,
     this.humidity,
+    this.soilHumidity,
     this.minTemp,
     this.maxTemp,
     this.phMin,
     this.phMax,
     this.allNull,
+    this.lightRequirement,
+    this.waterRequirement,
+    this.source,
+    this.sourceReference,
+    this.lastVerifiedAt,
   });
 
   factory SpeciesCareInfoDTO.fromJson(Map<String, dynamic> json) {
     return SpeciesCareInfoDTO(
       light: json['light'],
       humidity: json['humidity'],
+      soilHumidity: json['soilHumidity'],
       minTemp: json['minTemp'],
       maxTemp: json['maxTemp'],
       phMin: json['phMin'],
       phMax: json['phMax'],
       allNull: json['allNull'],
+      lightRequirement: json['lightRequirement'],
+      waterRequirement: json['waterRequirement'],
+      source: json['source'],
+      sourceReference: json['sourceReference'],
+      lastVerifiedAt: json['lastVerifiedAt'] == null
+          ? null
+          : DateTime.parse(json['lastVerifiedAt']),
     );
   }
 
@@ -203,11 +233,16 @@ class SpeciesCareInfoDTO {
     return {
       if (light != null) 'light': light,
       if (humidity != null) 'humidity': humidity,
+      if (soilHumidity != null) 'soilHumidity': soilHumidity,
       if (minTemp != null) 'minTemp': minTemp,
       if (maxTemp != null) 'maxTemp': maxTemp,
       if (phMin != null) 'phMin': phMin,
       if (phMax != null) 'phMax': phMax,
       if (allNull != null) 'allNull': allNull,
+      if (source != null) 'source': source,
+      if (sourceReference != null) 'sourceReference': sourceReference,
+      if (lastVerifiedAt != null)
+        'lastVerifiedAt': lastVerifiedAt!.toIso8601String(),
     };
   }
 }

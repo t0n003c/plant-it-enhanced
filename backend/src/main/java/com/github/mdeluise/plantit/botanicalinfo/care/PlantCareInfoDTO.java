@@ -1,5 +1,7 @@
 package com.github.mdeluise.plantit.botanicalinfo.care;
 
+import java.time.Instant;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(name = "Plant care info", description = "Represents a plant's care info.")
@@ -8,6 +10,8 @@ public class PlantCareInfoDTO {
     private Integer light;
     @Schema(description = "Humidity requirement")
     private Integer humidity;
+    @Schema(description = "Required soil moisture on a 0-10 scale")
+    private Integer soilHumidity;
     @Schema(description = "Minimum temperature requirement")
     private Double minTemp;
     @Schema(description = "Maximum temperature requirement")
@@ -16,6 +20,16 @@ public class PlantCareInfoDTO {
     private Double phMax;
     @Schema(description = "Minimum PH requirement")
     private Double phMin;
+    @Schema(description = "Plain-language light requirement", accessMode = Schema.AccessMode.READ_ONLY)
+    private CareRequirementLevel lightRequirement;
+    @Schema(description = "Plain-language water requirement", accessMode = Schema.AccessMode.READ_ONLY)
+    private CareRequirementLevel waterRequirement;
+    @Schema(description = "Source of the care data")
+    private String source;
+    @Schema(description = "Identifier used by the care-data source")
+    private String sourceReference;
+    @Schema(description = "Last verification time for the care data")
+    private Instant lastVerifiedAt;
     @Schema(description = "Are all fields null?", accessMode = Schema.AccessMode.READ_ONLY)
     private boolean allNull;
 
@@ -37,6 +51,16 @@ public class PlantCareInfoDTO {
 
     public void setHumidity(Integer humidity) {
         this.humidity = humidity;
+    }
+
+
+    public Integer getSoilHumidity() {
+        return soilHumidity;
+    }
+
+
+    public void setSoilHumidity(Integer soilHumidity) {
+        this.soilHumidity = soilHumidity;
     }
 
 
@@ -77,6 +101,56 @@ public class PlantCareInfoDTO {
 
     public void setPhMin(Double phMin) {
         this.phMin = phMin;
+    }
+
+
+    public CareRequirementLevel getLightRequirement() {
+        return lightRequirement;
+    }
+
+
+    public void setLightRequirement(CareRequirementLevel lightRequirement) {
+        this.lightRequirement = lightRequirement;
+    }
+
+
+    public CareRequirementLevel getWaterRequirement() {
+        return waterRequirement;
+    }
+
+
+    public void setWaterRequirement(CareRequirementLevel waterRequirement) {
+        this.waterRequirement = waterRequirement;
+    }
+
+
+    public String getSource() {
+        return source;
+    }
+
+
+    public void setSource(String source) {
+        this.source = source;
+    }
+
+
+    public String getSourceReference() {
+        return sourceReference;
+    }
+
+
+    public void setSourceReference(String sourceReference) {
+        this.sourceReference = sourceReference;
+    }
+
+
+    public Instant getLastVerifiedAt() {
+        return lastVerifiedAt;
+    }
+
+
+    public void setLastVerifiedAt(Instant lastVerifiedAt) {
+        this.lastVerifiedAt = lastVerifiedAt;
     }
 
 
