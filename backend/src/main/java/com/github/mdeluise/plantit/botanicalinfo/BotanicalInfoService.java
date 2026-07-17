@@ -228,8 +228,8 @@ public class BotanicalInfoService {
     public BotanicalInfo updateCareInfo(Long id, PlantCareInfo careInfo) {
         final BotanicalInfo result = get(id);
         result.setPlantCareInfo(careInfo);
-        if (careInfo.getSourceReference() != null) {
-            result.getExternalReferences().put(BotanicalInfoCreator.TREFLE.name(), careInfo.getSourceReference());
+        if (careInfo.getSource() != null && careInfo.getSourceReference() != null) {
+            result.getExternalReferences().put(careInfo.getSource(), careInfo.getSourceReference());
         }
         return botanicalInfoRepository.save(result);
     }

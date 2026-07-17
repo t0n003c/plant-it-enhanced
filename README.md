@@ -60,11 +60,13 @@ or mobile app.
 
 1. Create a free [Pl@ntNet API key](https://my.plantnet.org/) for photo identification.
 2. Create a [Trefle access token](https://trefle.io/) for structured care data.
-3. Add both values to the same `.env` file used by Docker Compose:
+3. Create a [Perenual API key](https://www.perenual.com/docs/api) for watering and sunlight fallback data.
+4. Add the values to the same `.env` file used by Docker Compose:
 
 ```dotenv
 PLANTNET_API_KEY=replace-with-your-plantnet-key
 TREFLE_TOKEN=replace-with-your-trefle-token
+PERENUAL_API_KEY=replace-with-your-perenual-key
 ```
 
 Redeploy only the server after changing these values:
@@ -74,13 +76,16 @@ docker compose up -d --no-deps --force-recreate server
 ```
 
 In Search, use the camera button, photograph one plant in clear light, compare the ranked
-suggestions, and select the best match. When the plant is added, Plant-it keeps the photo in your
-own upload directory and attempts to attach a care guide automatically. Care values are stored in
-your MySQL catalog with their source and verification time and can still be edited manually.
+suggestions, and select the best match. Opening a search result loads a cached care preview without
+saving the species. When the plant is added, Plant-it keeps the photo in your own upload directory
+and attaches the preview to the saved catalog entry. Plant-it checks Trefle first and uses Perenual
+when Trefle returns no usable care values. Care values are stored in your MySQL catalog with their
+source and verification time and can still be edited manually.
 
 Identification suggestions are provided by [Pl@ntNet](https://plantnet.org/). Structured care
-data is provided by [Trefle](https://trefle.io/) under its published terms. Always treat automated
-identification and generalized care guidance as suggestions.
+data is provided by [Trefle](https://trefle.io/) and [Perenual](https://www.perenual.com/) under
+their published terms. Always treat automated identification and generalized care guidance as
+suggestions.
 
 ## Quickstart
 ### Server

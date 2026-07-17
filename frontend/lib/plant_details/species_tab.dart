@@ -61,6 +61,11 @@ class _SpeciesDetailsTabState extends State<SpeciesDetailsTab> {
             children: widget.isLoading
                 ? generateSkeleton(7, widget.isLoading)
                 : [
+                    if (widget.refreshingCare && widget.onRefreshCare == null)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
                     if (widget.species.care.lightRequirement != null)
                       _CareGuidanceCard(
                         icon: Icons.wb_sunny_outlined,
@@ -203,6 +208,9 @@ class _SpeciesDetailsTabState extends State<SpeciesDetailsTab> {
   String? _careSourceLabel(BuildContext context) {
     if (widget.species.care.source == 'TREFLE') {
       return AppLocalizations.of(context).careDataProvidedByTrefle;
+    }
+    if (widget.species.care.source == 'PERENUAL') {
+      return AppLocalizations.of(context).careDataProvidedByPerenual;
     }
     return widget.species.care.source;
   }

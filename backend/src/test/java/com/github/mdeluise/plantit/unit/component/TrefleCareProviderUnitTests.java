@@ -21,7 +21,12 @@ import org.mockito.Mockito;
 @DisplayName("Unit tests for Trefle care enrichment")
 class TrefleCareProviderUnitTests {
     private static final String SEARCH_RESPONSE = """
-        {"data":[{"scientific_name":"Monstera deliciosa","slug":"monstera-deliciosa"}]}
+        {
+          "data": [
+            {"scientific_name":"Monstera deliciosa","slug":"monstera-deliciosa"},
+            {"scientific_name":"Zea mays","slug":"zea-mays"}
+          ]
+        }
         """;
     private static final String DETAIL_RESPONSE = """
         {
@@ -40,6 +45,21 @@ class TrefleCareProviderUnitTests {
           }
         }
         """;
+    private static final String EMPTY_DETAIL_RESPONSE = """
+        {
+          "data": {
+            "main_species": {
+              "growth": {
+                "light": null,
+                "atmospheric_humidity": null,
+                "soil_humidity": null,
+                "minimum_temperature": {"deg_c": null},
+                "maximum_temperature": {"deg_c": null}
+              }
+            }
+          }
+        }
+        """;
     private HttpServer server;
     private String serverUrl;
 
@@ -51,6 +71,8 @@ class TrefleCareProviderUnitTests {
         server.createContext("/api/v1/plants/search", exchange -> respond(exchange, SEARCH_RESPONSE));
         server.createContext("/api/v1/plants/monstera-deliciosa",
                              exchange -> respond(exchange, DETAIL_RESPONSE));
+        server.createContext("/api/v1/plants/zea-mays",
+                             exchange -> respond(exchange, EMPTY_DETAIL_RESPONSE));
         server.start();
     }
 
@@ -82,6 +104,22 @@ class TrefleCareProviderUnitTests {
         Assertions.assertEquals("TREFLE", result.getSource());
         Assertions.assertEquals("monstera-deliciosa", result.getSourceReference());
         Assertions.assertNotNull(result.getLastVerifiedAt());
+    }
+
+
+    @Test
+    @DisplayName("Should treat nested objects containing only null values as missing care data")
+    void shouldTreatNestedNullValuesAsMissing() {
+        final TrefleCareProperties trefleProperties = Mockito.mock(TrefleCareProperties.class);
+        final PlantSearchProperties searchProperties = Mockito.mock(PlantSearchProperties.class);
+        Mockito.when(trefleProperties.isConfigured()).thenReturn(true);
+        Mockito.when(trefleProperties.getUrl()).thenReturn(serverUrl);
+        Mockito.when(trefleProperties.getToken()).thenReturn("secret");
+        Mockito.when(searchProperties.getUserAgent()).thenReturn("Plant-it unit test");
+        final TrefleCareProvider provider = new TrefleCareProvider(
+            HttpClient.newHttpClient(), trefleProperties, searchProperties);
+
+        Assertions.assertTrue(provider.fetch("Zea mays").isEmpty());
     }
 
 
