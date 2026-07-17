@@ -35,7 +35,10 @@ public class PlantInfoExtractorFacade {
     }
 
 
-    @Cacheable(value = "botanical-info", key = "{#size, @authenticatedUserService.getAuthenticatedUser().id}")
+    @Cacheable(
+        value = "botanical-info",
+        key = "{'botanical-schema-v3', #size, @authenticatedUserService.getAuthenticatedUser().id}"
+    )
     public List<BotanicalInfo> getAll(int size) {
         logger.debug("Search all botanical info");
         return chainHead.getAll(size);
@@ -44,11 +47,11 @@ public class PlantInfoExtractorFacade {
 
     @Cacheable(
         value = "botanical-info",
-        key = "{#partialPlantScientificName, #size, @authenticatedUserService.getAuthenticatedUser().id}"
+        key = "{'common-name-v3', #searchTerm, #size, @authenticatedUserService.getAuthenticatedUser().id}"
     )
-    public List<BotanicalInfo> extractPlants(String partialPlantScientificName, int size) {
-        final String searchTerm = partialPlantScientificName.isBlank() ? "*" : partialPlantScientificName.trim();
-        logger.debug(String.format("Extract botanical info matching %s (size %s)", searchTerm, size));
-        return chainHead.extractPlants(searchTerm, size);
+    public List<BotanicalInfo> extractPlants(String searchTerm, int size) {
+        final String normalizedSearchTerm = searchTerm.isBlank() ? "*" : searchTerm.trim();
+        logger.debug(String.format("Extract botanical info matching %s (size %s)", normalizedSearchTerm, size));
+        return chainHead.extractPlants(normalizedSearchTerm, size);
     }
 }

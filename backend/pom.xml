@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.github.mdeluise</groupId>
     <artifactId>plant-it</artifactId>
-    <version>0.10.0</version>
+    <version>0.11.0</version>
     <name>Plant it</name>
     <description>Gardening companion app</description>
     <properties>
@@ -70,7 +70,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
-            <version>3.3.5</version>
+            <version>3.4.0</version>
         </dependency>
         <!--
             https://github.com/kstyrc/embedded-redis/issues/135#issuecomment-1825620600
@@ -84,12 +84,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
-            <version>3.3.5</version>
+            <version>3.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
-            <version>3.3.5</version>
+            <version>3.4.0</version>
         </dependency>
         <dependency>
             <groupId>com.bucket4j</groupId>
@@ -152,7 +152,7 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>2.6.0</version>
+            <version>2.7.0</version>
         </dependency>
 
     </dependencies>
@@ -215,7 +215,7 @@
                     <dependency>
                         <groupId>com.puppycrawl.tools</groupId>
                         <artifactId>checkstyle</artifactId>
-                        <version>10.20.1</version>
+                        <version>10.20.2</version>
                     </dependency>
                 </dependencies>
             </plugin>

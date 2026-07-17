@@ -1,7 +1,11 @@
 package com.github.mdeluise.plantit.botanicalinfo;
 
 import java.io.Serializable;
+import java.time.Instant;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -23,6 +27,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.MapKeyColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
@@ -43,6 +48,15 @@ public class BotanicalInfo implements Serializable, ImageTarget {
     @CollectionTable(name = "synonyms")
     @Column(name = "synonym_value")
     private Set<String> synonyms = new HashSet<>();
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "botanical_common_names", joinColumns = @JoinColumn(name = "botanical_info_id"))
+    private Set<BotanicalCommonName> commonNames = new LinkedHashSet<>();
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "botanical_external_references", joinColumns = @JoinColumn(name = "botanical_info_id"))
+    @MapKeyColumn(name = "provider", length = 32)
+    @Column(name = "external_id")
+    private Map<String, String> externalReferences = new HashMap<>();
+    private Instant lastVerifiedAt;
     private String family;
     private String genus;
     private String species;
@@ -84,6 +98,49 @@ public class BotanicalInfo implements Serializable, ImageTarget {
 
     public void setSynonyms(Set<String> synonyms) {
         this.synonyms = synonyms;
+    }
+
+
+    public Set<BotanicalCommonName> getCommonNames() {
+        return commonNames;
+    }
+
+
+    public void setCommonNames(Set<BotanicalCommonName> commonNames) {
+        this.commonNames = commonNames;
+    }
+
+
+    @Transient
+    public String getPreferredCommonName() {
+        return commonNames.stream()
+                          .filter(BotanicalCommonName::isPreferred)
+                          .map(BotanicalCommonName::getName)
+                          .findFirst()
+                          .orElseGet(() -> commonNames.stream()
+                                                      .map(BotanicalCommonName::getName)
+                                                      .findFirst()
+                                                      .orElse(null));
+    }
+
+
+    public Map<String, String> getExternalReferences() {
+        return externalReferences;
+    }
+
+
+    public void setExternalReferences(Map<String, String> externalReferences) {
+        this.externalReferences = externalReferences;
+    }
+
+
+    public Instant getLastVerifiedAt() {
+        return lastVerifiedAt;
+    }
+
+
+    public void setLastVerifiedAt(Instant lastVerifiedAt) {
+        this.lastVerifiedAt = lastVerifiedAt;
     }
 
 

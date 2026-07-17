@@ -2,6 +2,7 @@ package com.github.mdeluise.plantit;
 
 import java.io.IOException;
 import java.net.http.HttpClient;
+import java.time.Duration;
 
 import com.github.mdeluise.plantit.notification.otp.OtpService;
 import com.github.mdeluise.plantit.notification.password.TemporaryPasswordService;
@@ -62,6 +63,7 @@ import redis.embedded.RedisServer;
 @EnableMethodSecurity
 @EnableCaching
 public class ApplicationConfig {
+    private static final Duration HTTP_CONNECT_TIMEOUT = Duration.ofSeconds(5);
     private final OtpService otpService;
     private final TemporaryPasswordService temporaryPasswordService;
     private final ReminderDispatcher reminderDispatcher;
@@ -111,7 +113,7 @@ public class ApplicationConfig {
 
     @Bean
     public HttpClient httpClient() {
-        return HttpClient.newHttpClient();
+        return HttpClient.newBuilder().connectTimeout(HTTP_CONNECT_TIMEOUT).build();
     }
 
 

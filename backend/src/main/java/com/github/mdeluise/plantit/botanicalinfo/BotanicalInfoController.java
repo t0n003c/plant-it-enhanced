@@ -67,6 +67,21 @@ public class BotanicalInfoController {
     }
 
 
+    @GetMapping("/search")
+    @Operation(
+        summary = "Search botanical information by common or scientific name",
+        description = "Searches localized common names, scientific synonyms, and accepted scientific names."
+    )
+    public ResponseEntity<List<BotanicalInfoDTO>> search(
+        @RequestParam(defaultValue = "5", required = false) Integer size,
+        @RequestParam String q) {
+        final Collection<BotanicalInfo> result = plantInfoExtractorFacade.extractPlants(q, size);
+        final List<BotanicalInfoDTO> convertedResult =
+            result.stream().map(botanicalInfoDtoConverter::convertToDTO).collect(Collectors.toList());
+        return ResponseEntity.ok(convertedResult);
+    }
+
+
     @GetMapping("/{botanicalInfoId}/_count")
     @Operation(
         summary = "Count the existing plant for a botanical info.",

@@ -1,6 +1,10 @@
 package com.github.mdeluise.plantit.botanicalinfo;
 
+import java.time.Instant;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -15,6 +19,14 @@ public class BotanicalInfoDTO {
     private String scientificName;
     @Schema(description = "Synonyms of the botanical info.")
     private Set<String> synonyms = new HashSet<>();
+    @Schema(description = "Preferred localized common name.", accessMode = Schema.AccessMode.READ_ONLY)
+    private String preferredCommonName;
+    @Schema(description = "Localized common names and their sources.")
+    private Set<BotanicalCommonNameDTO> commonNames = new LinkedHashSet<>();
+    @Schema(description = "Provider identifiers used to verify this taxon.")
+    private Map<String, String> externalReferences = new HashMap<>();
+    @Schema(description = "Last time external taxonomy was verified.")
+    private Instant lastVerifiedAt;
     @Schema(description = "Family of the botanical info.")
     private String family;
     @Schema(description = "Genus of the botanical info.")
@@ -64,6 +76,46 @@ public class BotanicalInfoDTO {
 
     public void setSynonyms(Set<String> synonyms) {
         this.synonyms = synonyms;
+    }
+
+
+    public String getPreferredCommonName() {
+        return preferredCommonName;
+    }
+
+
+    public void setPreferredCommonName(String preferredCommonName) {
+        this.preferredCommonName = preferredCommonName;
+    }
+
+
+    public Set<BotanicalCommonNameDTO> getCommonNames() {
+        return commonNames;
+    }
+
+
+    public void setCommonNames(Set<BotanicalCommonNameDTO> commonNames) {
+        this.commonNames = commonNames;
+    }
+
+
+    public Map<String, String> getExternalReferences() {
+        return externalReferences;
+    }
+
+
+    public void setExternalReferences(Map<String, String> externalReferences) {
+        this.externalReferences = externalReferences;
+    }
+
+
+    public Instant getLastVerifiedAt() {
+        return lastVerifiedAt;
+    }
+
+
+    public void setLastVerifiedAt(Instant lastVerifiedAt) {
+        this.lastVerifiedAt = lastVerifiedAt;
     }
 
 

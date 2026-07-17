@@ -1,0 +1,12 @@
+.git
+.github
+.idea
+.vscode
+backend/target
+frontend/.dart_tool
+frontend/.flutter-plugins
+frontend/.flutter-plugins-dependencies
+frontend/build
+docs
+screenshots
+*.md

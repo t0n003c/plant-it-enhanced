@@ -48,10 +48,7 @@ class _SpeciesDetailsTabState extends State<SpeciesDetailsTab> {
                 : [
                     FullWidthInfoEntry(
                       title: AppLocalizations.of(context).synonyms,
-                      value: widget.species.synonyms
-                          ?.join(",")
-                          .replaceAll("[", "")
-                          .replaceAll("]", ""),
+                      value: widget.species.synonyms?.join(", "),
                     )
                   ],
           ),

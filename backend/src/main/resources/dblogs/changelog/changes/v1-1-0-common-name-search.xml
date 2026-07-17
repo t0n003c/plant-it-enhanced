@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+
+    <changeSet id="plantSearchWidenTaxonomyColumns" author="OpenAI">
+        <modifyDataType tableName="botanical_infos" columnName="family" newDataType="varchar(255)"/>
+        <modifyDataType tableName="botanical_infos" columnName="genus" newDataType="varchar(255)"/>
+        <modifyDataType tableName="botanical_infos" columnName="species" newDataType="varchar(255)"/>
+        <modifyDataType tableName="synonyms" columnName="synonym_value" newDataType="varchar(255)"/>
+    </changeSet>
+
+
+    <changeSet id="plantSearchAddVerificationTimestamp" author="OpenAI">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="botanical_infos" columnName="last_verified_at"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="botanical_infos">
+            <column name="last_verified_at" type="timestamp">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+
+    <changeSet id="plantSearchCreateCommonNamesTable" author="OpenAI">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="botanical_common_names"/>
+            </not>
+        </preConditions>
+        <createTable tableName="botanical_common_names">
+            <column name="botanical_info_id" type="bigint">
+                <constraints nullable="false"
+                             foreignKeyName="fk_commonNames_botanicalInfo"
+                             references="botanical_infos(id)"
+                             deleteCascade="true"/>
+            </column>
+            <column name="common_name_value" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="normalized_name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="language_code" type="varchar(16)"/>
+            <column name="region_code" type="varchar(16)"/>
+            <column name="is_preferred" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="botanical_common_names" indexName="idx_common_name_normalized">
+            <column name="normalized_name"/>
+        </createIndex>
+        <createIndex tableName="botanical_common_names" indexName="idx_common_name_botanical_info">
+            <column name="botanical_info_id"/>
+        </createIndex>
+    </changeSet>
+
+
+    <changeSet id="plantSearchCreateExternalReferencesTable" author="OpenAI">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="botanical_external_references"/>
+            </not>
+        </preConditions>
+        <createTable tableName="botanical_external_references">
+            <column name="botanical_info_id" type="bigint">
+                <constraints nullable="false"
+                             foreignKeyName="fk_externalRefs_botanicalInfo"
+                             references="botanical_infos(id)"
+                             deleteCascade="true"/>
+            </column>
+            <column name="provider" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="external_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="botanical_external_references"
+                       columnNames="botanical_info_id,provider"
+                       constraintName="pk_botanical_external_references"/>
+        <createIndex tableName="botanical_external_references" indexName="idx_external_reference_provider">
+            <column name="provider"/>
+            <column name="external_id"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

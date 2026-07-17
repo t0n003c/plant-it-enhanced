@@ -7,15 +7,19 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.github.mdeluise.plantit.botanicalinfo.BotanicalCommonName;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfo;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoCreator;
 import com.github.mdeluise.plantit.exception.InfoExtractionException;
 import com.github.mdeluise.plantit.image.BotanicalInfoImage;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,105 +33,153 @@ import org.springframework.stereotype.Component;
 @SuppressWarnings("ClassDataAbstractionCoupling")
 @Component
 public class FloraCodexRequestMaker {
+    private static final int HTTP_SUCCESS_MIN = 200;
+    private static final int HTTP_SUCCESS_MAX = 300;
+    private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(8);
+    private static final String SPECIES_RANK_FILTER = "filter%5Brank%5D=species";
     private final String token;
     private final String baseEndpoint;
+    private final String locale;
+    private final String region;
+    private final HttpClient client;
     private final Logger logger = LoggerFactory.getLogger(FloraCodexRequestMaker.class);
 
 
     @Autowired
     public FloraCodexRequestMaker(@Value("${floracodex.url}") String domain,
-                                  @Value("${floracodex.key}") String token) {
-        this.baseEndpoint = domain + "/v1";
+                                  @Value("${floracodex.key}") String token,
+                                  @Value("${plant-search.locale}") String locale,
+                                  @Value("${plant-search.region}") String region) {
+        this.baseEndpoint = removeTrailingSlash(domain) + "/v2";
         this.token = token;
+        this.locale = locale;
+        this.region = region;
+        this.client = HttpClient.newHttpClient();
     }
 
 
-    public Page<BotanicalInfo> fetchInfoFromPartial(String partialPlantScientificName, Pageable pageable)
+    public FloraCodexRequestMaker(String domain, String token) {
+        this(domain, token, "en", "US");
+    }
+
+
+    public Page<BotanicalInfo> fetchInfoFromPartial(String searchTerm, Pageable pageable)
         throws InfoExtractionException {
-        logger.debug("Fetching info for \"{}\" from FloraCodex", partialPlantScientificName);
-        final String encodedPartialName = URLEncoder.encode(partialPlantScientificName, StandardCharsets.UTF_8);
-        final String url =
-            String.format("%s/species/search?q=%s&limit=%s&page=%s&key=%s", baseEndpoint, encodedPartialName,
-                          pageable.getPageSize(), pageable.getPageNumber(), token
-            );
-        final HttpClient client = HttpClient.newHttpClient();
-        final HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).GET().build();
-
-        HttpResponse<String> response;
-        try {
-            response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        } catch (IOException | InterruptedException e) {
-            throw new InfoExtractionException(e);
-        }
-        final JsonObject responseJson = JsonParser.parseString(response.body()).getAsJsonObject();
-        final List<BotanicalInfo> botanicalInfos = new ArrayList<>();
-        responseJson.get("data").getAsJsonArray().forEach(plantResult -> {
-            if (plantResult.getAsJsonObject().get("rank").getAsString().equals("SPECIES")) {
-                final BotanicalInfo botanicalInfo = new BotanicalInfo();
-                botanicalInfo.setCreator(BotanicalInfoCreator.FLORA_CODEX);
-                try {
-                    fillFloraCodexInfo(plantResult, botanicalInfo);
-                    botanicalInfos.add(botanicalInfo);
-                } catch (UnsupportedOperationException e) {
-                    logger.error("Error while retrieving info about species", e);
-                }
-            }
-        });
-        return new PageImpl<>(botanicalInfos);
-    }
-
-
-    private void fillFloraCodexInfo(JsonElement plantResult, BotanicalInfo botanicalInfo) {
-        final JsonObject plantJson = plantResult.getAsJsonObject();
-        botanicalInfo.setExternalId(plantJson.get("id").getAsString());
-        botanicalInfo.setSpecies(plantJson.get("scientific_name").getAsString());
-        botanicalInfo.setFamily(plantJson.get("family").getAsString());
-        botanicalInfo.setGenus(plantJson.get("genus").getAsString());
-        if (!isJsonValueNull(plantJson, "image_url")) {
-            fillImage(botanicalInfo, plantJson.get("image_url").getAsString());
-        }
-    }
-
-
-
-    private boolean isJsonValueNull(JsonObject jsonObject, String key) {
-        if (jsonObject.get(key) == null || jsonObject.get(key).isJsonNull()) {
-            return true;
-        }
-        try {
-            return jsonObject.get(key).getAsString().equals("null");
-        } catch (UnsupportedOperationException ignored) {
-            return false;
-        }
+        logger.debug("Fetching info for \"{}\" from FloraCodex", searchTerm);
+        final String encodedSearchTerm = URLEncoder.encode(searchTerm, StandardCharsets.UTF_8);
+        final String url = String.format("%s/species?q=%s&%s&page=%s", baseEndpoint, encodedSearchTerm,
+                                         SPECIES_RANK_FILTER, pageable.getPageNumber() + 1);
+        return fetchPage(url, pageable);
     }
 
 
     public Page<BotanicalInfo> fetchAll(Pageable pageable) {
         logger.debug("Fetching all info from FloraCodex");
-        final String url =
-            String.format("%s/species/search?limit=%s&page=%s&key=%s", baseEndpoint, pageable.getPageSize(),
-                          pageable.getPageNumber(), token
-            );
-        final HttpClient client = HttpClient.newHttpClient();
-        final HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).GET().build();
+        final String url = String.format("%s/species?%s&page=%s", baseEndpoint, SPECIES_RANK_FILTER,
+                                         pageable.getPageNumber() + 1);
+        return fetchPage(url, pageable);
+    }
 
-        HttpResponse<String> response;
+
+    private Page<BotanicalInfo> fetchPage(String url, Pageable pageable) {
+        final HttpRequest request = HttpRequest.newBuilder()
+                                               .uri(URI.create(url))
+                                               .header("Authorization", "ApiKey " + token)
+                                               .header("Accept", "application/json")
+                                               .timeout(REQUEST_TIMEOUT)
+                                               .GET()
+                                               .build();
+        final HttpResponse<String> response = send(request);
+        if (response.statusCode() < HTTP_SUCCESS_MIN || response.statusCode() >= HTTP_SUCCESS_MAX) {
+            throw new InfoExtractionException("FloraCodex returned HTTP " + response.statusCode());
+        }
+
         try {
-            response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        } catch (IOException | InterruptedException e) {
+            final JsonObject responseJson = JsonParser.parseString(response.body()).getAsJsonObject();
+            final List<BotanicalInfo> botanicalInfos = new ArrayList<>();
+            responseJson.get("data").getAsJsonArray().forEach(plantResult -> addSpecies(
+                plantResult, botanicalInfos
+            ));
+            final long total = readTotal(responseJson, botanicalInfos.size());
+            return new PageImpl<>(botanicalInfos, pageable, total);
+        } catch (JsonParseException | IllegalStateException | UnsupportedOperationException | NullPointerException |
+                 NumberFormatException e) {
             throw new InfoExtractionException(e);
         }
-        final JsonObject responseJson = JsonParser.parseString(response.body()).getAsJsonObject();
-        List<BotanicalInfo> botanicalInfos = new ArrayList<>();
-        responseJson.get("data").getAsJsonArray().forEach(plantResult -> {
-            if (plantResult.getAsJsonObject().get("rank").getAsString().equals("SPECIES")) {
-                BotanicalInfo botanicalInfo = new BotanicalInfo();
-                botanicalInfo.setCreator(BotanicalInfoCreator.FLORA_CODEX);
-                fillFloraCodexInfo(plantResult, botanicalInfo);
-                botanicalInfos.add(botanicalInfo);
+    }
+
+
+    private HttpResponse<String> send(HttpRequest request) {
+        try {
+            return client.send(request, HttpResponse.BodyHandlers.ofString());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new InfoExtractionException(e);
+        } catch (IOException e) {
+            throw new InfoExtractionException(e);
+        }
+    }
+
+
+    private void addSpecies(JsonElement plantResult, List<BotanicalInfo> botanicalInfos) {
+        final JsonObject plantJson = plantResult.getAsJsonObject();
+        if (!"species".equalsIgnoreCase(readString(plantJson, "rank"))) {
+            return;
+        }
+
+        final BotanicalInfo botanicalInfo = new BotanicalInfo();
+        botanicalInfo.setCreator(BotanicalInfoCreator.FLORA_CODEX);
+        try {
+            fillFloraCodexInfo(plantJson, botanicalInfo);
+            botanicalInfos.add(botanicalInfo);
+        } catch (UnsupportedOperationException e) {
+            logger.error("Error while retrieving info about species", e);
+        }
+    }
+
+
+    private void fillFloraCodexInfo(JsonObject plantJson, BotanicalInfo botanicalInfo) {
+        final String externalId = readString(plantJson, "id");
+        botanicalInfo.setExternalId(externalId);
+        if (externalId != null) {
+            botanicalInfo.getExternalReferences().put(BotanicalInfoCreator.FLORA_CODEX.name(), externalId);
+        }
+        botanicalInfo.setSpecies(readString(plantJson, "scientific_name"));
+        botanicalInfo.setFamily(readString(plantJson, "family"));
+        botanicalInfo.setGenus(readString(plantJson, "genus"));
+
+        final String commonName = readString(plantJson, "common_name");
+        if (commonName != null && !commonName.equalsIgnoreCase(botanicalInfo.getSpecies())) {
+            botanicalInfo.getSynonyms().add(commonName);
+            botanicalInfo.getCommonNames().add(new BotanicalCommonName(
+                commonName, locale, region, true, BotanicalInfoCreator.FLORA_CODEX
+            ));
+        }
+        final String imageUrl = readString(plantJson, "image_url");
+        if (imageUrl != null) {
+            fillImage(botanicalInfo, imageUrl);
+        }
+        botanicalInfo.setLastVerifiedAt(Instant.now());
+    }
+
+
+    private long readTotal(JsonObject responseJson, int fallback) {
+        if (responseJson.has("meta") && responseJson.get("meta").isJsonObject()) {
+            final JsonObject meta = responseJson.getAsJsonObject("meta");
+            if (meta.has("total") && !meta.get("total").isJsonNull()) {
+                return meta.get("total").getAsLong();
             }
-        });
-        return new PageImpl<>(botanicalInfos);
+        }
+        return fallback;
+    }
+
+
+    private String readString(JsonObject jsonObject, String key) {
+        if (!jsonObject.has(key) || jsonObject.get(key).isJsonNull()) {
+            return null;
+        }
+        final String value = jsonObject.get(key).getAsString();
+        return "null".equalsIgnoreCase(value) || value.isBlank() ? null : value;
     }
 
 
@@ -136,5 +188,10 @@ public class FloraCodexRequestMaker {
         abstractEntityImage.setUrl(imageUrl);
         abstractEntityImage.setId(null);
         botanicalInfo.setImage(abstractEntityImage);
+    }
+
+
+    private static String removeTrailingSlash(String domain) {
+        return domain.endsWith("/") ? domain.substring(0, domain.length() - 1) : domain;
     }
 }

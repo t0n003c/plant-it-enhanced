@@ -2,7 +2,11 @@
   <img width="150px" src="images/plant-it-logo.png" title="Plant-it">
 </p>
 
-<h1 align="center">Plant-it</h1>
+<h1 align="center">Plant-it Enhanced</h1>
+
+> This is a maintained fork of [MDeLuise/plant-it](https://github.com/MDeLuise/plant-it),
+> focused on accurate everyday-name plant search and reliable self-hosted deployment.
+> It remains available under the original GPLv3 license.
 
 <p align="center"><i><b>[Project under "active" development, some features may be unstable or change in the future. A first release version is planned to be packed soon].</b></i></p>
 <p align="center">Plant-it is a <b>self-hosted gardening companion app.</b><br>Useful for keeping track of plant care, receiving notifications about when to water plants, uploading plant images, and more.</p>
@@ -26,6 +30,8 @@ Plant-it helps you remember the last time you did a treatment of your plants, wh
 
 ## Features highlight
 * Add existing plants or user created plants to your collection
+* Search by everyday common names, aliases, reordered words, and minor typos
+* Verify accepted scientific taxonomy through GBIF, with iNaturalist discovery and FloraCodex fallback
 * Log events like watering, fertilizing, biostimulating, etc. for your plants
 * View all the logged events, filtering by plant and event type
 * Upload photos of your plants
@@ -33,73 +39,24 @@ Plant-it helps you remember the last time you did a treatment of your plants, wh
 
 ## Quickstart
 ### Server
-Installing Plant-it is pretty straight forward, in order to do so follow these steps:
+The maintained AMD64/ARM64 image is published from this repository to
+`ghcr.io/t0n003c/plant-it-enhanced` after the complete backend and frontend test suites pass.
 
-* Create a folder where you want to place all Plant-it related files.
-* Inside that folder, create a file named `docker-compose.yml` with this content:
-  ```yaml
-  name: plant-it
-  services:
-    server:
-      image: msdeluise/plant-it-server:latest
-      env_file: server.env
-      depends_on:
-        - db
-        - cache
-      restart: unless-stopped
-      volumes:
-        - "./upload-dir:/upload-dir"
-      ports:
-        - "8080:8080"
-        - "3000:3000"
+```bash
+git clone https://github.com/t0n003c/plant-it-enhanced.git
+cd plant-it-enhanced
+cp .env.example .env
+```
 
-    db:
-      image: mysql:8.0
-      restart: always
-      env_file: server.env
-      volumes:
-        - "./db:/var/lib/mysql"
+Replace every `replace-with-...` value in `.env`, then start the stack:
 
-    cache:
-      image: redis:7.2.1
-      restart: always
-  ```
-* Inside that folder, create a file named `server.env` with this content:
-  ```properties
-  #
-  # DB
-  #
-  MYSQL_HOST=db
-  MYSQL_PORT=3306
-  MYSQL_USERNAME=root
-  MYSQL_PSW=root
-  MYSQL_DATABASE=bootdb
-  MYSQL_ROOT_PASSWORD=root
+```bash
+docker compose -f compose.example.yaml up -d
+```
 
-  #
-  # JWT
-  #
-  JWT_SECRET=putTheSecretHere
-  JWT_EXP=1
-
-  #
-  # Server config
-  #
-  USERS_LIMIT=-1
-  UPLOAD_DIR=/upload-dir
-  API_PORT=8080
-  FLORACODEX_KEY=
-  LOG_LEVEL=DEBUG
-  ALLOWED_ORIGINS=*
-
-  #
-  # Cache
-  #
-  CACHE_TTL=86400
-  CACHE_HOST=cache
-  CACHE_PORT=6379
-  ```
-* Run the docker compose file (`docker compose -f docker-compose.yml up -d`), then the service will be available at `localhost:3000`, while the REST API will be available at `localhost:8080/api` (`localhost:8080/api/swagger-ui/index.html` for the documentation of them).
+The web app is available at `http://localhost:3000`; the API is available at
+`http://localhost:8080/api`. MySQL and Redis share an internal-only network, while
+the server has a separate network for outbound plant-data requests.
 
 <a href="https://docs.plant-it.org/latest/server-installation/#configuration">Take a look at the documentation</a> in order to understand the available configurations.
 

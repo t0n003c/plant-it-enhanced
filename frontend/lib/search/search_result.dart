@@ -31,6 +31,43 @@ class SearchResultCard extends StatefulWidget {
 class _SearchResultCardState extends State<SearchResultCard> {
   String? _url;
 
+  Widget _buildPlantLabels(BuildContext context) {
+    final String? commonName = widget.species.preferredCommonName?.trim();
+    final bool hasCommonName = commonName != null && commonName.isNotEmpty;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (widget.species.creator == "USER")
+          TagChip(
+            tag: AppLocalizations.of(context).custom.toUpperCase(),
+          ),
+        Text(
+          hasCommonName ? commonName : widget.species.scientificName,
+          softWrap: false,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(color: Colors.white),
+        ),
+        if (hasCommonName)
+          Text(
+            widget.species.scientificName,
+            softWrap: false,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Colors.grey,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        if (widget.species.family != null)
+          Text(
+            widget.species.family!,
+            softWrap: false,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(color: Colors.grey),
+          ),
+      ],
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -46,8 +83,8 @@ class _SearchResultCardState extends State<SearchResultCard> {
   @override
   Widget build(BuildContext context) {
     return CachedNetworkImage(
-      imageUrl: _url ??
-          "${widget.env.http.backendUrl}image/content/non-existing-id",
+      imageUrl:
+          _url ?? "${widget.env.http.backendUrl}image/content/non-existing-id",
       httpHeaders: {
         "Key": widget.env.http.key!,
       },
@@ -109,30 +146,7 @@ class _SearchResultCardState extends State<SearchResultCard> {
               Positioned(
                 bottom: 10,
                 left: 10,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (widget.species.creator == "USER")
-                      TagChip(
-                        tag: AppLocalizations.of(context).custom.toUpperCase(),
-                      ),
-                    Text(
-                      widget.species.scientificName,
-                      softWrap: false,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                          color: Colors
-                              .white), // Make text color white for better contrast
-                    ),
-                    if (widget.species.family != null)
-                      Text(
-                        widget.species.family!,
-                        softWrap: false,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(color: Colors.grey),
-                      ),
-                  ],
-                ),
+                child: _buildPlantLabels(context),
               ),
             ],
           ),
@@ -204,30 +218,7 @@ class _SearchResultCardState extends State<SearchResultCard> {
               Positioned(
                 bottom: 10,
                 left: 10,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (widget.species.creator == "USER")
-                      TagChip(
-                        tag: AppLocalizations.of(context).custom.toUpperCase(),
-                      ),
-                    Text(
-                      widget.species.scientificName,
-                      softWrap: false,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                          color: Colors
-                              .white), // Make text color white for better contrast
-                    ),
-                    if (widget.species.family != null)
-                      Text(
-                        widget.species.family!,
-                        softWrap: false,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(color: Colors.grey),
-                      ),
-                  ],
-                ),
+                child: _buildPlantLabels(context),
               ),
             ],
           ),

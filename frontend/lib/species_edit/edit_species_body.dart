@@ -54,11 +54,13 @@ class _EditSpeciesBodyState extends State<EditSpeciesBody> {
               padding: const EdgeInsets.fromLTRB(0, 30, 0, 0),
               children: [
                 EditableFullWidthInfoEntry(
-                  value: widget.species.synonyms?.join(",")
-                          .replaceAll("[", "")
-                          .replaceAll("]", ""),
+                  value: widget.species.synonyms?.join(", "),
                   title: AppLocalizations.of(context).synonyms,
-                  onChanged: (s) => widget.species.synonyms = s.split(","),
+                  onChanged: (s) => widget.species.synonyms = s
+                      .split(",")
+                      .map((value) => value.trim())
+                      .where((value) => value.isNotEmpty)
+                      .toList(),
                 ),
               ],
             ),

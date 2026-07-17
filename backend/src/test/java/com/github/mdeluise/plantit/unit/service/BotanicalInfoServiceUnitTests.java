@@ -53,21 +53,24 @@ class BotanicalInfoServiceUnitTests {
         authenticatedUser.setId(1L);
         final BotanicalInfo botanicalInfo1 = new BotanicalInfo();
         botanicalInfo1.setId(1L);
+        botanicalInfo1.setSpecies("partialName one");
         botanicalInfo1.setUserCreator(authenticatedUser);
         final BotanicalInfo botanicalInfo2 = new BotanicalInfo();
         botanicalInfo2.setId(2L);
+        botanicalInfo2.setSpecies("partialName two");
         botanicalInfo2.setUserCreator(authenticatedUser);
         final List<BotanicalInfo> botanicalInfoList = Arrays.asList(botanicalInfo1, botanicalInfo2);
         final Set<BotanicalInfo> expectedBotanicalInfoSet = new HashSet<>(botanicalInfoList);
         Mockito.when(authenticatedUserService.getAuthenticatedUser()).thenReturn(authenticatedUser);
-        Mockito.when(botanicalInfoRepository.getBySpeciesOrSynonym(partialScientificName))
+        Mockito.when(botanicalInfoRepository.getBySpeciesSynonymOrCommonName(partialScientificName, "partialname"))
                .thenReturn(botanicalInfoList);
 
         final Set<BotanicalInfo> result = botanicalInfoService.getByPartialScientificName(partialScientificName, size);
 
         Assertions.assertThat(expectedBotanicalInfoSet).hasSameElementsAs(result);
         Mockito.verify(authenticatedUserService, Mockito.times(2)).getAuthenticatedUser();
-        Mockito.verify(botanicalInfoRepository, Mockito.times(1)).getBySpeciesOrSynonym(partialScientificName);
+        Mockito.verify(botanicalInfoRepository, Mockito.times(1))
+               .getBySpeciesSynonymOrCommonName(partialScientificName, "partialname");
     }
 
 

@@ -1,7 +1,9 @@
 package com.github.mdeluise.plantit.botanicalinfo;
 
 import java.net.MalformedURLException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -16,6 +18,8 @@ import com.github.mdeluise.plantit.image.EntityImage;
 import com.github.mdeluise.plantit.image.storage.ImageStorageService;
 import com.github.mdeluise.plantit.plant.Plant;
 import com.github.mdeluise.plantit.plant.PlantRepository;
+import com.github.mdeluise.plantit.plantinfo.search.PlantNameNormalizer;
+import com.github.mdeluise.plantit.plantinfo.search.PlantSearchScorer;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,17 +48,29 @@ public class BotanicalInfoService {
     }
 
 
-    public Set<BotanicalInfo> getByPartialScientificName(String partialScientificName, int size) {
-        logger.debug(String.format("Search for DB saved botanical info matching '%s' scientific name (max size %s)",
-                                   partialScientificName, size
+    public Set<BotanicalInfo> getByPartialScientificName(String searchTerm, int size) {
+        logger.debug(String.format("Search for DB saved botanical info matching '%s' (max size %s)",
+                                   searchTerm, size
         ));
-        final List<BotanicalInfo> result = botanicalInfoRepository
-                                               .getBySpeciesOrSynonym(partialScientificName).stream()
+        final String normalizedSearch = PlantNameNormalizer.normalize(searchTerm);
+        final Set<BotanicalInfo> candidates = new LinkedHashSet<>(botanicalInfoRepository
+                                                                     .getBySpeciesSynonymOrCommonName(
+                                                                         searchTerm, normalizedSearch));
+        if (candidates.size() < size) {
+            candidates.addAll(botanicalInfoRepository.findAll());
+        }
+        final List<BotanicalInfo> result = candidates.stream()
                                                .filter(botanicalInfo -> botanicalInfo.isAccessibleToUser(
                                                    authenticatedUserService.getAuthenticatedUser()))
+                                               .filter(botanicalInfo -> PlantSearchScorer.score(
+                                                   searchTerm, botanicalInfo) > 0)
+                                               .sorted((left, right) -> Integer.compare(
+                                                   PlantSearchScorer.score(searchTerm, right),
+                                                   PlantSearchScorer.score(searchTerm, left)
+                                               ))
                                                .limit(size)
                                                .toList();
-        return new HashSet<>(result.subList(0, Math.min(size, result.size())));
+        return new LinkedHashSet<>(result);
     }
 
 
@@ -63,7 +79,7 @@ public class BotanicalInfoService {
         final List<BotanicalInfo> result = botanicalInfoRepository.findAll().stream().filter(
                                                                       botanicalInfo -> botanicalInfo.isAccessibleToUser(authenticatedUserService.getAuthenticatedUser()))
                                                                   .limit(size).toList();
-        return new HashSet<>(result);
+        return new LinkedHashSet<>(result);
     }
 
 
@@ -95,6 +111,7 @@ public class BotanicalInfoService {
             toSave.setUserCreator(authenticatedUserService.getAuthenticatedUser());
         }
         removeDuplicatedCaseInsensitiveSynonyms(toSave);
+        removeInvalidCommonNames(toSave);
         final BotanicalInfoImage imageToSave = toSave.getImage();
         toSave.setImage(null);
         final BotanicalInfo result = botanicalInfoRepository.save(toSave);
@@ -247,6 +264,9 @@ public class BotanicalInfoService {
         toUpdate.setSpecies(updated.getSpecies());
         toUpdate.setPlantCareInfo(updated.getPlantCareInfo());
         toUpdate.setSynonyms(new HashSet<>(updated.getSynonyms()));
+        toUpdate.setCommonNames(new LinkedHashSet<>(updated.getCommonNames()));
+        toUpdate.setExternalReferences(new HashMap<>(updated.getExternalReferences()));
+        toUpdate.setLastVerifiedAt(updated.getLastVerifiedAt());
         return botanicalInfoRepository.save(toUpdate);
     }
 
@@ -259,6 +279,9 @@ public class BotanicalInfoService {
         userCreatedCopy.setSpecies(toCopy.getSpecies());
         userCreatedCopy.setPlantCareInfo(toCopy.getPlantCareInfo());
         userCreatedCopy.setSynonyms(new HashSet<>(toCopy.getSynonyms()));
+        userCreatedCopy.setCommonNames(new LinkedHashSet<>(toCopy.getCommonNames()));
+        userCreatedCopy.setExternalReferences(new HashMap<>(toCopy.getExternalReferences()));
+        userCreatedCopy.setLastVerifiedAt(toCopy.getLastVerifiedAt());
 
         userCreatedCopy = save(userCreatedCopy);
 
@@ -314,5 +337,14 @@ public class BotanicalInfoService {
             }
         }
         return false;
+    }
+
+
+    private void removeInvalidCommonNames(BotanicalInfo botanicalInfo) {
+        final Set<BotanicalCommonName> validCommonNames = botanicalInfo.getCommonNames().stream()
+                                                                           .filter(commonName -> commonName.getName() != null)
+                                                                           .filter(commonName -> !commonName.getName().isBlank())
+                                                                           .collect(Collectors.toCollection(LinkedHashSet::new));
+        botanicalInfo.setCommonNames(validCommonNames);
     }
 }

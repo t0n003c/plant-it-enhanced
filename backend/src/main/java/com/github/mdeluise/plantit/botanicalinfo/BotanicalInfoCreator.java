@@ -4,4 +4,6 @@ public enum BotanicalInfoCreator {
     USER,
     TREFLE,
     FLORA_CODEX,
+    INATURALIST,
+    GBIF,
 }

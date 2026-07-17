@@ -8,3 +8,6 @@ online-resources/documentation/venv
 
 frontend/untranslated.txt
 
+# Local deployment data and secrets
+.env
+data/

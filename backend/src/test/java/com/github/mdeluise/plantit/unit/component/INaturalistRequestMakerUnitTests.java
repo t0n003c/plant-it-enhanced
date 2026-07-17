@@ -1,0 +1,136 @@
+package com.github.mdeluise.plantit.unit.component;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.http.HttpClient;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+
+import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfo;
+import com.github.mdeluise.plantit.plantinfo.config.GbifProperties;
+import com.github.mdeluise.plantit.plantinfo.config.INaturalistProperties;
+import com.github.mdeluise.plantit.plantinfo.config.PlantSearchProperties;
+import com.github.mdeluise.plantit.plantinfo.gbif.GbifTaxonomyVerifier;
+import com.github.mdeluise.plantit.plantinfo.inaturalist.INaturalistRequestMaker;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpServer;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
+@DisplayName("Unit tests for iNaturalist common-name search")
+class INaturalistRequestMakerUnitTests {
+    private static final String AUTOCOMPLETE_RESPONSE = """
+        {
+          "results": [
+            {
+              "id": 67710,
+              "name": "Sansevieria trifasciata",
+              "rank": "species",
+              "iconic_taxon_name": "Plantae",
+              "preferred_common_name": "Snake Plant",
+              "matched_term": "Snake Plant",
+              "observations_count": 10000
+            },
+            {
+              "id": 99999,
+              "name": "Dracaena trifasciata",
+              "rank": "species",
+              "iconic_taxon_name": "Plantae",
+              "preferred_common_name": "Mother-in-Law's Tongue",
+              "matched_term": "Snake Plant",
+              "observations_count": 20000
+            }
+          ]
+        }
+        """;
+    private static final String GBIF_RESPONSE = """
+        {
+          "acceptedUsage": {
+            "key": "11041822",
+            "canonicalName": "Dracaena trifasciata",
+            "rank": "SPECIES"
+          },
+          "classification": [
+            {"rank": "FAMILY", "name": "Asparagaceae"},
+            {"rank": "GENUS", "name": "Dracaena"}
+          ],
+          "diagnostics": {"confidence": 100}
+        }
+        """;
+    private HttpServer server;
+    private String serverUrl;
+
+
+    @BeforeEach
+    void setUp() throws IOException {
+        server = HttpServer.create(new InetSocketAddress(0), 0);
+        serverUrl = "http://127.0.0.1:" + server.getAddress().getPort();
+    }
+
+
+    @AfterEach
+    void tearDown() {
+        server.stop(0);
+    }
+
+
+    @Test
+    @DisplayName("Should rank regional common names and merge accepted-name duplicates")
+    void shouldRankAndMergeAcceptedTaxa() {
+        final AtomicReference<String> naturalistQuery = new AtomicReference<>();
+        server.createContext("/v1/taxa/autocomplete", exchange -> {
+            naturalistQuery.set(exchange.getRequestURI().getRawQuery());
+            respond(exchange, AUTOCOMPLETE_RESPONSE);
+        });
+        server.createContext("/v2/species/match", exchange -> respond(exchange, GBIF_RESPONSE));
+        server.start();
+
+        final INaturalistRequestMaker requestMaker = createRequestMaker();
+        final List<BotanicalInfo> results = requestMaker.search("snake plant", 5);
+
+        Assertions.assertTrue(naturalistQuery.get().contains("q=snake+plant"));
+        Assertions.assertTrue(naturalistQuery.get().contains("locale=en"));
+        Assertions.assertTrue(naturalistQuery.get().contains("preferred_place_id=1"));
+        Assertions.assertEquals(1, results.size());
+        final BotanicalInfo result = results.get(0);
+        Assertions.assertEquals("Dracaena trifasciata", result.getSpecies());
+        Assertions.assertEquals("Snake Plant", result.getPreferredCommonName());
+        Assertions.assertEquals("67710", result.getExternalId());
+        Assertions.assertEquals("67710", result.getExternalReferences().get("INATURALIST"));
+        Assertions.assertEquals("11041822", result.getExternalReferences().get("GBIF"));
+        Assertions.assertTrue(result.getSynonyms().contains("Sansevieria trifasciata"));
+        Assertions.assertTrue(result.getCommonNames().stream()
+                                    .anyMatch(name -> "Mother-in-Law's Tongue".equals(name.getName())));
+    }
+
+
+    private INaturalistRequestMaker createRequestMaker() {
+        final INaturalistProperties naturalistProperties = Mockito.mock(INaturalistProperties.class);
+        final GbifProperties gbifProperties = Mockito.mock(GbifProperties.class);
+        final PlantSearchProperties searchProperties = Mockito.mock(PlantSearchProperties.class);
+        Mockito.when(naturalistProperties.getUrl()).thenReturn(serverUrl);
+        Mockito.when(naturalistProperties.getPreferredPlaceId()).thenReturn(1);
+        Mockito.when(gbifProperties.getUrl()).thenReturn(serverUrl);
+        Mockito.when(gbifProperties.getMinimumConfidence()).thenReturn(90);
+        Mockito.when(searchProperties.getLocale()).thenReturn("en");
+        Mockito.when(searchProperties.getRegion()).thenReturn("US");
+        Mockito.when(searchProperties.getUserAgent()).thenReturn("Plant-it unit test");
+        final HttpClient client = HttpClient.newHttpClient();
+        final GbifTaxonomyVerifier verifier = new GbifTaxonomyVerifier(client, gbifProperties, searchProperties);
+        return new INaturalistRequestMaker(client, verifier, naturalistProperties, searchProperties);
+    }
+
+
+    private void respond(HttpExchange exchange, String body) throws IOException {
+        final byte[] response = body.getBytes(StandardCharsets.UTF_8);
+        exchange.getResponseHeaders().set("Content-Type", "application/json");
+        exchange.sendResponseHeaders(200, response.length);
+        exchange.getResponseBody().write(response);
+        exchange.close();
+    }
+}

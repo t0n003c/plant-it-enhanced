@@ -42,14 +42,20 @@ public class PlantService {
     }
 
 
-    @Cacheable(value = "plants", key = "{#pageable, @authenticatedUserService.getAuthenticatedUser().id}")
+    @Cacheable(
+        value = "plants",
+        key = "{'botanical-schema-v3', #pageable, @authenticatedUserService.getAuthenticatedUser().id}"
+    )
     public Page<Plant> getAll(Pageable pageable) {
         logger.debug("Search for DB saved plants");
         return plantRepository.findAllByOwner(authenticatedUserService.getAuthenticatedUser(), pageable);
     }
 
 
-    @Cacheable(cacheNames = "plants", key = "{#id, @authenticatedUserService.getAuthenticatedUser().id}")
+    @Cacheable(
+        cacheNames = "plants",
+        key = "{'botanical-schema-v3', #id, @authenticatedUserService.getAuthenticatedUser().id}"
+    )
     public Plant get(Long id) {
         logger.debug("Search for DB plant " + id);
         final Plant result = plantRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
