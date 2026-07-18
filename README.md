@@ -31,7 +31,7 @@ Plant-it helps you remember the last time you did a treatment of your plants, wh
 ## Features highlight
 * Add existing plants or user created plants to your collection
 * Search a reviewed offline index by everyday common names, aliases, reordered words, and minor typos
-* Recognize an offline starter set of 80 North American trail plants, including wildflowers,
+* Recognize an offline starter set of 90 North American trail plants, including wildflowers,
   prairie plants, ferns, shrubs, trees, and several contact hazards
 * Keep a private, chronological hiking journal with multi-photo observations, optional GPS, trail
   and habitat notes, and explicitly confirmed identifications
@@ -43,6 +43,8 @@ Plant-it helps you remember the last time you did a treatment of your plants, wh
 * Optionally use a coarsened field location to select a closer Pl@ntNet regional flora while exact
   observation coordinates remain on the self-hosted server
 * Compare visual confidence with bounded, attributable regional and nearby seasonal evidence
+* Compare source-reviewed lookalikes and use positive habitat/elevation evidence where a reviewed
+  ecological profile exists
 * Review unidentified finds from saved photos and filter the Trail dashboard by status, hike, date,
   names, habitats, trails, or notes
 * Verify accepted scientific taxonomy through GBIF, with iNaturalist discovery and FloraCodex fallback
@@ -67,7 +69,7 @@ available. Plant-it retains the provider's source page, license code, and attrib
 smaller square thumbnail if the preferred medium image cannot be loaded. Existing local and
 user-selected images always take precedence.
 
-The reviewed offline index contains 160 taxa and nearly 600 everyday-name and synonym examples and
+The reviewed offline index contains 170 taxa and more than 600 everyday-name and synonym examples and
 works without an API key. The web app sends its current language and region with each search.
 `PLANT_SEARCH_LOCALE` and `PLANT_SEARCH_REGION` are fallbacks for older clients. Outbound
 iNaturalist traffic is also throttled with a small interactive burst; repeated searches continue
@@ -75,11 +77,13 @@ to use Redis.
 
 ### Trail plant coverage
 
-The index includes an 80-species North American hiking starter set spanning eastern and Midwest
+The index includes a 90-species North American hiking starter set spanning eastern and Midwest
 woodlands and prairies, western forests and wildflowers, and northern boreal plants. Trail results
 carry a visible **North American trail plant** tag. Poison ivy, poison sumac, western poison oak,
-and stinging nettle also carry a high-contrast **Avoid contact · verify independently** warning.
-The same metadata is applied when Pl@ntNet returns an exact scientific-name match.
+stinging nettle, poison hemlock, giant hogweed, cow parsnip, water hemlock, wild parsnip,
+purple-stemmed angelica, and poodle-dog bush also carry a high-contrast **Avoid contact · verify
+independently** warning. The same metadata is applied when Pl@ntNet returns an exact
+scientific-name match.
 
 The starter set was cross-checked against public land-agency resources including the
 [Cuyahoga Valley woodland wildflower list](https://www.nps.gov/cuva/learn/nature/wildflowers.htm),
@@ -88,6 +92,14 @@ The starter set was cross-checked against public land-agency resources including
 and [Denali's abundant boreal plants](https://www.nps.gov/dena/learn/nature/abundant-plant-species.htm).
 It is a broad starter set, not a claim that every species occurs on every North American trail.
 Range, season, elevation, and local look-alikes still matter.
+
+The initial reviewed field guide adds six exact-taxonomy ecological profiles and 12 attributable
+lookalike comparisons. Candidate cards show the comparison clue, scientific name, additional
+contact warning where applicable, and a link to its public-agency or Extension source. Habitat can
+add at most three percentage points and elevation at most two, and only when the recorded context
+matches a reviewed profile. A mismatch never subtracts confidence or rules out a candidate. See
+the [Trail field guide](online-resources/documentation/docs/trail-field-guide.md) for the current
+coverage and data-review rules.
 
 Plant-it does not use a photo or common-name match to decide whether a wild plant is edible, safe
 to touch, or suitable for medicine. Do not eat or handle a trail plant based on an app result; for
@@ -159,9 +171,11 @@ identification requests on the world flora, or adjust the privacy/accuracy trade
 When contextual identification is enabled, the server also checks public, research-grade
 iNaturalist observations around the same coarsened grid point for the observation month and its two
 adjacent months. Nearby evidence can make only a bounded adjustment; the Pl@ntNet photo confidence
-remains visible separately. Habitat and elevation are displayed as field context but are not scored
-without a source-backed ecological range. Native, introduced, or endemic status appears only when
-iNaturalist supplies it for the configured place. Configure the radius and response bound with
+remains visible separately. Habitat and elevation remain visible as field context. An exact
+scientific-name or reviewed-synonym match can add a small positive adjustment when the context
+falls within the source-backed field-guide profile; unmatched context is not penalized. Native,
+introduced, or endemic status appears only when iNaturalist supplies it for the configured place.
+Configure the radius and response bound with
 `IDENTIFICATION_OCCURRENCE_RADIUS_KM` and `IDENTIFICATION_OCCURRENCE_RESULT_LIMIT`, or disable this
 lookup with `IDENTIFICATION_CONTEXT_ENABLED=false`. Keep `INATURALIST_PLACE_ID` aligned with
 `PLANT_SEARCH_REGION`; the example place ID `1` is the United States.

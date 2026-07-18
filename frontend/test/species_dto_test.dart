@@ -54,6 +54,16 @@ void main() {
           'detail': '6,7,8',
         }
       ],
+      'reviewedLookalikes': [
+        {
+          'scientificName': 'Parthenocissus quinquefolia',
+          'commonName': 'Virginia creeper',
+          'comparison': 'Usually five leaflets instead of three.',
+          'source': 'U.S. National Park Service',
+          'sourceReference': 'https://www.nps.gov/example',
+          'contactHazard': false,
+        }
+      ],
       'establishmentMeans': 'native',
       'establishmentPlace': 'United States',
       'catalogTags': ['NORTH_AMERICAN_TRAIL'],
@@ -72,6 +82,8 @@ void main() {
     expect(species.identificationConfidence, 0.82);
     expect(species.contextualIdentificationScore, 0.94);
     expect(species.identificationEvidence.single.observationCount, 42);
+    expect(species.reviewedLookalikes.single.commonName, 'Virginia creeper');
+    expect(species.reviewedLookalikes.single.contactHazard, isFalse);
     expect(species.establishmentMeans, 'native');
     expect(species.establishmentPlace, 'United States');
     expect(
@@ -93,6 +105,19 @@ void main() {
           'sourceReference': 'https://www.inaturalist.org/observations',
           'observationCount': 42,
           'detail': '6,7,8',
+        }
+      ],
+    );
+    expect(
+      species.toMap()['reviewedLookalikes'],
+      [
+        {
+          'scientificName': 'Parthenocissus quinquefolia',
+          'commonName': 'Virginia creeper',
+          'comparison': 'Usually five leaflets instead of three.',
+          'source': 'U.S. National Park Service',
+          'sourceReference': 'https://www.nps.gov/example',
+          'contactHazard': false,
         }
       ],
     );

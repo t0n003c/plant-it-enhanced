@@ -745,6 +745,24 @@
       }
     }
   },
+  "habitatMatchEvidence": "Reviewed habitat includes {habitat}",
+  "@habitatMatchEvidence": {
+    "placeholders": {
+      "habitat": {
+        "type": "String",
+        "example": "forest edges and disturbed paths"
+      }
+    }
+  },
+  "elevationMatchEvidence": "Recorded elevation is within the reviewed range: {range} m",
+  "@elevationMatchEvidence": {
+    "placeholders": {
+      "range": {
+        "type": "String",
+        "example": "305–2134"
+      }
+    }
+  },
   "habitatRecordedEvidence": "Habitat recorded: {habitat}. It is shown for comparison but is not scored without a source-backed habitat range.",
   "@habitatRecordedEvidence": {
     "placeholders": {
@@ -789,6 +807,26 @@
     }
   },
   "contactHazardCompareHint": "Possible contact hazard. Do not touch it; compare lookalikes and follow local ranger or public-health guidance.",
+  "reviewedLookalikesTitle": "Reviewed lookalikes ({count})",
+  "@reviewedLookalikesTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "lookalikeComparisonHint": "Compare these source-reviewed clues; they do not confirm an identification.",
+  "alsoContactHazard": "Also avoid contact",
+  "viewLookalikeSource": "View {source} source",
+  "@viewLookalikeSource": {
+    "placeholders": {
+      "source": {
+        "type": "String",
+        "example": "U.S. National Park Service"
+      }
+    }
+  },
   "contextRankingExplanation": "Photo confidence remains separate. Context can make only a small, source-backed ranking adjustment.",
   "identificationSafetyReminder": "Identification suggestions can be wrong. Never use this app to decide whether a wild plant is edible, medicinal, or safe to touch.",
   "runIdentificationAgain": "Run identification again",

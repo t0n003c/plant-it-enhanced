@@ -1,0 +1,174 @@
+{
+  "profiles": [
+    {
+      "scientificName": "Toxicodendron radicans",
+      "scientificSynonyms": ["Rhus radicans"],
+      "ecology": {
+        "habitatKeywords": ["forest edge", "woodland edge", "forest path", "trail", "path", "disturbed area"],
+        "habitatDescription": "forest edges, forest paths, and other disturbed areas",
+        "source": "U.S. National Park Service",
+        "sourceReference": "https://www.nps.gov/miss/learn/nature/poison_ivy.htm"
+      },
+      "lookalikes": [
+        {
+          "scientificName": "Parthenocissus quinquefolia",
+          "commonName": "Virginia creeper",
+          "comparison": "Virginia creeper usually has five leaflets; poison ivy has three. Both can turn red in fall.",
+          "source": "U.S. National Park Service",
+          "sourceReference": "https://www.nps.gov/miss/learn/nature/poison_ivy.htm",
+          "contactHazard": false
+        },
+        {
+          "scientificName": "Arisaema triphyllum",
+          "commonName": "Jack-in-the-pulpit",
+          "comparison": "Both can have three leaflets, but Jack-in-the-pulpit has red berries and a distinctive brown-green flower.",
+          "source": "U.S. National Park Service",
+          "sourceReference": "https://www.nps.gov/miss/learn/nature/poison_ivy.htm",
+          "contactHazard": false
+        },
+        {
+          "scientificName": "Acer negundo",
+          "commonName": "Boxelder",
+          "comparison": "Boxelder has opposite branching and three to seven leaflets; poison ivy branches alternately and has three.",
+          "source": "U.S. National Park Service",
+          "sourceReference": "https://home.nps.gov/arch/learn/nature/aceraceae_acer_negundo.htm",
+          "contactHazard": false
+        }
+      ]
+    },
+    {
+      "scientificName": "Conium maculatum",
+      "scientificSynonyms": [],
+      "ecology": {
+        "habitatKeywords": ["railroad", "railway", "river", "ditch", "field edge", "farm", "bike path"],
+        "habitatDescription": "sunny railways, rivers, ditches, field edges, farms, and bike paths",
+        "source": "University of Minnesota Extension",
+        "sourceReference": "https://extension.umn.edu/identify-invasive-species/poison-hemlock"
+      },
+      "lookalikes": [
+        {
+          "scientificName": "Daucus carota",
+          "commonName": "Queen Anne's lace",
+          "comparison": "Queen Anne's lace has a hairy stem without purple blotches and line-like bracts beneath the flowers.",
+          "source": "University of Minnesota Extension",
+          "sourceReference": "https://extension.umn.edu/identify-invasive-species/poison-hemlock",
+          "contactHazard": false
+        },
+        {
+          "scientificName": "Heracleum maximum",
+          "commonName": "Cow parsnip",
+          "comparison": "Cow parsnip has very large lobed leaves and lacks poison hemlock's purple stem spots. Its sap may burn skin in sunlight.",
+          "source": "University of Minnesota Extension",
+          "sourceReference": "https://extension.umn.edu/identify-invasive-species/poison-hemlock",
+          "contactHazard": true
+        },
+        {
+          "scientificName": "Cicuta maculata",
+          "commonName": "Spotted water hemlock",
+          "comparison": "Water hemlock may have purple stem spots, but its leaves are not lacy. Both plants are highly toxic.",
+          "source": "University of Minnesota Extension",
+          "sourceReference": "https://extension.umn.edu/identify-invasive-species/poison-hemlock",
+          "contactHazard": true
+        },
+        {
+          "scientificName": "Heracleum mantegazzianum",
+          "commonName": "Giant hogweed",
+          "comparison": "Giant hogweed can have purple stem spots, but its enormous lobed leaves are not lacy and its sap can cause severe burns.",
+          "source": "University of Minnesota Extension",
+          "sourceReference": "https://extension.umn.edu/identify-invasive-species/poison-hemlock",
+          "contactHazard": true
+        }
+      ]
+    },
+    {
+      "scientificName": "Heracleum mantegazzianum",
+      "scientificSynonyms": [],
+      "ecology": {
+        "habitatKeywords": ["moist", "sunny", "stream", "river", "field", "forest", "yard", "roadside", "riparian"],
+        "habitatDescription": "moist, sunny streams, rivers, fields, forests, yards, roadsides, and riparian areas",
+        "source": "University of Minnesota Extension",
+        "sourceReference": "https://extension.umn.edu/identify-invasive-species/giant-hogweed"
+      },
+      "lookalikes": [
+        {
+          "scientificName": "Heracleum maximum",
+          "commonName": "Cow parsnip",
+          "comparison": "Cow parsnip is smaller, has less deeply cut leaves, and lacks giant hogweed's purple stem blotches. Its sap may also burn skin.",
+          "source": "New York State Department of Environmental Conservation",
+          "sourceReference": "https://dec.ny.gov/nature/animals-fish-plants/plants/harmful-plants/giant-hogweed",
+          "contactHazard": true
+        },
+        {
+          "scientificName": "Angelica atropurpurea",
+          "commonName": "Purple-stemmed angelica",
+          "comparison": "Angelica has smooth, waxy purple stems without blotches and smaller, rounded flower clusters.",
+          "source": "New York State Department of Environmental Conservation",
+          "sourceReference": "https://dec.ny.gov/nature/animals-fish-plants/plants/harmful-plants/giant-hogweed",
+          "contactHazard": true
+        },
+        {
+          "scientificName": "Pastinaca sativa",
+          "commonName": "Wild parsnip",
+          "comparison": "Wild parsnip is shorter, has yellow flowers, and a grooved green hairless stem. Its sap can cause severe burns.",
+          "source": "New York State Department of Environmental Conservation",
+          "sourceReference": "https://dec.ny.gov/nature/animals-fish-plants/plants/harmful-plants/giant-hogweed",
+          "contactHazard": true
+        },
+        {
+          "scientificName": "Daucus carota",
+          "commonName": "Queen Anne's lace",
+          "comparison": "Queen Anne's lace is much shorter, with small flower clusters, fern-like leaves, and a bristly green stem.",
+          "source": "New York State Department of Environmental Conservation",
+          "sourceReference": "https://dec.ny.gov/nature/animals-fish-plants/plants/harmful-plants/giant-hogweed",
+          "contactHazard": false
+        }
+      ]
+    },
+    {
+      "scientificName": "Toxicodendron diversilobum",
+      "scientificSynonyms": ["Rhus diversiloba"],
+      "ecology": {
+        "habitatKeywords": ["disturbed site", "stream", "river", "canyon", "foothill", "oak woodland", "chaparral", "slope"],
+        "habitatDescription": "disturbed sites, streams, canyons, foothill oak woodland, chaparral, and moist or dry slopes",
+        "maximumElevationMeters": 1829,
+        "source": "USDA Forest Service",
+        "sourceReference": "https://www.fs.usda.gov/media/232503"
+      },
+      "lookalikes": []
+    },
+    {
+      "scientificName": "Urtica dioica",
+      "scientificSynonyms": [],
+      "ecology": {
+        "habitatKeywords": ["stream bank", "stream", "wet meadow", "shaded", "moist", "waterway", "riparian"],
+        "habitatDescription": "stream banks, wet-meadow edges, and shaded moist or riparian places",
+        "maximumElevationMeters": 3048,
+        "source": "USDA Forest Service",
+        "sourceReference": "https://www.fs.usda.gov/media/232503"
+      },
+      "lookalikes": []
+    },
+    {
+      "scientificName": "Eriodictyon parryi",
+      "scientificSynonyms": ["Turricula parryi", "Nama parryi"],
+      "ecology": {
+        "habitatKeywords": ["post fire", "burn area", "burn scar", "chaparral", "conifer zone"],
+        "habitatDescription": "post-fire chaparral below the conifer zone in southern California",
+        "minimumElevationMeters": 305,
+        "maximumElevationMeters": 2134,
+        "source": "USDA Forest Service",
+        "sourceReference": "https://www.fs.usda.gov/media/232503"
+      },
+      "lookalikes": [
+        {
+          "scientificName": "Eriodictyon californicum",
+          "commonName": "Yerba santa",
+          "comparison": "Poodle-dog bush resembles yerba santa and can grow in the same areas; avoid touching an uncertain plant.",
+          "source": "USDA Forest Service",
+          "sourceReference": "https://www.fs.usda.gov/media/232503",
+          "contactHazard": false
+        }
+      ]
+    }
+  ]
+}
