@@ -6,6 +6,8 @@
   older `main.dart.js`; mutable web assets now revalidate and critical entry files use `no-store`.
 - Serve Flutter JavaScript and JSON with their correct MIME types and validate the bundled Nginx
   configuration while building the release image.
+- Add a high-contrast, mobile-friendly `/update.html` recovery page that unregisters only the
+  Flutter service worker and app-shell caches without deleting application or offline journal data.
 - Enrich image-less trusted and saved search results with iNaturalist's default species photos
   without replacing an existing local or user-selected image.
 - Preserve provider, source page, license, attribution, and a square-image fallback when a species
