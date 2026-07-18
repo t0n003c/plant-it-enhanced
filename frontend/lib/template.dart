@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:plant_it/environment.dart';
+import 'package:plant_it/deployment_status_banner.dart';
 import 'package:plant_it/event/events_page.dart';
 import 'package:plant_it/homepage/homepage.dart';
 import 'package:plant_it/more/more_page.dart';
@@ -42,12 +43,19 @@ class _TemplatePageState extends State<TemplatePage> {
         color: Theme.of(context).scaffoldBackgroundColor,
         child: SafeArea(
           bottom: false,
-          child: IndexedStack(
-            index: _currentIndex,
-            children: List<Widget>.generate(
-              _pages.length,
-              (index) => _pages[index] ?? const SizedBox.shrink(),
-            ),
+          child: Column(
+            children: [
+              DeploymentStatusBanner(env: _env),
+              Expanded(
+                child: IndexedStack(
+                  index: _currentIndex,
+                  children: List<Widget>.generate(
+                    _pages.length,
+                    (index) => _pages[index] ?? const SizedBox.shrink(),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

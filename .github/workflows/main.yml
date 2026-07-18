@@ -35,6 +35,9 @@ jobs:
           docker compose -f compose.example.yaml config --quiet
           docker compose -f compose.nas.example.yaml config --quiet
 
+      - name: Validate deployment scripts
+        run: sh -n scripts/*.sh
+
       - name: Build documentation
         run: |
           python3 -m venv /tmp/plantit-docs-venv
@@ -62,6 +65,14 @@ jobs:
       - name: Verify backend
         working-directory: backend
         run: mvn -B -ntp verify
+
+      - name: Verify packaged version metadata
+        working-directory: backend
+        run: |
+          unzip -p target/*.jar BOOT-INF/classes/application.properties \
+            | grep -Eq '^app\.version[[:space:]]*=[[:space:]]*[0-9]+\.'
+          ! unzip -p target/*.jar BOOT-INF/classes/application.properties \
+            | grep -q '@project.version@'
 
   frontend:
     name: Frontend tests
@@ -144,5 +155,7 @@ jobs:
           labels: ${{ steps.metadata.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            BUILD_REVISION=${{ github.sha }}
           provenance: mode=max
           sbom: true

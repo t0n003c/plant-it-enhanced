@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,13 +22,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class SystemInfoController {
     private final SystemVersionService systemVersionService;
     private final NotificationDispatcherService notificationDispatcherService;
+    private final BuildInfoService buildInfoService;
 
 
     @Autowired
     public SystemInfoController(SystemVersionService systemVersionService,
-                                NotificationDispatcherService notificationDispatcherService) {
+                                NotificationDispatcherService notificationDispatcherService,
+                                BuildInfoService buildInfoService) {
         this.systemVersionService = systemVersionService;
         this.notificationDispatcherService = notificationDispatcherService;
+        this.buildInfoService = buildInfoService;
     }
 
 
@@ -47,6 +51,19 @@ public class SystemInfoController {
     public ResponseEntity<SystemVersionInfo> getVersion() throws IOException, InterruptedException {
         final SystemVersionInfo result = systemVersionService.getLatestVersion();
         return ResponseEntity.ok(result);
+    }
+
+
+    @GetMapping("/build")
+    @Operation(
+        summary = "Running build", description = "Get the version and source revision now running."
+    )
+    public ResponseEntity<BuildInfo> getBuild() {
+        final BuildInfo result = buildInfoService.get();
+        return ResponseEntity.ok()
+                             .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                             .header("X-Plant-It-Revision", result.revision())
+                             .body(result);
     }
 
 

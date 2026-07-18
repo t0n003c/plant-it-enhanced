@@ -6,6 +6,8 @@ import java.util.Collections;
 
 import com.github.mdeluise.plantit.notification.dispatcher.NotificationDispatcherName;
 import com.github.mdeluise.plantit.notification.dispatcher.NotificationDispatcherService;
+import com.github.mdeluise.plantit.systeminfo.BuildInfo;
+import com.github.mdeluise.plantit.systeminfo.BuildInfoService;
 import com.github.mdeluise.plantit.systeminfo.SystemInfoController;
 import com.github.mdeluise.plantit.systeminfo.SystemVersionInfo;
 import com.github.mdeluise.plantit.systeminfo.SystemVersionService;
@@ -27,6 +29,8 @@ class SystemInfoControllerUnitTests {
     private SystemVersionService systemVersionService;
     @Mock
     private NotificationDispatcherService notificationDispatcherService;
+    @Mock
+    private BuildInfoService buildInfoService;
     @InjectMocks
     private SystemInfoController systemInfoController;
 
@@ -59,6 +63,21 @@ class SystemInfoControllerUnitTests {
         Mockito.when(systemVersionService.getLatestVersion()).thenThrow(InterruptedException.class);
 
         Assertions.assertThrows(InterruptedException.class, () -> systemInfoController.getVersion());
+    }
+
+
+    @Test
+    @DisplayName("Test get running build")
+    void testGetBuild() {
+        final BuildInfo buildInfo = new BuildInfo("0.16.0", "abc123");
+        Mockito.when(buildInfoService.get()).thenReturn(buildInfo);
+
+        final ResponseEntity<BuildInfo> responseEntity = systemInfoController.getBuild();
+
+        Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        Assertions.assertEquals(buildInfo, responseEntity.getBody());
+        Assertions.assertEquals("no-store", responseEntity.getHeaders().getCacheControl());
+        Assertions.assertEquals("abc123", responseEntity.getHeaders().getFirst("X-Plant-It-Revision"));
     }
 
 
