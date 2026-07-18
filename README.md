@@ -33,6 +33,8 @@ Plant-it helps you remember the last time you did a treatment of your plants, wh
 * Search a reviewed offline index by everyday common names, aliases, reordered words, and minor typos
 * Recognize an offline starter set of 80 North American trail plants, including wildflowers,
   prairie plants, ferns, shrubs, trees, and several contact hazards
+* Keep a private, chronological hiking journal with multi-photo observations, optional GPS, trail
+  and habitat notes, and explicitly confirmed identifications
 * See why a search result matched and its match confidence
 * Take guided whole-plant, leaf, and flower photos, compare the top matches, and add the plant
 * Verify accepted scientific taxonomy through GBIF, with iNaturalist discovery and FloraCodex fallback
@@ -79,6 +81,19 @@ to touch, or suitable for medicine. Do not eat or handle a trail plant based on 
 contact hazards, follow local ranger guidance such as the
 [NPS poison-ivy precautions](https://www.nps.gov/sacn/learn/nature/poisonivy.htm). Leave wild
 plants where they grow and observe local trail rules.
+
+### Trail journal
+
+Trail observations are separate from cultivated plants. Saving a wild find never creates a
+watering reminder or adds it to **My Green Friends**. Start from the Trail Journal card on the home
+screen or the central add button, take a whole-plant photo, optionally add leaf and flower views,
+and either confirm one of the identification candidates or save it as unidentified for later.
+
+Location is always opt-in. Exact coordinates and photo metadata remain in the authenticated,
+self-hosted account, and the initial sharing preference is **Private**. Obscured and open settings
+are recorded for future exports, but v0.15 does not publish observations. Browser location access
+requires an HTTPS deployment (or localhost); photos, notes, and identification continue to work
+when location is unavailable or denied.
 
 ## Photo identification and care guides
 
@@ -172,6 +187,9 @@ light, pot, drainage, soil, recent-care, and approximate-location fields. It is 
 not change existing account or plant data. The authenticated **More → System diagnostics** screen
 checks MySQL, Redis, provider configuration and recent provider responses. See
 [Backup and restore](BACKUP_AND_RESTORE.md) for the verified archive scripts and NAS schedule.
+
+The Field Journal migration adds owner-scoped observations and observation-image links. It does
+not convert or modify existing plants, care reminders, diaries, or photos.
 
 <a href="https://docs.plant-it.org/latest/server-installation/#configuration">Take a look at the documentation</a> in order to understand the available configurations.
 

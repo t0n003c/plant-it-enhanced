@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.15.0 - 2026-07-18 - Field journal foundation
+
+- Separate wild observations from owned plants so trail finds never receive care reminders.
+- Add authenticated, owner-scoped observation create, list, update, delete, and photo APIs backed
+  by an additive Liquibase migration.
+- Add a mobile-first Trail Journal entry point, guided multi-photo capture, chronological journal,
+  optional trail, habitat, and field notes, and explicit identification confirmation.
+- Allow observations to be retained when Pl@ntNet is unavailable or no candidate is trustworthy.
+- Make GPS capture opt-in and location privacy `PRIVATE` by default, with obscured and open export
+  preferences recorded for future portable-data work.
+- Add Android and iOS foreground-location permissions, while keeping every non-location workflow
+  functional when permission is denied or browser HTTPS is unavailable.
+
 ## 0.14.0 - 2026-07-17 - Trustworthy onboarding
 
 - Add a reviewed offline everyday-name index with more than 300 search examples, relevance

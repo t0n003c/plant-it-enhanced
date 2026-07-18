@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+
+    <changeSet id="createFieldObservationTable" author="t0n003c">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="observations"/>
+            </not>
+        </preConditions>
+        <createTable tableName="observations">
+            <column name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="owner_id" type="bigint">
+                <constraints nullable="false"
+                             foreignKeyName="fk_observation_user"
+                             references="application_users(id)"
+                             deleteCascade="true"/>
+            </column>
+            <column name="botanical_info_id" type="bigint"/>
+            <column name="observed_at" type="datetime(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="datetime(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="datetime(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="display_name" type="varchar(120)"/>
+            <column name="trail_name" type="varchar(120)"/>
+            <column name="habitat" type="varchar(120)"/>
+            <column name="notes" type="varchar(8500)"/>
+            <column name="latitude" type="double"/>
+            <column name="longitude" type="double"/>
+            <column name="accuracy_meters" type="double"/>
+            <column name="elevation_meters" type="double"/>
+            <column name="location_privacy" type="varchar(16)" defaultValue="PRIVATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(16)" defaultValue="UNIDENTIFIED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="identification_confidence" type="double"/>
+            <column name="identification_provider" type="varchar(40)"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="observations"
+                                 baseColumnNames="botanical_info_id"
+                                 constraintName="fk_observation_botanical_info"
+                                 referencedTableName="botanical_infos"
+                                 referencedColumnNames="id"
+                                 onDelete="SET NULL"/>
+        <createIndex tableName="observations" indexName="idx_observation_owner_observed_at">
+            <column name="owner_id"/>
+            <column name="observed_at"/>
+        </createIndex>
+        <createIndex tableName="observations" indexName="idx_observation_botanical_info">
+            <column name="botanical_info_id"/>
+        </createIndex>
+    </changeSet>
+
+
+    <changeSet id="addFieldObservationImages" author="t0n003c">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="entity_images"/>
+            <tableExists tableName="observations"/>
+            <not>
+                <columnExists tableName="entity_images" columnName="observation_entity_id"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="entity_images">
+            <column name="observation_entity_id" type="bigint"/>
+        </addColumn>
+        <addForeignKeyConstraint baseTableName="entity_images"
+                                 baseColumnNames="observation_entity_id"
+                                 constraintName="fk_entity_image_observation"
+                                 referencedTableName="observations"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+        <createIndex tableName="entity_images" indexName="idx_entity_image_observation">
+            <column name="observation_entity_id"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

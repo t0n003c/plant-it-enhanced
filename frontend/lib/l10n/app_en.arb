@@ -555,5 +555,60 @@
         "example": "1"
       }
     }
+  },
+  "trailJournal": "Trail journal",
+  "trailJournalSubtitle": "Keep wild observations separate from plants you care for at home.",
+  "recordTrailFind": "Record a trail find",
+  "noTrailObservations": "No trail observations yet. Take a photo on your next hike.",
+  "trailJournalLoadError": "Could not load your trail journal.",
+  "unidentifiedTrailFind": "Unidentified trail find",
+  "confirmedIdentification": "Confirmed identification",
+  "needsIdentification": "Needs identification",
+  "exactLocationPrivate": "Exact location saved privately",
+  "startWithPhoto": "Start with a plant photo",
+  "observationPhotoIntro": "Photograph the whole plant, then add a leaf or flower view when available.",
+  "fieldNotes": "Field notes",
+  "trailOrPark": "Trail or park",
+  "habitat": "Habitat, such as woodland edge or wet meadow",
+  "recordLocation": "Save my current location",
+  "recordingLocation": "Getting your location…",
+  "locationCaptured": "Location captured to about {meters} m accuracy",
+  "@locationCaptured": {
+    "placeholders": {
+      "meters": {
+        "type": "int",
+        "example": "12"
+      }
+    }
+  },
+  "removeLocation": "Remove saved location",
+  "locationPermissionDenied": "Location permission was not granted. You can still save this observation.",
+  "locationUnavailable": "Your location could not be read. You can still save this observation.",
+  "locationPrivacy": "Location privacy",
+  "privateLocation": "Private — exact coordinates stay in your account",
+  "obscuredLocation": "Obscured — use an approximate area when exporting",
+  "openLocation": "Open — allow exact coordinates in future exports",
+  "leaveWhatYouFind": "Leave what you find",
+  "leaveWhatYouFindHint": "Photograph wild plants without picking or tasting them. An app identification is never proof that a plant is safe to touch or eat.",
+  "chooseIdentification": "Confirm an identification",
+  "identificationOptional": "Choose a candidate only when it matches what you saw. You can save it as unidentified instead.",
+  "saveTrailObservation": "Save trail observation",
+  "observationSaved": "Trail observation saved",
+  "observationSaveError": "Could not save this observation.",
+  "observationPhotoUploadWarning": "The observation was saved, but one or more photos could not be uploaded.",
+  "identificationFailedSaveAnyway": "Identification is unavailable right now. You can still save the photos as an unidentified observation.",
+  "photosRequired": "Add at least one photo before saving.",
+  "deleteObservation": "Delete observation",
+  "deleteObservationConfirm": "Delete this observation and all of its photos?",
+  "changeObservationPhotos": "Retake or change photos",
+  "viewTrailJournal": "View trail journal",
+  "trailObservationCount": "{count, plural, =0{No observations} =1{1 observation} other{{count} observations}}",
+  "@trailObservationCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "12"
+      }
+    }
   }
 }

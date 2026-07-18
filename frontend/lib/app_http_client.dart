@@ -155,6 +155,32 @@ class AppHttpClient {
     return response;
   }
 
+  Future<http.Response> uploadObservationImage(
+    XFile image,
+    int observationId, {
+    String? description,
+  }) async {
+    final imageBytes = await image.readAsBytes();
+    final uri = _prependBackendURL('observation/$observationId/image').replace(
+      queryParameters: {
+        if (description != null && description.isNotEmpty)
+          'description': description,
+      },
+    );
+    final request = http.MultipartRequest('POST', uri);
+    request.files.add(
+      http.MultipartFile.fromBytes(
+        'image',
+        imageBytes,
+        filename: image.name,
+        contentType: _getMediaType(image.name),
+      ),
+    );
+    if (key != null) request.headers['Key'] = key!;
+    if (jwt != null) request.headers['Authorization'] = 'Bearer $jwt';
+    return http.Response.fromStream(await request.send());
+  }
+
   void close() {
     _inner.close();
   }
