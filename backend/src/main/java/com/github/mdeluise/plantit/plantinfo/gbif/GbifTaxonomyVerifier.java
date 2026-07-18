@@ -14,6 +14,7 @@ import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfo;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoCreator;
 import com.github.mdeluise.plantit.plantinfo.config.GbifProperties;
 import com.github.mdeluise.plantit.plantinfo.config.PlantSearchProperties;
+import com.github.mdeluise.plantit.systeminfo.ProviderStatusRegistry;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
@@ -36,16 +37,25 @@ public class GbifTaxonomyVerifier {
     private final String userAgent;
     private final int minimumConfidence;
     private volatile Instant unavailableUntil = Instant.EPOCH;
+    private final ProviderStatusRegistry providerStatusRegistry;
     private final Logger logger = LoggerFactory.getLogger(GbifTaxonomyVerifier.class);
+
+
+    public GbifTaxonomyVerifier(HttpClient client, GbifProperties gbifProperties,
+                                PlantSearchProperties searchProperties) {
+        this(client, gbifProperties, searchProperties, new ProviderStatusRegistry());
+    }
 
 
     @Autowired
     public GbifTaxonomyVerifier(HttpClient client, GbifProperties gbifProperties,
-                                PlantSearchProperties searchProperties) {
+                                PlantSearchProperties searchProperties,
+                                ProviderStatusRegistry providerStatusRegistry) {
         this.client = client;
         this.baseEndpoint = removeTrailingSlash(gbifProperties.getUrl());
         this.userAgent = searchProperties.getUserAgent();
         this.minimumConfidence = gbifProperties.getMinimumConfidence();
+        this.providerStatusRegistry = providerStatusRegistry;
     }
 
 
@@ -66,6 +76,9 @@ public class GbifTaxonomyVerifier {
         try {
             final HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() < HTTP_SUCCESS_MIN || response.statusCode() >= HTTP_SUCCESS_MAX) {
+                providerStatusRegistry.recordFailure(
+                    "GBIF", response.statusCode(), "GBIF verification returned HTTP " + response.statusCode(),
+                    quotaRemaining(response));
                 logger.warn("GBIF verification returned HTTP {}", response.statusCode());
                 if (response.statusCode() == HTTP_TOO_MANY_REQUESTS ||
                         response.statusCode() >= HTTP_SERVER_ERROR_MIN) {
@@ -73,6 +86,7 @@ public class GbifTaxonomyVerifier {
                 }
                 return candidate;
             }
+            providerStatusRegistry.recordSuccess("GBIF", response.statusCode(), quotaRemaining(response));
             unavailableUntil = Instant.EPOCH;
             applyVerification(candidate, JsonParser.parseString(response.body()).getAsJsonObject());
         } catch (InterruptedException e) {
@@ -81,6 +95,7 @@ public class GbifTaxonomyVerifier {
             logger.warn("GBIF verification interrupted for {}", candidate.getSpecies());
         } catch (IOException | JsonParseException | IllegalStateException | UnsupportedOperationException |
                  NullPointerException | NumberFormatException e) {
+            providerStatusRegistry.recordFailure("GBIF", 0, e.getMessage(), null);
             markUnavailable();
             logger.warn("Unable to verify {} with GBIF: {}", candidate.getSpecies(), e.getMessage());
         }
@@ -153,5 +168,10 @@ public class GbifTaxonomyVerifier {
 
     private static String removeTrailingSlash(String value) {
         return value.endsWith("/") ? value.substring(0, value.length() - 1) : value;
+    }
+
+
+    private String quotaRemaining(HttpResponse<?> response) {
+        return response.headers().firstValue("x-ratelimit-remaining").orElse(null);
     }
 }

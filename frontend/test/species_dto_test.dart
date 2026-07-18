@@ -36,6 +36,7 @@ void main() {
       'plantCareInfo': <String, dynamic>{},
       'creator': 'INATURALIST',
       'externalId': '67710',
+      'catalogTags': ['NORTH_AMERICAN_TRAIL'],
     });
 
     expect(species.synonyms, ['Sansevieria trifasciata', 'snake plant']);
@@ -43,10 +44,12 @@ void main() {
     expect(species.commonNames.first.name, 'Snake Plant');
     expect(species.externalReferences['GBIF'], '11041822');
     expect(species.canonicalTaxonKey, '11041822');
+    expect(species.catalogTags, ['NORTH_AMERICAN_TRAIL']);
     expect(
         species.preferredCommonNameFor('es', region: 'MX'), 'Lengua de suegra');
     expect(species.preferredCommonNameFor('en', region: 'US'), 'Snake Plant');
     expect(species.toMap()['synonyms'],
         ['Sansevieria trifasciata', 'snake plant']);
+    expect(species.toMap()['catalogTags'], ['NORTH_AMERICAN_TRAIL']);
   });
 }

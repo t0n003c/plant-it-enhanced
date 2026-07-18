@@ -10,6 +10,7 @@ import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoService;
 import com.github.mdeluise.plantit.exception.InfoExtractionException;
 import com.github.mdeluise.plantit.plantinfo.AbstractPlantInfoExtractorStep;
 import com.github.mdeluise.plantit.plantinfo.gbif.GbifTaxonomyVerifier;
+import com.github.mdeluise.plantit.plantinfo.search.PlantSearchScorer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
@@ -18,7 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
-@Order(3)
+@Order(4)
 public class FloraCodexPlantInfoExtractorStep extends AbstractPlantInfoExtractorStep {
     private final FloraCodexRequestMaker floraCodexRequestMaker;
     private final BotanicalInfoService botanicalInfoService;
@@ -44,8 +45,14 @@ public class FloraCodexPlantInfoExtractorStep extends AbstractPlantInfoExtractor
                 floraCodexRequestMaker.fetchInfoFromPartial(partialPlantScientificName, Pageable.ofSize(size));
             final List<BotanicalInfo> filteredResult = result.stream()
                                                              .map(gbifTaxonomyVerifier::verify)
+                                                             .filter(botanicalInfo -> PlantSearchScorer.evaluate(
+                                                                 partialPlantScientificName,
+                                                                 botanicalInfo).isRelevant())
                                                              .filter(botanicalInfo -> !existAlreadyALocalVersion(
                                                                  botanicalInfo))
+                                                             .peek(botanicalInfo ->
+                                                                 PlantSearchScorer.applyMatchMetadata(
+                                                                     partialPlantScientificName, botanicalInfo))
                                                              .toList();
             return new LinkedHashSet<>(filteredResult);
         } catch (InfoExtractionException e) {

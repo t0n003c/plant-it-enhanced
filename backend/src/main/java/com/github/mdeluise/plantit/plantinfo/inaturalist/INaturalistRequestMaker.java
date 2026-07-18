@@ -23,6 +23,7 @@ import com.github.mdeluise.plantit.plantinfo.config.PlantSearchProperties;
 import com.github.mdeluise.plantit.plantinfo.gbif.GbifTaxonomyVerifier;
 import com.github.mdeluise.plantit.plantinfo.search.PlantNameNormalizer;
 import com.github.mdeluise.plantit.plantinfo.search.PlantSearchScorer;
+import com.github.mdeluise.plantit.systeminfo.ProviderStatusRegistry;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
@@ -47,9 +48,9 @@ public class INaturalistRequestMaker {
     private final String region;
     private final int preferredPlaceId;
     private final String userAgent;
+    private ProviderStatusRegistry providerStatusRegistry = new ProviderStatusRegistry();
 
 
-    @Autowired
     public INaturalistRequestMaker(HttpClient client,
                                    GbifTaxonomyVerifier gbifTaxonomyVerifier,
                                    INaturalistRequestThrottle requestThrottle,
@@ -63,6 +64,12 @@ public class INaturalistRequestMaker {
         this.region = searchProperties.getRegion();
         this.preferredPlaceId = naturalistProperties.getPreferredPlaceId();
         this.userAgent = searchProperties.getUserAgent();
+    }
+
+
+    @Autowired
+    void setProviderStatusRegistry(ProviderStatusRegistry providerStatusRegistry) {
+        this.providerStatusRegistry = providerStatusRegistry;
     }
 
 
@@ -97,8 +104,12 @@ public class INaturalistRequestMaker {
                                                .build();
         final HttpResponse<String> response = send(request);
         if (response.statusCode() < HTTP_SUCCESS_MIN || response.statusCode() >= HTTP_SUCCESS_MAX) {
+            providerStatusRegistry.recordFailure(
+                "INATURALIST", response.statusCode(), "iNaturalist returned HTTP " + response.statusCode(),
+                quotaRemaining(response));
             throw new InfoExtractionException("iNaturalist returned HTTP " + response.statusCode());
         }
+        providerStatusRegistry.recordSuccess("INATURALIST", response.statusCode(), quotaRemaining(response));
         try {
             return parseResponse(searchTerm, size, response.body(), effectiveLocale, effectiveRegion);
         } catch (JsonParseException | IllegalStateException | UnsupportedOperationException | NullPointerException |
@@ -124,10 +135,12 @@ public class INaturalistRequestMaker {
                   .map(gbifTaxonomyVerifier::verify)
                   .forEach(candidate -> mergeCandidate(verifiedResults, candidate));
         return verifiedResults.values().stream()
+                  .filter(candidate -> PlantSearchScorer.evaluate(searchTerm, candidate).isRelevant())
                   .sorted((left, right) -> Integer.compare(
                       PlantSearchScorer.score(searchTerm, right), PlantSearchScorer.score(searchTerm, left)
                   ))
                   .limit(size)
+                  .peek(candidate -> PlantSearchScorer.applyMatchMetadata(searchTerm, candidate))
                   .toList();
     }
 
@@ -161,11 +174,13 @@ public class INaturalistRequestMaker {
         if (matchedTerm != null && !matchedTerm.equalsIgnoreCase(scientificName)) {
             botanicalInfo.getSynonyms().add(matchedTerm);
         }
-        candidates.add(new RankedCandidate(
-            botanicalInfo,
-            PlantSearchScorer.score(searchTerm, botanicalInfo),
-            readLong(result, "observations_count")
-        ));
+        if (PlantSearchScorer.evaluate(searchTerm, botanicalInfo).isRelevant()) {
+            candidates.add(new RankedCandidate(
+                botanicalInfo,
+                PlantSearchScorer.score(searchTerm, botanicalInfo),
+                readLong(result, "observations_count")
+            ));
+        }
     }
 
 
@@ -224,6 +239,11 @@ public class INaturalistRequestMaker {
 
     private static String removeTrailingSlash(String value) {
         return value.endsWith("/") ? value.substring(0, value.length() - 1) : value;
+    }
+
+
+    private String quotaRemaining(HttpResponse<?> response) {
+        return response.headers().firstValue("x-ratelimit-remaining").orElse(null);
     }
 
 

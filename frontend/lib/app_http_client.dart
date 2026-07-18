@@ -103,22 +103,32 @@ class AppHttpClient {
     return MediaType('image', extension);
   }
 
-  Future<http.Response> identifyPlant(XFile image, String language) async {
-    final imageBytes = await image.readAsBytes();
+  Future<http.Response> identifyPlant(
+    List<XFile> images,
+    List<String> organs,
+    String language,
+  ) async {
+    if (images.isEmpty || images.length != organs.length) {
+      throw ArgumentError('Identification images and organ labels must match');
+    }
     final uri = _prependBackendURL('plant-identification').replace(
       queryParameters: {
         'language': language,
       },
     );
     final request = http.MultipartRequest('POST', uri);
-    request.files.add(
-      http.MultipartFile.fromBytes(
-        'image',
-        imageBytes,
-        filename: image.name,
-        contentType: _getMediaType(image.name),
-      ),
-    );
+    for (int index = 0; index < images.length; index++) {
+      final XFile image = images[index];
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'images',
+          await image.readAsBytes(),
+          filename: image.name,
+          contentType: _getMediaType(image.name),
+        ),
+      );
+      request.files.add(http.MultipartFile.fromString('organs', organs[index]));
+    }
     if (key != null) request.headers['Key'] = key!;
     if (jwt != null) request.headers['Authorization'] = 'Bearer $jwt';
     return http.Response.fromStream(await request.send());

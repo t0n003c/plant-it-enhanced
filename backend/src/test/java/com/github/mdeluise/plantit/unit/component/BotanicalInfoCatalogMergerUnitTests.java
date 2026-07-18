@@ -6,6 +6,7 @@ import com.github.mdeluise.plantit.botanicalinfo.BotanicalCommonName;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfo;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoCatalogMerger;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoCreator;
+import com.github.mdeluise.plantit.plantinfo.search.TrustedCommonNameIndex;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -53,6 +54,7 @@ class BotanicalInfoCatalogMergerUnitTests {
         source.setGenus("Dracaena");
         source.setLastVerifiedAt(Instant.parse("2026-01-01T00:00:00Z"));
         source.getExternalReferences().put("INATURALIST", "inat-1");
+        source.getCatalogTags().add(TrustedCommonNameIndex.NORTH_AMERICAN_TRAIL_TAG);
         source.getPlantCareInfo().setLight(5);
         source.getPlantCareInfo().setHumidity(60);
         source.getSynonyms().add("Mother-in-Law's Tongue");
@@ -69,6 +71,8 @@ class BotanicalInfoCatalogMergerUnitTests {
         Assertions.assertTrue(merged.getSynonyms().contains("Mother-in-Law's Tongue"));
         Assertions.assertEquals("flora-1", merged.getExternalReferences().get("FLORA_CODEX"));
         Assertions.assertEquals("inat-1", merged.getExternalReferences().get("INATURALIST"));
+        Assertions.assertTrue(merged.getCatalogTags().contains(
+            TrustedCommonNameIndex.NORTH_AMERICAN_TRAIL_TAG));
         Assertions.assertEquals(3, merged.getPlantCareInfo().getLight());
         Assertions.assertEquals(60, merged.getPlantCareInfo().getHumidity());
         Assertions.assertEquals(2, merged.getCommonNames().size());

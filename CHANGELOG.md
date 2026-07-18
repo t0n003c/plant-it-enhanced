@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.14.0 - 2026-07-17 - Trustworthy onboarding
+
+- Add a reviewed offline everyday-name index with more than 300 search examples, relevance
+  filtering, match reasons, and confidence so short fragments do not outrank real common names.
+- Expand that index to 160 taxa and nearly 600 examples with 80 tagged North American trail
+  plants, visible trail badges, and high-contrast contact-hazard warnings that also follow exact
+  scientific-name photo matches.
+- Merge Trefle, the 80-profile bundled catalog, and Perenual care field by field while retaining
+  each value's source, reference, confidence, and verification time.
+- Add guided whole-plant, leaf, and flower capture, multi-image Pl@ntNet identification, and a
+  high-contrast top-three candidate flow that preserves the selected photo when adding a plant.
+- Capture optional placement, light, window, pot, drainage, soil, and recent-care details and use
+  them to suggest a conservative watering reminder.
+- Add an authenticated diagnostics screen for MySQL, Redis, provider configuration, recent HTTP
+  status, quota information, application version, and optional NAS public egress IP.
+- Add checksum-verified database-and-upload backup and restore scripts with PROCESS-free MySQL
+  dumps, retention controls, explicit destructive confirmation, and NAS scheduling guidance.
+- Add additive Liquibase migrations, provider/search/care tests, mobile target-size coverage, and
+  a documented release roadmap.
+
 ## 0.13.3 - 2026-07-17 - Reliable common-plant care
 
 - Add a bundled, source-attributed care catalog covering 25 common houseplant, herb, vegetable,

@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:plant_it/commons.dart';
 import 'package:plant_it/dto/species_dto.dart';
 import 'package:plant_it/environment.dart';
+import 'package:plant_it/plant_add/add_plant_page.dart';
 import 'package:plant_it/search/species_details_page.dart';
 import 'package:plant_it/search/tag.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -56,6 +57,22 @@ class _SearchResultCardState extends State<SearchResultCard> {
             tag:
                 '${widget.species.identificationProvider ?? 'AI'} ${(widget.species.identificationConfidence! * 100).round()}%',
           ),
+        if (widget.species.searchMatchReason != null &&
+            widget.species.searchMatchConfidence != null)
+          TagChip(
+            tag: AppLocalizations.of(context).searchMatchLabel(
+              _searchMatchReason(context, widget.species.searchMatchReason!),
+              (widget.species.searchMatchConfidence! * 100).round(),
+            ),
+          ),
+        if (widget.species.catalogTags.contains('NORTH_AMERICAN_TRAIL'))
+          TagChip(tag: AppLocalizations.of(context).trailPlant),
+        if (widget.species.catalogTags.contains('CONTACT_HAZARD'))
+          TagChip(
+            tag: AppLocalizations.of(context).avoidPlantContact,
+            backgroundColor: const Color(0xFFFFD166),
+            foregroundColor: const Color(0xFF2B2100),
+          ),
         Text(
           hasCommonName ? commonName : widget.species.scientificName,
           softWrap: false,
@@ -81,6 +98,24 @@ class _SearchResultCardState extends State<SearchResultCard> {
           ),
       ],
     );
+  }
+
+  String _searchMatchReason(BuildContext context, String reason) {
+    return switch (reason) {
+      'EXACT_COMMON_NAME' =>
+        AppLocalizations.of(context).searchMatchExactCommonName,
+      'COMMON_NAME_PREFIX' =>
+        AppLocalizations.of(context).searchMatchCommonNamePrefix,
+      'COMMON_NAME_KEYWORDS' =>
+        AppLocalizations.of(context).searchMatchCommonNameKeywords,
+      'COMMON_NAME_TYPO' =>
+        AppLocalizations.of(context).searchMatchCommonNameTypo,
+      'SCIENTIFIC_NAME' =>
+        AppLocalizations.of(context).searchMatchScientificName,
+      'SCIENTIFIC_SYNONYM' =>
+        AppLocalizations.of(context).searchMatchScientificSynonym,
+      _ => AppLocalizations.of(context).searchMatchRelatedName,
+    };
   }
 
   @override
@@ -302,10 +337,39 @@ class _SearchResultCardState extends State<SearchResultCard> {
                 right: 10,
                 child: _buildPlantLabels(context),
               ),
+              Positioned(
+                top: 10,
+                right: 10,
+                child: FilledButton.icon(
+                  key: const Key('addIdentificationCandidateAction'),
+                  onPressed: () => _openAddPlant(context),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFFC7F9CC),
+                    foregroundColor: const Color(0xFF10231C),
+                  ),
+                  icon: const Icon(Icons.add),
+                  label: Text(AppLocalizations.of(context).addPlant),
+                ),
+              ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _openAddPlant(BuildContext context) async {
+    final dynamic speciesCreated = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => AddPlantPage(
+          env: widget.env,
+          species: widget.species,
+          identificationImage: widget.identificationImage,
+        ),
+      ),
+    );
+    if (speciesCreated is SpeciesDTO) {
+      widget.updateSpeciesLocally(speciesCreated);
+    }
   }
 }

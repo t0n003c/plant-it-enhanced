@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class CuratedCareProvider {
+    private static final double REVIEWED_CATALOG_CONFIDENCE = 0.88;
     private static final int SCALE_MINIMUM = 0;
     private static final int SCALE_MAXIMUM = 10;
     private final Map<String, CatalogProfile> profilesByScientificName;
@@ -106,6 +107,9 @@ public class CuratedCareProvider {
         result.setSource(BotanicalInfoCreator.CURATED_CATALOG.name());
         result.setSourceReference(profile.sourceReference);
         result.setLastVerifiedAt(verifiedAt);
+        result.attributePopulatedFields(
+            BotanicalInfoCreator.CURATED_CATALOG.name(), profile.sourceReference,
+            REVIEWED_CATALOG_CONFIDENCE, verifiedAt);
         return result;
     }
 

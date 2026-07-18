@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+
+    <changeSet id="careProfilesAddFieldProvenance" author="t0n003c">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="botanical_infos"/>
+            <not>
+                <columnExists tableName="botanical_infos" columnName="care_field_provenance"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="botanical_infos">
+            <column name="care_field_provenance" type="text"/>
+        </addColumn>
+    </changeSet>
+
+
+    <changeSet id="plantsAddGrowingEnvironmentProfile" author="t0n003c">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="plants"/>
+            <not>
+                <columnExists tableName="plants" columnName="growing_environment"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="plants">
+            <column name="growing_environment" type="varchar(16)"/>
+            <column name="light_exposure" type="varchar(16)"/>
+            <column name="window_direction" type="varchar(8)"/>
+            <column name="pot_diameter_cm" type="double"/>
+            <column name="pot_material" type="varchar(24)"/>
+            <column name="has_drainage" type="boolean"/>
+            <column name="soil_type" type="varchar(100)"/>
+            <column name="last_watered_at" type="datetime(6)"/>
+            <column name="last_repotted_at" type="datetime(6)"/>
+            <column name="latitude" type="double"/>
+            <column name="longitude" type="double"/>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

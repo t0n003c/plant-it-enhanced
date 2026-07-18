@@ -78,6 +78,8 @@ class _SpeciesDetailsTabState extends State<SpeciesDetailsTab> {
                           context,
                           widget.species.care.lightRequirement!,
                         ),
+                        provenance:
+                            widget.species.care.fieldProvenance['light'],
                       ),
                     if (widget.species.care.waterRequirement != null)
                       _CareGuidanceCard(
@@ -91,6 +93,8 @@ class _SpeciesDetailsTabState extends State<SpeciesDetailsTab> {
                           context,
                           widget.species.care.waterRequirement!,
                         ),
+                        provenance:
+                            widget.species.care.fieldProvenance['soilHumidity'],
                       ),
                     if (widget.species.care.lightRequirement != null ||
                         widget.species.care.waterRequirement != null)
@@ -146,6 +150,12 @@ class _SpeciesDetailsTabState extends State<SpeciesDetailsTab> {
                     SimpleInfoEntry(
                       title: AppLocalizations.of(context).careDataSource,
                       value: _careSourceLabel(context),
+                    ),
+                    ...widget.species.care.fieldProvenance.entries.map(
+                      (entry) => SimpleInfoEntry(
+                        title: _careFieldLabel(context, entry.key),
+                        value: _provenanceLabel(context, entry.value),
+                      ),
                     ),
                     SimpleInfoEntry(
                       title: AppLocalizations.of(context).careDataLastVerified,
@@ -215,7 +225,45 @@ class _SpeciesDetailsTabState extends State<SpeciesDetailsTab> {
     if (widget.species.care.source == 'PERENUAL') {
       return AppLocalizations.of(context).careDataProvidedByPerenual;
     }
+    if (widget.species.care.source == 'MULTIPLE') {
+      return AppLocalizations.of(context).careDataProvidedByMultiple;
+    }
     return widget.species.care.source;
+  }
+
+  String _careFieldLabel(BuildContext context, String field) {
+    return switch (field) {
+      'light' => AppLocalizations.of(context).sunlight,
+      'humidity' => AppLocalizations.of(context).humidity,
+      'soilHumidity' => AppLocalizations.of(context).soilMoisture,
+      'minTemp' => AppLocalizations.of(context).minTemp,
+      'maxTemp' => AppLocalizations.of(context).maxTemp,
+      'phMin' => AppLocalizations.of(context).minPh,
+      'phMax' => AppLocalizations.of(context).maxPh,
+      _ => field,
+    };
+  }
+
+  String _provenanceLabel(
+    BuildContext context,
+    CareFieldProvenanceDTO provenance,
+  ) {
+    final String source = _sourceName(context, provenance.source);
+    if (provenance.confidence == null) return source;
+    return AppLocalizations.of(context).careSourceWithConfidence(
+      source,
+      (provenance.confidence! * 100).round(),
+    );
+  }
+
+  String _sourceName(BuildContext context, String? source) {
+    return switch (source) {
+      'TREFLE' => AppLocalizations.of(context).careDataProvidedByTrefle,
+      'CURATED_CATALOG' =>
+        AppLocalizations.of(context).careDataProvidedByCuratedCatalog,
+      'PERENUAL' => AppLocalizations.of(context).careDataProvidedByPerenual,
+      _ => source ?? AppLocalizations.of(context).noInfoAvailable,
+    };
   }
 
   String _waterGuidance(BuildContext context, String requirement) {
@@ -235,12 +283,14 @@ class _CareGuidanceCard extends StatelessWidget {
   final String title;
   final String level;
   final String guidance;
+  final CareFieldProvenanceDTO? provenance;
 
   const _CareGuidanceCard({
     required this.icon,
     required this.title,
     required this.level,
     required this.guidance,
+    this.provenance,
   });
 
   @override
@@ -261,10 +311,29 @@ class _CareGuidanceCard extends StatelessWidget {
                 children: [
                   Text(
                     '$title · $level',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 4),
-                  Text(guidance, style: const TextStyle(color: Colors.grey)),
+                  Text(
+                    guidance,
+                    style: const TextStyle(color: Colors.white70),
+                  ),
+                  if (provenance?.source != null) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      provenance!.confidence == null
+                          ? provenance!.source!
+                          : '${provenance!.source} · '
+                              '${(provenance!.confidence! * 100).round()}%',
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

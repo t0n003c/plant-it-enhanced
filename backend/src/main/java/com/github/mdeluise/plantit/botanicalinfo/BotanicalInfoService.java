@@ -63,13 +63,15 @@ public class BotanicalInfoService {
         final List<BotanicalInfo> result = candidates.stream()
                                                .filter(botanicalInfo -> botanicalInfo.isAccessibleToUser(
                                                    authenticatedUserService.getAuthenticatedUser()))
-                                               .filter(botanicalInfo -> PlantSearchScorer.score(
-                                                   searchTerm, botanicalInfo) > 0)
+                                               .filter(botanicalInfo -> PlantSearchScorer.evaluate(
+                                                   searchTerm, botanicalInfo).isRelevant())
                                                .sorted((left, right) -> Integer.compare(
                                                    PlantSearchScorer.score(searchTerm, right),
                                                    PlantSearchScorer.score(searchTerm, left)
                                                ))
                                                .limit(size)
+                                               .peek(botanicalInfo -> PlantSearchScorer.applyMatchMetadata(
+                                                   searchTerm, botanicalInfo))
                                                .toList();
         return new LinkedHashSet<>(result);
     }

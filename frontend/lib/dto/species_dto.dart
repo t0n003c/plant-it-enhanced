@@ -22,6 +22,9 @@ class SpeciesDTO {
   double? identificationConfidence;
   String? identificationProvider;
   String? identificationModel;
+  String? searchMatchReason;
+  double? searchMatchConfidence;
+  List<String> catalogTags;
 
   SpeciesDTO({
     this.id,
@@ -45,6 +48,9 @@ class SpeciesDTO {
     this.identificationConfidence,
     this.identificationProvider,
     this.identificationModel,
+    this.searchMatchReason,
+    this.searchMatchConfidence,
+    this.catalogTags = const [],
   });
 
   factory SpeciesDTO.fromJson(Map<String, dynamic> json) {
@@ -80,6 +86,12 @@ class SpeciesDTO {
           (json['identificationConfidence'] as num?)?.toDouble(),
       identificationProvider: json['identificationProvider'],
       identificationModel: json['identificationModel'],
+      searchMatchReason: json['searchMatchReason'],
+      searchMatchConfidence:
+          (json['searchMatchConfidence'] as num?)?.toDouble(),
+      catalogTags: (json['catalogTags'] as List<dynamic>? ?? [])
+          .map((value) => value.toString())
+          .toList(),
     );
   }
 
@@ -105,6 +117,7 @@ class SpeciesDTO {
       if (imageContentType != null) 'imageContentType': imageContentType,
       'creator': creator,
       if (externalId != null) 'externalId': externalId,
+      'catalogTags': catalogTags,
     };
   }
 
@@ -192,6 +205,7 @@ class SpeciesCareInfoDTO {
   String? source;
   String? sourceReference;
   DateTime? lastVerifiedAt;
+  Map<String, CareFieldProvenanceDTO> fieldProvenance;
 
   SpeciesCareInfoDTO({
     this.light,
@@ -207,6 +221,7 @@ class SpeciesCareInfoDTO {
     this.source,
     this.sourceReference,
     this.lastVerifiedAt,
+    this.fieldProvenance = const {},
   });
 
   factory SpeciesCareInfoDTO.fromJson(Map<String, dynamic> json) {
@@ -226,6 +241,13 @@ class SpeciesCareInfoDTO {
       lastVerifiedAt: json['lastVerifiedAt'] == null
           ? null
           : DateTime.parse(json['lastVerifiedAt']),
+      fieldProvenance:
+          (json['fieldProvenance'] as Map<String, dynamic>? ?? {}).map(
+        (key, value) => MapEntry(
+          key,
+          CareFieldProvenanceDTO.fromJson(value as Map<String, dynamic>),
+        ),
+      ),
     );
   }
 
@@ -243,6 +265,43 @@ class SpeciesCareInfoDTO {
       if (sourceReference != null) 'sourceReference': sourceReference,
       if (lastVerifiedAt != null)
         'lastVerifiedAt': lastVerifiedAt!.toIso8601String(),
+      'fieldProvenance': fieldProvenance.map(
+        (key, value) => MapEntry(key, value.toMap()),
+      ),
+    };
+  }
+}
+
+class CareFieldProvenanceDTO {
+  String? source;
+  String? sourceReference;
+  double? confidence;
+  DateTime? verifiedAt;
+
+  CareFieldProvenanceDTO({
+    this.source,
+    this.sourceReference,
+    this.confidence,
+    this.verifiedAt,
+  });
+
+  factory CareFieldProvenanceDTO.fromJson(Map<String, dynamic> json) {
+    return CareFieldProvenanceDTO(
+      source: json['source'],
+      sourceReference: json['sourceReference'],
+      confidence: (json['confidence'] as num?)?.toDouble(),
+      verifiedAt: json['verifiedAt'] == null
+          ? null
+          : DateTime.parse(json['verifiedAt']),
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      if (source != null) 'source': source,
+      if (sourceReference != null) 'sourceReference': sourceReference,
+      if (confidence != null) 'confidence': confidence,
+      if (verifiedAt != null) 'verifiedAt': verifiedAt!.toIso8601String(),
     };
   }
 }

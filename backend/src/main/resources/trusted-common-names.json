@@ -1,0 +1,884 @@
+{
+  "entries": [
+    {
+      "scientificName": "Monstera deliciosa",
+      "scientificSynonyms": [],
+      "commonNames": ["Monstera", "Swiss cheese plant", "split-leaf philodendron", "fruit salad plant"]
+    },
+    {
+      "scientificName": "Epipremnum aureum",
+      "scientificSynonyms": ["Scindapsus aureus"],
+      "commonNames": ["Pothos", "golden pothos", "devil's ivy", "hunter's robe"]
+    },
+    {
+      "scientificName": "Dracaena trifasciata",
+      "scientificSynonyms": ["Sansevieria trifasciata"],
+      "commonNames": ["Snake plant", "mother-in-law's tongue", "sansevieria", "viper's bowstring hemp"]
+    },
+    {
+      "scientificName": "Chlorophytum comosum",
+      "scientificSynonyms": [],
+      "commonNames": ["Spider plant", "airplane plant", "ribbon plant", "spider ivy"]
+    },
+    {
+      "scientificName": "Spathiphyllum wallisii",
+      "scientificSynonyms": [],
+      "commonNames": ["Peace lily", "white sails", "spathe flower", "closet plant"]
+    },
+    {
+      "scientificName": "Zamioculcas zamiifolia",
+      "scientificSynonyms": [],
+      "commonNames": ["ZZ plant", "Zanzibar gem", "eternity plant", "aroid palm"]
+    },
+    {
+      "scientificName": "Aloe vera",
+      "scientificSynonyms": ["Aloe barbadensis"],
+      "commonNames": ["Aloe vera", "true aloe", "medicinal aloe", "burn plant"]
+    },
+    {
+      "scientificName": "Philodendron hederaceum",
+      "scientificSynonyms": ["Philodendron scandens"],
+      "commonNames": ["Heartleaf philodendron", "sweetheart plant", "heart-leaf philodendron", "philodendron vine"]
+    },
+    {
+      "scientificName": "Ficus lyrata",
+      "scientificSynonyms": [],
+      "commonNames": ["Fiddle-leaf fig", "fiddle leaf fig", "banjo fig", "lyre-leaf fig"]
+    },
+    {
+      "scientificName": "Ficus elastica",
+      "scientificSynonyms": [],
+      "commonNames": ["Rubber plant", "rubber fig", "India rubber tree", "rubber bush"]
+    },
+    {
+      "scientificName": "Pilea peperomioides",
+      "scientificSynonyms": [],
+      "commonNames": ["Chinese money plant", "pancake plant", "UFO plant", "missionary plant"]
+    },
+    {
+      "scientificName": "Crassula ovata",
+      "scientificSynonyms": [],
+      "commonNames": ["Jade plant", "friendship tree", "lucky jade", "dollar plant"]
+    },
+    {
+      "scientificName": "Pachira aquatica",
+      "scientificSynonyms": [],
+      "commonNames": ["Money tree", "Malabar chestnut", "Guiana chestnut", "provision tree"]
+    },
+    {
+      "scientificName": "Maranta leuconeura",
+      "scientificSynonyms": [],
+      "commonNames": ["Prayer plant", "praying plant", "rabbit tracks", "herringbone plant"]
+    },
+    {
+      "scientificName": "Beaucarnea recurvata",
+      "scientificSynonyms": ["Nolina recurvata"],
+      "commonNames": ["Ponytail palm", "elephant-foot tree", "bottle palm", "ponytail plant"]
+    },
+    {
+      "scientificName": "Curio rowleyanus",
+      "scientificSynonyms": ["Senecio rowleyanus"],
+      "commonNames": ["String of pearls", "string of beads", "bead plant", "pearl plant"]
+    },
+    {
+      "scientificName": "Schlumbergera truncata",
+      "scientificSynonyms": ["Zygocactus truncatus"],
+      "commonNames": ["Thanksgiving cactus", "crab cactus", "false Christmas cactus", "claw cactus"]
+    },
+    {
+      "scientificName": "Tradescantia zebrina",
+      "scientificSynonyms": ["Zebrina pendula"],
+      "commonNames": ["Inch plant", "zebra inch plant", "silver inch plant", "striped wandering plant"]
+    },
+    {
+      "scientificName": "Hoya carnosa",
+      "scientificSynonyms": [],
+      "commonNames": ["Wax plant", "porcelain flower", "honey plant", "wax vine"]
+    },
+    {
+      "scientificName": "Dracaena fragrans",
+      "scientificSynonyms": [],
+      "commonNames": ["Corn plant", "mass cane", "cornstalk dracaena", "happy plant"]
+    },
+    {
+      "scientificName": "Dieffenbachia seguine",
+      "scientificSynonyms": ["Dieffenbachia maculata"],
+      "commonNames": ["Dumb cane", "leopard lily", "dieffenbachia", "tuftroot"]
+    },
+    {
+      "scientificName": "Aglaonema commutatum",
+      "scientificSynonyms": [],
+      "commonNames": ["Chinese evergreen", "Philippine evergreen", "aglaonema", "silver evergreen"]
+    },
+    {
+      "scientificName": "Nephrolepis exaltata",
+      "scientificSynonyms": [],
+      "commonNames": ["Boston fern", "sword fern", "tuber ladder fern", "wild Boston fern"]
+    },
+    {
+      "scientificName": "Adiantum raddianum",
+      "scientificSynonyms": [],
+      "commonNames": ["Maidenhair fern", "delta maidenhair", "trailing maidenhair", "fern maidenhair"]
+    },
+    {
+      "scientificName": "Hedera helix",
+      "scientificSynonyms": [],
+      "commonNames": ["English ivy", "common ivy", "European ivy", "ivy plant"]
+    },
+    {
+      "scientificName": "Peperomia obtusifolia",
+      "scientificSynonyms": [],
+      "commonNames": ["Baby rubber plant", "blunt-leaved peperomia", "pepper face", "American rubber plant"]
+    },
+    {
+      "scientificName": "Streptocarpus ionanthus",
+      "scientificSynonyms": ["Saintpaulia ionantha"],
+      "commonNames": ["African violet", "saintpaulia", "cape violet", "Usambara violet"]
+    },
+    {
+      "scientificName": "Anthurium andraeanum",
+      "scientificSynonyms": [],
+      "commonNames": ["Flamingo flower", "laceleaf", "painter's palette", "oilcloth flower"]
+    },
+    {
+      "scientificName": "Codiaeum variegatum",
+      "scientificSynonyms": [],
+      "commonNames": ["Croton", "garden croton", "variegated croton", "Joseph's coat croton"]
+    },
+    {
+      "scientificName": "Heptapleurum arboricola",
+      "scientificSynonyms": ["Schefflera arboricola"],
+      "commonNames": ["Dwarf umbrella tree", "umbrella plant", "Hawaiian elf", "dwarf schefflera"]
+    },
+    {
+      "scientificName": "Dracaena reflexa var. angustifolia",
+      "scientificSynonyms": ["Dracaena marginata"],
+      "commonNames": ["Madagascar dragon tree", "red-edged dracaena", "dragon blood tree", "marginata"]
+    },
+    {
+      "scientificName": "Musa acuminata",
+      "scientificSynonyms": [],
+      "commonNames": ["Dwarf banana", "banana plant", "Cavendish banana", "edible banana"]
+    },
+    {
+      "scientificName": "Citrus limon",
+      "scientificSynonyms": ["Citrus x limon"],
+      "commonNames": ["Lemon tree", "lemon plant", "common lemon", "citrus lemon"]
+    },
+    {
+      "scientificName": "Coffea arabica",
+      "scientificSynonyms": [],
+      "commonNames": ["Coffee plant", "Arabian coffee", "coffee shrub", "coffee tree"]
+    },
+    {
+      "scientificName": "Araucaria heterophylla",
+      "scientificSynonyms": [],
+      "commonNames": ["Norfolk Island pine", "star pine", "house pine", "Norfolk pine"]
+    },
+    {
+      "scientificName": "Echeveria elegans",
+      "scientificSynonyms": [],
+      "commonNames": ["Mexican snowball", "white Mexican rose", "pearl echeveria", "Mexican gem"]
+    },
+    {
+      "scientificName": "Haworthiopsis attenuata",
+      "scientificSynonyms": ["Haworthia attenuata"],
+      "commonNames": ["Zebra haworthia", "zebra cactus", "zebra succulent", "attenuata"]
+    },
+    {
+      "scientificName": "Kalanchoe blossfeldiana",
+      "scientificSynonyms": [],
+      "commonNames": ["Flaming Katy", "Christmas kalanchoe", "widow's thrill", "florist kalanchoe"]
+    },
+    {
+      "scientificName": "Sedum morganianum",
+      "scientificSynonyms": [],
+      "commonNames": ["Burro's tail", "donkey's tail", "lamb's tail sedum", "horse's tail sedum"]
+    },
+    {
+      "scientificName": "Gymnocalycium mihanovichii",
+      "scientificSynonyms": [],
+      "commonNames": ["Moon cactus", "ruby ball cactus", "Hibotan cactus", "red cap cactus"]
+    },
+    {
+      "scientificName": "Opuntia microdasys",
+      "scientificSynonyms": [],
+      "commonNames": ["Bunny ears cactus", "polka-dot cactus", "angel's wings cactus", "golden bristle cactus"]
+    },
+    {
+      "scientificName": "Sempervivum tectorum",
+      "scientificSynonyms": [],
+      "commonNames": ["Houseleek", "hens and chicks", "roof houseleek", "Jupiter's beard"]
+    },
+    {
+      "scientificName": "Ocimum basilicum",
+      "scientificSynonyms": [],
+      "commonNames": ["Basil", "sweet basil", "great basil", "garden basil"]
+    },
+    {
+      "scientificName": "Salvia rosmarinus",
+      "scientificSynonyms": ["Rosmarinus officinalis"],
+      "commonNames": ["Rosemary", "garden rosemary", "common rosemary", "compass plant"]
+    },
+    {
+      "scientificName": "Thymus vulgaris",
+      "scientificSynonyms": [],
+      "commonNames": ["Thyme", "common thyme", "garden thyme", "English thyme"]
+    },
+    {
+      "scientificName": "Mentha spicata",
+      "scientificSynonyms": [],
+      "commonNames": ["Spearmint", "garden mint", "lamb mint", "common spearmint"]
+    },
+    {
+      "scientificName": "Origanum vulgare",
+      "scientificSynonyms": [],
+      "commonNames": ["Oregano", "wild marjoram", "common oregano", "pot marjoram"]
+    },
+    {
+      "scientificName": "Petroselinum crispum",
+      "scientificSynonyms": [],
+      "commonNames": ["Parsley", "garden parsley", "common parsley", "curly parsley"]
+    },
+    {
+      "scientificName": "Coriandrum sativum",
+      "scientificSynonyms": [],
+      "commonNames": ["Cilantro", "coriander", "Chinese parsley", "dhania"]
+    },
+    {
+      "scientificName": "Allium schoenoprasum",
+      "scientificSynonyms": [],
+      "commonNames": ["Chives", "common chives", "garden chives", "rush leek"]
+    },
+    {
+      "scientificName": "Artemisia dracunculus",
+      "scientificSynonyms": [],
+      "commonNames": ["Tarragon", "estragon", "dragon herb", "little dragon herb"]
+    },
+    {
+      "scientificName": "Salvia officinalis",
+      "scientificSynonyms": [],
+      "commonNames": ["Sage", "common sage", "garden sage", "kitchen sage"]
+    },
+    {
+      "scientificName": "Melissa officinalis",
+      "scientificSynonyms": [],
+      "commonNames": ["Lemon balm", "balm mint", "common balm", "sweet balm"]
+    },
+    {
+      "scientificName": "Anethum graveolens",
+      "scientificSynonyms": [],
+      "commonNames": ["Dill", "dill weed", "garden dill", "common dill"]
+    },
+    {
+      "scientificName": "Zea mays",
+      "scientificSynonyms": [],
+      "commonNames": ["Corn", "maize", "sweet corn", "field corn"]
+    },
+    {
+      "scientificName": "Solanum lycopersicum",
+      "scientificSynonyms": ["Lycopersicon esculentum"],
+      "commonNames": ["Tomato", "tomato plant", "garden tomato", "cherry tomato"]
+    },
+    {
+      "scientificName": "Capsicum annuum",
+      "scientificSynonyms": [],
+      "commonNames": ["Bell pepper", "chili pepper", "sweet pepper", "garden pepper"]
+    },
+    {
+      "scientificName": "Cucumis sativus",
+      "scientificSynonyms": [],
+      "commonNames": ["Cucumber", "garden cucumber", "slicing cucumber", "pickling cucumber"]
+    },
+    {
+      "scientificName": "Lactuca sativa",
+      "scientificSynonyms": [],
+      "commonNames": ["Lettuce", "garden lettuce", "leaf lettuce", "romaine lettuce"]
+    },
+    {
+      "scientificName": "Phaseolus vulgaris",
+      "scientificSynonyms": [],
+      "commonNames": ["Common bean", "green bean", "snap bean", "kidney bean"]
+    },
+    {
+      "scientificName": "Cucurbita pepo",
+      "scientificSynonyms": [],
+      "commonNames": ["Zucchini", "courgette", "summer squash", "field pumpkin"]
+    },
+    {
+      "scientificName": "Fragaria x ananassa",
+      "scientificSynonyms": ["Fragaria × ananassa"],
+      "commonNames": ["Strawberry", "garden strawberry", "cultivated strawberry", "pineapple strawberry"]
+    },
+    {
+      "scientificName": "Helianthus annuus",
+      "scientificSynonyms": [],
+      "commonNames": ["Sunflower", "common sunflower", "annual sunflower", "Kansas sunflower"]
+    },
+    {
+      "scientificName": "Lavandula angustifolia",
+      "scientificSynonyms": ["Lavandula officinalis"],
+      "commonNames": ["Lavender", "English lavender", "common lavender", "true lavender"]
+    },
+    {
+      "scientificName": "Rosa chinensis",
+      "scientificSynonyms": [],
+      "commonNames": ["Rose", "China rose", "Chinese rose", "Bengal rose"]
+    },
+    {
+      "scientificName": "Tagetes erecta",
+      "scientificSynonyms": [],
+      "commonNames": ["Marigold", "African marigold", "Aztec marigold", "big marigold"]
+    },
+    {
+      "scientificName": "Petunia x atkinsiana",
+      "scientificSynonyms": ["Petunia × hybrida"],
+      "commonNames": ["Petunia", "garden petunia", "hybrid petunia", "bedding petunia"]
+    },
+    {
+      "scientificName": "Pelargonium x hortorum",
+      "scientificSynonyms": ["Pelargonium × hortorum"],
+      "commonNames": ["Geranium", "garden geranium", "zonal geranium", "bedding geranium"]
+    },
+    {
+      "scientificName": "Viola x wittrockiana",
+      "scientificSynonyms": ["Viola × wittrockiana"],
+      "commonNames": ["Pansy", "garden pansy", "hybrid pansy", "viola pansy"]
+    },
+    {
+      "scientificName": "Impatiens walleriana",
+      "scientificSynonyms": [],
+      "commonNames": ["Impatiens", "busy Lizzie", "patient Lucy", "sultana flower"]
+    },
+    {
+      "scientificName": "Chrysanthemum x morifolium",
+      "scientificSynonyms": ["Chrysanthemum × morifolium"],
+      "commonNames": ["Chrysanthemum", "garden mum", "florist's daisy", "hardy mum"]
+    },
+    {
+      "scientificName": "Hydrangea macrophylla",
+      "scientificSynonyms": [],
+      "commonNames": ["Hydrangea", "bigleaf hydrangea", "mophead hydrangea", "hortensia"]
+    },
+    {
+      "scientificName": "Tulipa gesneriana",
+      "scientificSynonyms": [],
+      "commonNames": ["Tulip", "garden tulip", "Didier's tulip", "late tulip"]
+    },
+    {
+      "scientificName": "Narcissus pseudonarcissus",
+      "scientificSynonyms": [],
+      "commonNames": ["Daffodil", "wild daffodil", "Lent lily", "trumpet narcissus"]
+    },
+    {
+      "scientificName": "Lilium candidum",
+      "scientificSynonyms": [],
+      "commonNames": ["Madonna lily", "white lily", "Annunciation lily", "meadow lily"]
+    },
+    {
+      "scientificName": "Dahlia pinnata",
+      "scientificSynonyms": [],
+      "commonNames": ["Dahlia", "garden dahlia", "pinnate dahlia", "common dahlia"]
+    },
+    {
+      "scientificName": "Zinnia elegans",
+      "scientificSynonyms": [],
+      "commonNames": ["Zinnia", "common zinnia", "elegant zinnia", "youth-and-old-age"]
+    },
+    {
+      "scientificName": "Cosmos bipinnatus",
+      "scientificSynonyms": [],
+      "commonNames": ["Cosmos", "garden cosmos", "Mexican aster", "cosmea"]
+    },
+    {
+      "scientificName": "Rudbeckia hirta",
+      "scientificSynonyms": [],
+      "commonNames": ["Black-eyed Susan", "gloriosa daisy", "yellow oxeye daisy", "brown-eyed Susan"]
+    },
+    {
+      "scientificName": "Echinacea purpurea",
+      "scientificSynonyms": [],
+      "commonNames": ["Purple coneflower", "eastern purple coneflower", "hedgehog coneflower", "purple echinacea"]
+    },
+    {
+      "scientificName": "Trillium grandiflorum",
+      "scientificSynonyms": [],
+      "commonNames": ["White trillium", "large-flowered trillium", "great white trillium"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Erythronium americanum",
+      "scientificSynonyms": [],
+      "commonNames": ["Trout lily", "yellow trout-lily", "yellow dogtooth violet"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Arisaema triphyllum",
+      "scientificSynonyms": [],
+      "commonNames": ["Jack-in-the-pulpit", "jack in the pulpit", "bog onion"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Podophyllum peltatum",
+      "scientificSynonyms": [],
+      "commonNames": ["Mayapple", "American mandrake", "wild mandrake"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Sanguinaria canadensis",
+      "scientificSynonyms": [],
+      "commonNames": ["Bloodroot", "red puccoon", "bloodwort"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Dicentra cucullaria",
+      "scientificSynonyms": [],
+      "commonNames": ["Dutchman's breeches", "Dutchman's-breeches", "little blue staggers"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Claytonia virginica",
+      "scientificSynonyms": [],
+      "commonNames": ["Virginia springbeauty", "spring beauty", "fairy spuds"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Mertensia virginica",
+      "scientificSynonyms": [],
+      "commonNames": ["Virginia bluebells", "Virginia cowslip", "Roanoke bells"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Asarum canadense",
+      "scientificSynonyms": [],
+      "commonNames": ["Wild ginger", "Canadian wild ginger", "woodland ginger"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Aquilegia canadensis",
+      "scientificSynonyms": [],
+      "commonNames": ["Wild columbine", "red columbine", "eastern red columbine"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Geranium maculatum",
+      "scientificSynonyms": [],
+      "commonNames": ["Wild geranium", "spotted geranium", "wood geranium"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Impatiens capensis",
+      "scientificSynonyms": [],
+      "commonNames": ["Jewelweed", "spotted jewelweed", "spotted touch-me-not"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Maianthemum racemosum",
+      "scientificSynonyms": ["Smilacina racemosa"],
+      "commonNames": ["False Solomon's seal", "Solomon's plume", "feathery false lily of the valley"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Polygonatum pubescens",
+      "scientificSynonyms": [],
+      "commonNames": ["Hairy Solomon's seal", "downy Solomon's seal", "small Solomon's seal"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Tiarella cordifolia",
+      "scientificSynonyms": [],
+      "commonNames": ["Foamflower", "heartleaf foamflower", "Allegheny foamflower"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Monotropa uniflora",
+      "scientificSynonyms": [],
+      "commonNames": ["Ghost plant", "Indian pipe", "ghost pipe"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Actaea racemosa",
+      "scientificSynonyms": ["Cimicifuga racemosa"],
+      "commonNames": ["Black cohosh", "black snakeroot", "black bugbane"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Eutrochium purpureum",
+      "scientificSynonyms": ["Eupatorium purpureum"],
+      "commonNames": ["Sweet Joe-Pye weed", "purple Joe-Pye weed", "sweet-scented Joe-Pye weed"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Solidago canadensis",
+      "scientificSynonyms": [],
+      "commonNames": ["Canada goldenrod", "Canadian goldenrod", "tall goldenrod"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Symphyotrichum novae-angliae",
+      "scientificSynonyms": ["Aster novae-angliae"],
+      "commonNames": ["New England aster", "New England American-aster", "hairy Michaelmas-daisy"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Monarda fistulosa",
+      "scientificSynonyms": [],
+      "commonNames": ["Wild bergamot", "wild bee balm", "horsemint"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Asclepias syriaca",
+      "scientificSynonyms": [],
+      "commonNames": ["Common milkweed", "silkweed", "Virginia silkweed"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Asclepias tuberosa",
+      "scientificSynonyms": [],
+      "commonNames": ["Butterfly weed", "butterfly milkweed", "orange milkweed"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Liatris pycnostachya",
+      "scientificSynonyms": [],
+      "commonNames": ["Prairie blazing star", "Kansas gayfeather", "button snakeroot"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Lupinus perennis",
+      "scientificSynonyms": [],
+      "commonNames": ["Wild lupine", "sundial lupine", "blue lupine"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Ratibida pinnata",
+      "scientificSynonyms": [],
+      "commonNames": ["Gray-headed coneflower", "grey-headed coneflower", "drooping coneflower"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Schizachyrium scoparium",
+      "scientificSynonyms": ["Andropogon scoparius"],
+      "commonNames": ["Little bluestem", "beard grass", "broom beardgrass"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Andropogon gerardi",
+      "scientificSynonyms": ["Andropogon gerardii"],
+      "commonNames": ["Big bluestem", "turkeyfoot grass", "tall bluestem"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Panicum virgatum",
+      "scientificSynonyms": [],
+      "commonNames": ["Switchgrass", "tall panic grass", "wild redtop"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Sorghastrum nutans",
+      "scientificSynonyms": [],
+      "commonNames": ["Indiangrass", "yellow Indiangrass", "Indian grass"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Matteuccia struthiopteris",
+      "scientificSynonyms": [],
+      "commonNames": ["Ostrich fern", "shuttlecock fern", "ostrich-feather fern"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Polystichum acrostichoides",
+      "scientificSynonyms": [],
+      "commonNames": ["Christmas fern", "dagger fern", "Christmas dagger fern"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Osmundastrum cinnamomeum",
+      "scientificSynonyms": ["Osmunda cinnamomea"],
+      "commonNames": ["Cinnamon fern", "cinnamon-colored fern", "buckhorn fern"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Onoclea sensibilis",
+      "scientificSynonyms": [],
+      "commonNames": ["Sensitive fern", "bead fern", "meadow brake"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Dryopteris marginalis",
+      "scientificSynonyms": [],
+      "commonNames": ["Marginal wood fern", "marginal shield fern", "leather wood fern"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Kalmia latifolia",
+      "scientificSynonyms": [],
+      "commonNames": ["Mountain laurel", "calico bush", "spoonwood"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Rhododendron maximum",
+      "scientificSynonyms": [],
+      "commonNames": ["Rosebay rhododendron", "great laurel", "great rhododendron"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Lindera benzoin",
+      "scientificSynonyms": [],
+      "commonNames": ["Spicebush", "northern spicebush", "wild allspice"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Viburnum acerifolium",
+      "scientificSynonyms": [],
+      "commonNames": ["Mapleleaf viburnum", "maple-leaved viburnum", "maple-leaved arrowwood"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Cornus canadensis",
+      "scientificSynonyms": ["Chamaepericlymenum canadense"],
+      "commonNames": ["Bunchberry", "Canadian bunchberry", "creeping dogwood"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Gaultheria procumbens",
+      "scientificSynonyms": [],
+      "commonNames": ["Eastern teaberry", "American wintergreen", "checkerberry"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Vaccinium angustifolium",
+      "scientificSynonyms": [],
+      "commonNames": ["Lowbush blueberry", "common lowbush blueberry", "sweet lowbush blueberry"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Rubus odoratus",
+      "scientificSynonyms": [],
+      "commonNames": ["Purple-flowering raspberry", "flowering raspberry", "Virginia raspberry"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Toxicodendron radicans",
+      "scientificSynonyms": ["Rhus radicans"],
+      "commonNames": ["Poison ivy", "eastern poison ivy", "climbing poison ivy"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL", "CONTACT_HAZARD"]
+    },
+    {
+      "scientificName": "Toxicodendron vernix",
+      "scientificSynonyms": ["Rhus vernix"],
+      "commonNames": ["Poison sumac", "swamp sumac", "thunderwood"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL", "CONTACT_HAZARD"]
+    },
+    {
+      "scientificName": "Urtica dioica",
+      "scientificSynonyms": [],
+      "commonNames": ["Stinging nettle", "common nettle", "burn nettle"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL", "CONTACT_HAZARD"]
+    },
+    {
+      "scientificName": "Acer saccharum",
+      "scientificSynonyms": [],
+      "commonNames": ["Sugar maple", "rock maple", "hard maple"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Acer rubrum",
+      "scientificSynonyms": [],
+      "commonNames": ["Red maple", "swamp maple", "soft maple"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Quercus alba",
+      "scientificSynonyms": [],
+      "commonNames": ["White oak", "eastern white oak", "stave oak"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Quercus rubra",
+      "scientificSynonyms": [],
+      "commonNames": ["Northern red oak", "eastern red oak", "champion oak"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Fagus grandifolia",
+      "scientificSynonyms": [],
+      "commonNames": ["American beech", "North American beech", "Carolina beech"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Betula papyrifera",
+      "scientificSynonyms": [],
+      "commonNames": ["Paper birch", "canoe birch", "American white birch"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Betula alleghaniensis",
+      "scientificSynonyms": ["Betula lutea"],
+      "commonNames": ["Yellow birch", "golden birch", "swamp birch"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Tsuga canadensis",
+      "scientificSynonyms": [],
+      "commonNames": ["Eastern hemlock", "Canadian hemlock", "hemlock spruce"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Pinus strobus",
+      "scientificSynonyms": [],
+      "commonNames": ["Eastern white pine", "northern white pine", "Weymouth pine"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Thuja occidentalis",
+      "scientificSynonyms": [],
+      "commonNames": ["Northern white cedar", "eastern arborvitae", "swamp cedar"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Populus tremuloides",
+      "scientificSynonyms": [],
+      "commonNames": ["Quaking aspen", "trembling aspen", "American aspen"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Liriodendron tulipifera",
+      "scientificSynonyms": [],
+      "commonNames": ["Tulip tree", "tulip poplar", "yellow poplar"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Sassafras albidum",
+      "scientificSynonyms": [],
+      "commonNames": ["Sassafras", "white sassafras", "red sassafras"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Cercis canadensis",
+      "scientificSynonyms": [],
+      "commonNames": ["Eastern redbud", "American redbud", "American Judas tree"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Cornus florida",
+      "scientificSynonyms": [],
+      "commonNames": ["Flowering dogwood", "eastern flowering dogwood", "white cornel"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Juniperus virginiana",
+      "scientificSynonyms": [],
+      "commonNames": ["Eastern redcedar", "eastern red cedar", "Virginian juniper"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Pseudotsuga menziesii",
+      "scientificSynonyms": [],
+      "commonNames": ["Douglas-fir", "Douglas fir", "Oregon pine"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Pinus ponderosa",
+      "scientificSynonyms": [],
+      "commonNames": ["Ponderosa pine", "western yellow pine", "bull pine"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Sequoia sempervirens",
+      "scientificSynonyms": [],
+      "commonNames": ["Coast redwood", "California redwood", "coastal redwood"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Acer macrophyllum",
+      "scientificSynonyms": [],
+      "commonNames": ["Bigleaf maple", "Oregon maple", "broadleaf maple"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Mahonia aquifolium",
+      "scientificSynonyms": ["Berberis aquifolium"],
+      "commonNames": ["Oregon grape", "holly-leaved barberry", "tall Oregon grape"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Arctostaphylos uva-ursi",
+      "scientificSynonyms": [],
+      "commonNames": ["Bearberry", "kinnikinnick", "red bearberry"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Balsamorhiza sagittata",
+      "scientificSynonyms": [],
+      "commonNames": ["Arrowleaf balsamroot", "arrow-leaved balsamroot", "Oregon sunflower"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Eschscholzia californica",
+      "scientificSynonyms": [],
+      "commonNames": ["California poppy", "golden poppy", "California sunlight"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Gaillardia aristata",
+      "scientificSynonyms": [],
+      "commonNames": ["Blanket flower", "common gaillardia", "great blanketflower"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Castilleja miniata",
+      "scientificSynonyms": [],
+      "commonNames": ["Giant red paintbrush", "common red paintbrush", "scarlet paintbrush"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Lupinus polyphyllus",
+      "scientificSynonyms": [],
+      "commonNames": ["Bigleaf lupine", "large-leaved lupine", "garden lupine"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Abies concolor",
+      "scientificSynonyms": [],
+      "commonNames": ["White fir", "Colorado white fir", "concolor fir"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Calocedrus decurrens",
+      "scientificSynonyms": ["Libocedrus decurrens"],
+      "commonNames": ["Incense cedar", "California incense cedar", "California post cedar"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Eriogonum umbellatum",
+      "scientificSynonyms": [],
+      "commonNames": ["Sulfur buckwheat", "sulphur-flower buckwheat", "sulfur flower"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Picea glauca",
+      "scientificSynonyms": [],
+      "commonNames": ["White spruce", "Canadian spruce", "skunk spruce"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Picea mariana",
+      "scientificSynonyms": [],
+      "commonNames": ["Black spruce", "bog spruce", "swamp spruce"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Vaccinium uliginosum",
+      "scientificSynonyms": [],
+      "commonNames": ["Bog blueberry", "alpine blueberry", "bog bilberry"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Toxicodendron diversilobum",
+      "scientificSynonyms": ["Rhus diversiloba"],
+      "commonNames": ["Pacific poison oak", "western poison oak", "California poison oak"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL", "CONTACT_HAZARD"]
+    }
+  ]
+}

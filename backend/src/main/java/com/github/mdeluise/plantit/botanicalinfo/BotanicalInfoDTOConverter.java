@@ -51,6 +51,10 @@ public class BotanicalInfoDTOConverter extends AbstractDTOConverter<BotanicalInf
                                          ? new HashMap<>() : new HashMap<>(data.getExternalReferences()));
         result.setCanonicalTaxonKey(data.getCanonicalTaxonKey());
         result.setLastVerifiedAt(data.getLastVerifiedAt());
+        result.setSearchMatchReason(data.getSearchMatchReason());
+        result.setSearchMatchConfidence(data.getSearchMatchConfidence());
+        result.setCatalogTags(data.getCatalogTags() == null
+                                  ? new LinkedHashSet<>() : new LinkedHashSet<>(data.getCatalogTags()));
         final PlantCareInfoDTO plantCareInfoDTO = plantCareInfoDtoConverter.convertToDTO(data.getPlantCareInfo());
         result.setPlantCareInfo(plantCareInfoDTO);
         return result;

@@ -1,6 +1,8 @@
 package com.github.mdeluise.plantit.botanicalinfo.care;
 
 import java.time.Instant;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -32,6 +34,8 @@ public class PlantCareInfoDTO {
     private Instant lastVerifiedAt;
     @Schema(description = "Are all fields null?", accessMode = Schema.AccessMode.READ_ONLY)
     private boolean allNull;
+    @Schema(description = "Source, confidence, and verification date for each populated care field")
+    private Map<String, CareFieldProvenance> fieldProvenance = new LinkedHashMap<>();
 
 
     public Integer getLight() {
@@ -161,5 +165,16 @@ public class PlantCareInfoDTO {
 
     public void setAllNull(boolean allNull) {
         this.allNull = allNull;
+    }
+
+
+    public Map<String, CareFieldProvenance> getFieldProvenance() {
+        return fieldProvenance;
+    }
+
+
+    public void setFieldProvenance(Map<String, CareFieldProvenance> fieldProvenance) {
+        this.fieldProvenance = fieldProvenance == null
+                                   ? new LinkedHashMap<>() : new LinkedHashMap<>(fieldProvenance);
     }
 }
