@@ -7,6 +7,7 @@ import 'package:plant_it/dto/species_dto.dart';
 import 'package:plant_it/environment.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:plant_it/search/add_custom.dart';
+import 'package:plant_it/search/guided_photo_sheet.dart';
 import 'package:plant_it/search/photo_source_sheet.dart';
 import 'package:plant_it/search/search_result.dart';
 
@@ -95,7 +96,7 @@ class _SeachPageState extends State<SeachPage> {
     }
   }
 
-  Future<void> _identifyFromPhoto(ImageSource source) async {
+  Future<void> _startGuidedIdentification(ImageSource source) async {
     Navigator.of(context).pop();
     final XFile? image = await ImagePicker().pickImage(
       source: source,
@@ -104,6 +105,25 @@ class _SeachPageState extends State<SeachPage> {
       maxHeight: 2048,
     );
     if (image == null || !mounted) return;
+    final GuidedPhotoSelection? selection =
+        await showModalBottomSheet<GuidedPhotoSelection>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: PhotoSourceSheet.backgroundColor,
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * .92,
+      ),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+      ),
+      clipBehavior: Clip.antiAlias,
+      builder: (context) => GuidedPhotoSheet(initialImage: image),
+    );
+    if (selection == null || !mounted) return;
+    await _identifyPhotos(selection);
+  }
+
+  Future<void> _identifyPhotos(GuidedPhotoSelection selection) async {
     _debounce?.cancel();
     final int requestId = ++_requestSequence;
     final Locale locale = Localizations.localeOf(context);
@@ -111,12 +131,13 @@ class _SeachPageState extends State<SeachPage> {
       _loading = true;
       _errorMessage = null;
       _identificationMode = true;
-      _identificationImage = image;
+      _identificationImage = selection.images.first;
       _searchController.clear();
     });
     try {
       final response = await widget.env.http.identifyPlant(
-        image,
+        selection.images,
+        selection.organs,
         locale.languageCode,
       );
       if (!mounted || requestId != _requestSequence) return;
@@ -132,6 +153,7 @@ class _SeachPageState extends State<SeachPage> {
         _result = (body as List<dynamic>)
             .map((candidate) =>
                 SpeciesDTO.fromJson(candidate as Map<String, dynamic>))
+            .take(3)
             .toList();
         if (_result.isEmpty) {
           _errorMessage = AppLocalizations.of(context).noIdentificationMatch;
@@ -160,8 +182,8 @@ class _SeachPageState extends State<SeachPage> {
       ),
       clipBehavior: Clip.antiAlias,
       builder: (context) => PhotoSourceSheet(
-        onCamera: () => _identifyFromPhoto(ImageSource.camera),
-        onGallery: () => _identifyFromPhoto(ImageSource.gallery),
+        onCamera: () => _startGuidedIdentification(ImageSource.camera),
+        onGallery: () => _startGuidedIdentification(ImageSource.gallery),
       ),
     );
   }

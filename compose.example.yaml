@@ -2,7 +2,8 @@ name: plant-it-enhanced
 
 services:
   server:
-    image: ghcr.io/t0n003c/plant-it-enhanced:latest
+    image: "${PLANTIT_IMAGE:-ghcr.io/t0n003c/plant-it-enhanced:latest}"
+    pull_policy: always
     restart: unless-stopped
     env_file:
       - ./.env
@@ -20,13 +21,21 @@ services:
       cache:
         condition: service_healthy
     volumes:
-      - ./data/upload:/upload-dir
+      - "${PLANTIT_UPLOAD_PATH:-./data/upload}:/upload-dir"
     ports:
-      - "8080:8080"
-      - "3000:3000"
+      - "${PLANTIT_API_HOST_PORT:-8080}:8080"
+      - "${PLANTIT_WEB_HOST_PORT:-3000}:3000"
     networks:
       - backend
       - app
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - nc -z 127.0.0.1 8080 && nc -z 127.0.0.1 3000
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
 
   db:
     image: mysql:8.0
@@ -39,7 +48,7 @@ services:
       MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD is required}"
       MYSQL_ROOT_HOST: localhost
     volumes:
-      - ./data/mysql:/var/lib/mysql
+      - "${PLANTIT_DB_PATH:-./data/mysql}:/var/lib/mysql"
     networks:
       - backend
     healthcheck:

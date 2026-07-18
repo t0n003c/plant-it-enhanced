@@ -35,7 +35,8 @@ public class PlantCareEnrichmentService {
 
     public BotanicalInfo refresh(long botanicalInfoId) {
         final BotanicalInfo botanicalInfo = botanicalInfoService.get(botanicalInfoId);
-        final Optional<PlantCareInfo> refreshed = findCare(botanicalInfo.getSpecies());
+        final Optional<PlantCareInfo> refreshed = findCare(
+            botanicalInfo.getSpecies(), botanicalInfo.getPlantCareInfo());
         return refreshed.map(careInfo -> botanicalInfoService.updateCareInfo(botanicalInfoId, careInfo))
                         .orElse(botanicalInfo);
     }
@@ -44,23 +45,20 @@ public class PlantCareEnrichmentService {
     @Cacheable(cacheNames = "plant-care-preview", key = "#scientificName.toLowerCase()",
                unless = "#result.isAllNull()")
     public PlantCareInfo preview(String scientificName) {
-        return findCare(scientificName).orElseGet(PlantCareInfo::new);
+        return findCare(scientificName, new PlantCareInfo()).orElseGet(PlantCareInfo::new);
     }
 
 
-    private Optional<PlantCareInfo> findCare(String scientificName) {
+    private Optional<PlantCareInfo> findCare(String scientificName, PlantCareInfo existingCare) {
         final List<InfoExtractionException> failures = new ArrayList<>();
-        Optional<PlantCareInfo> refreshed = fetchFromTrefle(scientificName, failures);
-        if (refreshed.isEmpty()) {
-            refreshed = curatedCareProvider.fetch(scientificName);
-        }
-        if (refreshed.isEmpty()) {
-            refreshed = fetchFromPerenual(scientificName, failures);
-        }
-        if (refreshed.isEmpty() && !failures.isEmpty()) {
+        final PlantCareInfo merged = existingCare == null ? new PlantCareInfo() : existingCare.copy();
+        fetchFromTrefle(scientificName, failures).ifPresent(merged::fillMissingFieldsFrom);
+        curatedCareProvider.fetch(scientificName).ifPresent(merged::fillMissingFieldsFrom);
+        fetchFromPerenual(scientificName, failures).ifPresent(merged::fillMissingFieldsFrom);
+        if (merged.isAllNull() && !failures.isEmpty()) {
             throw new CareProviderUnavailableException();
         }
-        return refreshed;
+        return merged.isAllNull() ? Optional.empty() : Optional.of(merged);
     }
 
 

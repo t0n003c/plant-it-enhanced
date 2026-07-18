@@ -16,6 +16,7 @@ import com.github.mdeluise.plantit.image.BotanicalInfoImage;
 import com.github.mdeluise.plantit.image.ImageContentResponse;
 import com.github.mdeluise.plantit.image.ImageRepository;
 import com.github.mdeluise.plantit.image.ImageUtility;
+import com.github.mdeluise.plantit.image.ObservationImageRepository;
 import com.github.mdeluise.plantit.image.PlantImage;
 import com.github.mdeluise.plantit.image.PlantImageRepository;
 import com.github.mdeluise.plantit.image.storage.FileSystemImageStorageService;
@@ -46,6 +47,8 @@ class FileSystemImageStorageServiceUnitTests {
     @Mock
     private PlantImageRepository plantImageRepository;
     @Mock
+    private ObservationImageRepository observationImageRepository;
+    @Mock
     private PlantRepository plantRepository;
     @Mock
     private AuthenticatedUserService authenticatedUserService;
@@ -55,8 +58,9 @@ class FileSystemImageStorageServiceUnitTests {
     @BeforeEach
     public void setup() {
         fileSystemImageStorageService =
-            new FileSystemImageStorageService(tmpDir.toString(), imageRepository, plantImageRepository, plantRepository,
-                                              10000000, authenticatedUserService
+            new FileSystemImageStorageService(tmpDir.toString(), imageRepository, plantImageRepository,
+                                              observationImageRepository, plantRepository, 10000000,
+                                              authenticatedUserService
             );
     }
 

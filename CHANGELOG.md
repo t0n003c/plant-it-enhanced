@@ -1,5 +1,59 @@
 # Changelog
 
+## 0.15.1 - 2026-07-18 - Offline trail capture
+
+- Store photo-first trail drafts, notes, optional GPS accuracy/elevation, and hike sessions in
+  durable on-device storage before attempting any network request.
+- Add visible pending, syncing, failed, and retry states; interrupted uploads resume without
+  discarding original photos or creating duplicate hike, observation, taxon, or image records.
+- Group field finds into named hikes with start/end times and keep active-hike context across the
+  journal, home card, and central quick-add action.
+- Add owner-scoped hike APIs, observation/hike client references, photo retry references, and an
+  additive Liquibase migration.
+- Keep the offline action unavailable when the device cannot provide durable storage rather than
+  implying that an in-memory draft is safe.
+- Add a Dockge/UGREEN NAS Compose example using the maintained `latest` image, automatic pulls,
+  health-gated startup, internal-only MySQL/Redis, and an external network only for the server.
+- Refresh the environment reference, self-hosting documentation, and backup guidance; pending
+  device drafts are explicitly excluded from server archives until they synchronize.
+- Validate both Compose examples and build the maintained documentation on every pull request,
+  including stacked feature pull requests.
+- Add storage round-trip, interrupted-sync, partial-upload recovery, idempotency, ownership, and
+  mobile action coverage.
+
+## 0.15.0 - 2026-07-18 - Field journal foundation
+
+- Separate wild observations from owned plants so trail finds never receive care reminders.
+- Add authenticated, owner-scoped observation create, list, update, delete, and photo APIs backed
+  by an additive Liquibase migration.
+- Add a mobile-first Trail Journal entry point, guided multi-photo capture, chronological journal,
+  optional trail, habitat, and field notes, and explicit identification confirmation.
+- Allow observations to be retained when Pl@ntNet is unavailable or no candidate is trustworthy.
+- Make GPS capture opt-in and location privacy `PRIVATE` by default, with obscured and open export
+  preferences recorded for future portable-data work.
+- Add Android and iOS foreground-location permissions, while keeping every non-location workflow
+  functional when permission is denied or browser HTTPS is unavailable.
+
+## 0.14.0 - 2026-07-17 - Trustworthy onboarding
+
+- Add a reviewed offline everyday-name index with more than 300 search examples, relevance
+  filtering, match reasons, and confidence so short fragments do not outrank real common names.
+- Expand that index to 160 taxa and nearly 600 examples with 80 tagged North American trail
+  plants, visible trail badges, and high-contrast contact-hazard warnings that also follow exact
+  scientific-name photo matches.
+- Merge Trefle, the 80-profile bundled catalog, and Perenual care field by field while retaining
+  each value's source, reference, confidence, and verification time.
+- Add guided whole-plant, leaf, and flower capture, multi-image Pl@ntNet identification, and a
+  high-contrast top-three candidate flow that preserves the selected photo when adding a plant.
+- Capture optional placement, light, window, pot, drainage, soil, and recent-care details and use
+  them to suggest a conservative watering reminder.
+- Add an authenticated diagnostics screen for MySQL, Redis, provider configuration, recent HTTP
+  status, quota information, application version, and optional NAS public egress IP.
+- Add checksum-verified database-and-upload backup and restore scripts with PROCESS-free MySQL
+  dumps, retention controls, explicit destructive confirmation, and NAS scheduling guidance.
+- Add additive Liquibase migrations, provider/search/care tests, mobile target-size coverage, and
+  a documented release roadmap.
+
 ## 0.13.3 - 2026-07-17 - Reliable common-plant care
 
 - Add a bundled, source-attributed care catalog covering 25 common houseplant, herb, vegetable,

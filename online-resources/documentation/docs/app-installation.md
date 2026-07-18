@@ -1,58 +1,53 @@
-# App Installation
-<p style="display: flex; align-items: center; justify-content: center;">
-<a href="https://f-droid.org/packages/com.github.mdeluise.plantit" rel="nofollow"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Get_it_on_F-Droid_%28material_design%29.svg/2880px-Get_it_on_F-Droid_%28material_design%29.svg.png" alt="Get it on F-Droid" style="height: 40px; max-width: 180px"></a>
-<a href="https://github.com/MDeLuise/plant-it/releases/latest"><img src="https://raw.githubusercontent.com/Kunzisoft/Github-badge/main/get-it-on-github.png" alt="Get it on GitHub" height="60" style="max-width: 200px"></a>
-</p>
+# App installation
 
-To illustrate how to use the various components of this project, let's assume you have deployed the server Docker image on a machine with the IP address `192.168.1.5` and have kept the default port configurations. Specifically, the API is running on port `8080`, and the frontend is running on port `3000`.
+Assume the server is reachable at `192.168.1.5`, the web app uses port `3000`, and the API uses
+port `8080`. Replace those values with the host, ports, or HTTPS names from your deployment.
 
-The sections below will guide you on how to use the app via different platforms. By following the steps in each section, you will be able to effectively use the system on various platforms.
+## Web app
 
-## Web App
-To access the web application, follow these steps:
+1. Open `http://192.168.1.5:3000`.
+2. When asked for the server URL, enter `http://192.168.1.5:8080` without `/api`.
+3. Create an account or sign in.
 
-1. Open your web browser and navigate to `http://192.168.1.5:3000`.
-2. You will see a page like the following:
+The web app stores pending Trail Journal drafts in durable browser storage. Use a normal browser
+profile, allow site storage, and do not clear site data while drafts are pending. The Trail Journal
+shows pending or failed synchronization explicitly.
 
-   ![](assets/setup-1.jpeg){ align=left; loading=lazy; style="height:600px;"}
-   ![](assets/setup-2.jpeg){ align=left; loading=lazy; style="height:600px;"}
+## HTTPS and reverse proxies
 
-3. In the server URL field, enter `http://192.168.1.5:8080` and click on "Continue".
+Camera file selection works over HTTP on a local network, but browser geolocation generally
+requires HTTPS (or localhost). For full trail capture on a phone, expose both the web and API routes
+through HTTPS and enter the public API base URL during setup. Configure `ALLOWED_ORIGINS` if you do
+not use the default `*` value.
 
-You can now either log in if you already have an account or sign up to create a new one. Once logged in, you can start using the app.
+A reverse proxy must route the frontend to container port `3000` and the API hostname or path to
+container port `8080`. Do not proxy MySQL or Redis.
 
 ## Android
-For Android devices, you have two options to use the app:
 
-### Web App
-1. Open your preferred browser on your Android device.
-2. Navigate to `http://192.168.1.5:3000` and follow the same steps as described in the Web App section.
+The enhanced web app works in Chrome and can be added to the home screen. A native enhanced APK can
+also be downloaded from the
+[Plant-it Enhanced releases](https://github.com/t0n003c/plant-it-enhanced/releases/latest) when an
+APK is attached to the release.
 
-### APK
-Alternatively, you can use the native Android application by installing the APK file:
+The F-Droid package is the upstream Plant-it client. Its release cadence and feature set may differ
+from this maintained fork, especially for Trail Journal and offline capture.
 
-1. Download the APK file from the [GitHub releases assets](https://github.com/MDeLuise/plant-it/releases/latest) or [FDroid](https://f-droid.org/en/packages/com.github.mdeluise.plantit/).
-2. Install the APK on your device (ensure you have enabled installation from unknown sources in your settings).
-3. Open the app and follow the instructions to set up and start using it.
+## iPhone and iPad
 
-## iOS
-Currently, the native iOS application is not available. However, you can use the web app on your iOS device by following these steps:
+1. Open the HTTPS web-app address in Safari.
+2. Tap **Share**.
+3. Choose **Add to Home Screen**.
+4. Open the installed web app and enter the API base URL when prompted.
 
-1. Open Safari and navigate to `http://192.168.1.5:3000`.
-2. You will see a page like the following:
-   
-   ![](assets/ios-pwa-1.jpg){ align=left; loading=lazy; style="height:600px;"}
-   ![](assets/ios-pwa-2.jpg){ align=left; loading=lazy; style="height:600px;"}
+Keep the same Safari/PWA site data until pending field observations have synchronized. Native iOS
+packaging is not currently published by this fork.
 
-3. Tap the share button in the navigation bar.
-4. Scroll down and tap on "Add to Home Screen".
-5. The web app will now be installed on your device as a PWA (Progressive Web App).
-6. Open the newly installed app and follow the steps in the Web App section to start using it.
+## Verify the connection
 
-## REST API
-For direct interaction with the server via the REST API:
+After signing in, open **More → System diagnostics**. Confirm the application version, database,
+and cache are healthy. Provider entries may show **not configured** when their optional API keys are
+blank; common-name search and the bundled care catalog still work.
 
-1. Open your browser and navigate to the Swagger UI available at `http://192.168.1.5:8080/api/swagger-ui/index.html`.
-
-The Swagger UI provides a comprehensive interface to interact with the API endpoints.
-Here, you can perform all main operations supported by the API, including authentication, data retrieval, and data manipulation.
+The REST API and Swagger UI are available at
+`http://192.168.1.5:8080/api/swagger-ui/index.html` for administrators and integrations.

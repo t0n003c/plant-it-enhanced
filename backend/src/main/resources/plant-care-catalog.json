@@ -164,6 +164,336 @@
       "light": 8,
       "soilHumidity": 6,
       "sourceReference": "https://plants.ces.ncsu.edu/plants/fragaria-x-ananassa/"
+    },
+    {
+      "scientificNames": ["Ficus lyrata"],
+      "light": 6,
+      "soilHumidity": 5,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/ficus-lyrata/"
+    },
+    {
+      "scientificNames": ["Ficus elastica"],
+      "light": 6,
+      "soilHumidity": 5,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/ficus-elastica/"
+    },
+    {
+      "scientificNames": ["Pilea peperomioides"],
+      "light": 6,
+      "soilHumidity": 5,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/pilea-peperomioides/"
+    },
+    {
+      "scientificNames": ["Crassula ovata"],
+      "light": 8,
+      "soilHumidity": 3,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/crassula-ovata/"
+    },
+    {
+      "scientificNames": ["Pachira aquatica"],
+      "light": 6,
+      "soilHumidity": 6,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/pachira-aquatica/"
+    },
+    {
+      "scientificNames": ["Maranta leuconeura"],
+      "light": 4,
+      "soilHumidity": 7,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/maranta-leuconeura/"
+    },
+    {
+      "scientificNames": ["Beaucarnea recurvata", "Nolina recurvata"],
+      "light": 7,
+      "soilHumidity": 3,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/beaucarnea-recurvata/"
+    },
+    {
+      "scientificNames": ["Curio rowleyanus", "Senecio rowleyanus"],
+      "light": 8,
+      "soilHumidity": 2,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/curio-rowleyanus/"
+    },
+    {
+      "scientificNames": ["Schlumbergera truncata", "Zygocactus truncatus"],
+      "light": 6,
+      "soilHumidity": 5,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/schlumbergera-truncata/"
+    },
+    {
+      "scientificNames": ["Tradescantia zebrina", "Zebrina pendula"],
+      "light": 7,
+      "soilHumidity": 5,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/tradescantia-zebrina/"
+    },
+    {
+      "scientificNames": ["Hoya carnosa"],
+      "light": 6,
+      "soilHumidity": 4,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/hoya-carnosa/"
+    },
+    {
+      "scientificNames": ["Dracaena fragrans"],
+      "light": 5,
+      "soilHumidity": 5,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/dracaena-fragrans/"
+    },
+    {
+      "scientificNames": ["Dieffenbachia seguine", "Dieffenbachia maculata"],
+      "light": 5,
+      "soilHumidity": 6,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/dieffenbachia-seguine/"
+    },
+    {
+      "scientificNames": ["Aglaonema commutatum"],
+      "light": 4,
+      "soilHumidity": 5,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/aglaonema-commutatum/"
+    },
+    {
+      "scientificNames": ["Nephrolepis exaltata"],
+      "light": 4,
+      "soilHumidity": 8,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/nephrolepis-exaltata/"
+    },
+    {
+      "scientificNames": ["Adiantum raddianum"],
+      "light": 3,
+      "soilHumidity": 8,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/adiantum-raddianum/"
+    },
+    {
+      "scientificNames": ["Hedera helix"],
+      "light": 6,
+      "soilHumidity": 6,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/hedera-helix/"
+    },
+    {
+      "scientificNames": ["Peperomia obtusifolia"],
+      "light": 5,
+      "soilHumidity": 4,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/peperomia-obtusifolia/"
+    },
+    {
+      "scientificNames": ["Streptocarpus ionanthus", "Saintpaulia ionantha"],
+      "light": 5,
+      "soilHumidity": 6,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/saintpaulia-ionantha/"
+    },
+    {
+      "scientificNames": ["Anthurium andraeanum"],
+      "light": 6,
+      "soilHumidity": 6,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/anthurium-andraeanum/"
+    },
+    {
+      "scientificNames": ["Codiaeum variegatum"],
+      "light": 8,
+      "soilHumidity": 6,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/codiaeum-variegatum/"
+    },
+    {
+      "scientificNames": ["Heptapleurum arboricola", "Schefflera arboricola"],
+      "light": 6,
+      "soilHumidity": 5,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/schefflera-arboricola/"
+    },
+    {
+      "scientificNames": ["Dracaena reflexa var. angustifolia", "Dracaena marginata"],
+      "light": 6,
+      "soilHumidity": 4,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/dracaena-marginata/"
+    },
+    {
+      "scientificNames": ["Musa acuminata"],
+      "light": 8,
+      "soilHumidity": 8,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/musa-acuminata/"
+    },
+    {
+      "scientificNames": ["Citrus limon", "Citrus x limon"],
+      "light": 9,
+      "soilHumidity": 6,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/citrus-limon/"
+    },
+    {
+      "scientificNames": ["Coffea arabica"],
+      "light": 6,
+      "soilHumidity": 6,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/coffea-arabica/"
+    },
+    {
+      "scientificNames": ["Araucaria heterophylla"],
+      "light": 6,
+      "soilHumidity": 5,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/araucaria-heterophylla/"
+    },
+    {
+      "scientificNames": ["Echeveria elegans"],
+      "light": 8,
+      "soilHumidity": 2,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/echeveria-elegans/"
+    },
+    {
+      "scientificNames": ["Haworthiopsis attenuata", "Haworthia attenuata"],
+      "light": 6,
+      "soilHumidity": 2,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/haworthiopsis-attenuata/"
+    },
+    {
+      "scientificNames": ["Kalanchoe blossfeldiana"],
+      "light": 8,
+      "soilHumidity": 3,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/kalanchoe-blossfeldiana/"
+    },
+    {
+      "scientificNames": ["Sedum morganianum"],
+      "light": 8,
+      "soilHumidity": 2,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/sedum-morganianum/"
+    },
+    {
+      "scientificNames": ["Gymnocalycium mihanovichii"],
+      "light": 8,
+      "soilHumidity": 2,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/gymnocalycium-mihanovichii/"
+    },
+    {
+      "scientificNames": ["Opuntia microdasys"],
+      "light": 9,
+      "soilHumidity": 2,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/opuntia-microdasys/"
+    },
+    {
+      "scientificNames": ["Sempervivum tectorum"],
+      "light": 9,
+      "soilHumidity": 2,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/sempervivum-tectorum/"
+    },
+    {
+      "scientificNames": ["Petroselinum crispum"],
+      "light": 7,
+      "soilHumidity": 6,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/petroselinum-crispum/"
+    },
+    {
+      "scientificNames": ["Coriandrum sativum"],
+      "light": 7,
+      "soilHumidity": 6,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/coriandrum-sativum/"
+    },
+    {
+      "scientificNames": ["Allium schoenoprasum"],
+      "light": 8,
+      "soilHumidity": 5,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/allium-schoenoprasum/"
+    },
+    {
+      "scientificNames": ["Artemisia dracunculus"],
+      "light": 9,
+      "soilHumidity": 4,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/artemisia-dracunculus/"
+    },
+    {
+      "scientificNames": ["Salvia officinalis"],
+      "light": 9,
+      "soilHumidity": 3,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/salvia-officinalis/"
+    },
+    {
+      "scientificNames": ["Melissa officinalis"],
+      "light": 6,
+      "soilHumidity": 7,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/melissa-officinalis/"
+    },
+    {
+      "scientificNames": ["Anethum graveolens"],
+      "light": 8,
+      "soilHumidity": 5,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/anethum-graveolens/"
+    },
+    {
+      "scientificNames": ["Petunia x atkinsiana", "Petunia × hybrida"],
+      "light": 9,
+      "soilHumidity": 6,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/petunia/"
+    },
+    {
+      "scientificNames": ["Pelargonium x hortorum", "Pelargonium × hortorum"],
+      "light": 8,
+      "soilHumidity": 5,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/pelargonium-x-hortorum/"
+    },
+    {
+      "scientificNames": ["Viola x wittrockiana", "Viola × wittrockiana"],
+      "light": 7,
+      "soilHumidity": 6,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/viola-x-wittrockiana/"
+    },
+    {
+      "scientificNames": ["Impatiens walleriana"],
+      "light": 5,
+      "soilHumidity": 7,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/impatiens-walleriana/"
+    },
+    {
+      "scientificNames": ["Chrysanthemum x morifolium", "Chrysanthemum × morifolium"],
+      "light": 9,
+      "soilHumidity": 6,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/chrysanthemum-x-morifolium/"
+    },
+    {
+      "scientificNames": ["Hydrangea macrophylla"],
+      "light": 6,
+      "soilHumidity": 8,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/hydrangea-macrophylla/"
+    },
+    {
+      "scientificNames": ["Tulipa gesneriana"],
+      "light": 8,
+      "soilHumidity": 6,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/tulipa-gesneriana/"
+    },
+    {
+      "scientificNames": ["Narcissus pseudonarcissus"],
+      "light": 7,
+      "soilHumidity": 6,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/narcissus-pseudonarcissus/"
+    },
+    {
+      "scientificNames": ["Lilium candidum"],
+      "light": 7,
+      "soilHumidity": 6,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/lilium-candidum/"
+    },
+    {
+      "scientificNames": ["Dahlia pinnata"],
+      "light": 9,
+      "soilHumidity": 6,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/dahlia-pinnata/"
+    },
+    {
+      "scientificNames": ["Zinnia elegans"],
+      "light": 9,
+      "soilHumidity": 4,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/zinnia-elegans/"
+    },
+    {
+      "scientificNames": ["Cosmos bipinnatus"],
+      "light": 9,
+      "soilHumidity": 4,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/cosmos-bipinnatus/"
+    },
+    {
+      "scientificNames": ["Rudbeckia hirta"],
+      "light": 9,
+      "soilHumidity": 5,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/rudbeckia-hirta/"
+    },
+    {
+      "scientificNames": ["Echinacea purpurea"],
+      "light": 9,
+      "soilHumidity": 4,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/echinacea-purpurea/"
     }
   ]
 }

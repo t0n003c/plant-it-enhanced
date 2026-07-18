@@ -63,13 +63,15 @@ public class BotanicalInfoService {
         final List<BotanicalInfo> result = candidates.stream()
                                                .filter(botanicalInfo -> botanicalInfo.isAccessibleToUser(
                                                    authenticatedUserService.getAuthenticatedUser()))
-                                               .filter(botanicalInfo -> PlantSearchScorer.score(
-                                                   searchTerm, botanicalInfo) > 0)
+                                               .filter(botanicalInfo -> PlantSearchScorer.evaluate(
+                                                   searchTerm, botanicalInfo).isRelevant())
                                                .sorted((left, right) -> Integer.compare(
                                                    PlantSearchScorer.score(searchTerm, right),
                                                    PlantSearchScorer.score(searchTerm, left)
                                                ))
                                                .limit(size)
+                                               .peek(botanicalInfo -> PlantSearchScorer.applyMatchMetadata(
+                                                   searchTerm, botanicalInfo))
                                                .toList();
         return new LinkedHashSet<>(result);
     }
@@ -139,6 +141,28 @@ public class BotanicalInfoService {
             throw e;
         }
         return result;
+    }
+
+
+    @CacheEvict(cacheNames = "botanical-info", allEntries = true)
+    @Transactional
+    public BotanicalInfo resolveOrSave(BotanicalInfo candidate) throws MalformedURLException {
+        if (candidate.isUserCreated()) {
+            final User authenticated = authenticatedUserService.getAuthenticatedUser();
+            candidate.setUserCreator(authenticated);
+            final Optional<BotanicalInfo> existing = botanicalInfoRepository
+                .findBySpeciesAndCreatorAndUserCreator(candidate.getSpecies(), candidate.getCreator(), authenticated);
+            if (existing.isPresent()) {
+                return existing.get();
+            }
+        } else {
+            BotanicalInfoCatalogMerger.prepareCanonicalIdentity(candidate);
+            final Optional<BotanicalInfo> existing = findCatalogMatch(candidate);
+            if (existing.isPresent()) {
+                return existing.get();
+            }
+        }
+        return save(candidate);
     }
 
 

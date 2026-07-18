@@ -24,7 +24,7 @@ import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoCreator;
 import com.github.mdeluise.plantit.exception.InfoExtractionException;
 import com.github.mdeluise.plantit.plantinfo.config.PlantNetProperties;
 import com.github.mdeluise.plantit.plantinfo.config.PlantSearchProperties;
-import com.google.gson.JsonArray;
+import com.github.mdeluise.plantit.systeminfo.ProviderStatusRegistry;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -38,24 +38,39 @@ public class PlantIdentificationService {
     private static final int HTTP_SUCCESS_MAX = 300;
     private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(40);
     private static final int MAXIMUM_RESULTS = 5;
+    private static final int MAXIMUM_IMAGES = 5;
     private static final String JPEG_CONTENT_TYPE = "image/jpeg";
     private static final String PNG_CONTENT_TYPE = "image/png";
     private final HttpClient httpClient;
     private final PlantNetProperties properties;
     private final PlantSearchProperties searchProperties;
+    private final ProviderStatusRegistry providerStatusRegistry;
+
+
+    public PlantIdentificationService(HttpClient httpClient, PlantNetProperties properties,
+                                      PlantSearchProperties searchProperties) {
+        this(httpClient, properties, searchProperties, new ProviderStatusRegistry());
+    }
 
 
     @Autowired
     public PlantIdentificationService(HttpClient httpClient, PlantNetProperties properties,
-                                      PlantSearchProperties searchProperties) {
+                                      PlantSearchProperties searchProperties,
+                                      ProviderStatusRegistry providerStatusRegistry) {
         this.httpClient = httpClient;
         this.properties = properties;
         this.searchProperties = searchProperties;
+        this.providerStatusRegistry = providerStatusRegistry;
     }
 
 
     public List<PlantIdentificationCandidate> identify(MultipartFile image, String language) {
-        validate(image);
+        return identify(List.of(new PlantIdentificationPhoto(image, "auto")), language);
+    }
+
+
+    public List<PlantIdentificationCandidate> identify(List<PlantIdentificationPhoto> photos, String language) {
+        validate(photos);
         final String boundary = "PlantIt-" + UUID.randomUUID();
         final HttpRequest request;
         try {
@@ -65,7 +80,7 @@ public class PlantIdentificationService {
                                  .header("Content-Type", "multipart/form-data; boundary=" + boundary)
                                  .header("User-Agent", searchProperties.getUserAgent())
                                  .timeout(REQUEST_TIMEOUT)
-                                 .POST(HttpRequest.BodyPublishers.ofByteArray(buildBody(image, boundary)))
+                                 .POST(HttpRequest.BodyPublishers.ofByteArray(buildBody(photos, boundary)))
                                  .build();
         } catch (IOException exception) {
             throw new InfoExtractionException(exception);
@@ -74,30 +89,44 @@ public class PlantIdentificationService {
             final HttpResponse<String> response = httpClient.send(
                 request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             if (response.statusCode() < HTTP_SUCCESS_MIN || response.statusCode() >= HTTP_SUCCESS_MAX) {
+                providerStatusRegistry.recordFailure(
+                    "PLANTNET", response.statusCode(),
+                    "Pl@ntNet identification returned HTTP " + response.statusCode(), quotaRemaining(response));
                 throw new InfoExtractionException(
                     "Pl@ntNet identification returned HTTP " + response.statusCode());
             }
+            providerStatusRegistry.recordSuccess("PLANTNET", response.statusCode(), quotaRemaining(response));
             return parse(response.body(), normalizeLanguage(language));
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
             throw new InfoExtractionException(exception);
         } catch (IOException exception) {
+            providerStatusRegistry.recordFailure("PLANTNET", 0, exception.getMessage(), null);
             throw new InfoExtractionException(exception);
         }
     }
 
 
-    private void validate(MultipartFile image) {
+    private void validate(List<PlantIdentificationPhoto> photos) {
         if (!properties.isConfigured()) {
             throw new InfoExtractionException(
                 "Photo identification is not configured. Set PLANTNET_API_KEY on the server.");
         }
-        if (image == null || image.isEmpty()) {
-            throw new IllegalArgumentException("A plant photo is required");
+        if (photos == null || photos.isEmpty()) {
+            throw new IllegalArgumentException("At least one plant photo is required");
         }
-        if (!JPEG_CONTENT_TYPE.equalsIgnoreCase(image.getContentType()) &&
-                !PNG_CONTENT_TYPE.equalsIgnoreCase(image.getContentType())) {
-            throw new IllegalArgumentException("Plant photos must be JPEG or PNG images");
+        if (photos.size() > MAXIMUM_IMAGES) {
+            throw new IllegalArgumentException("At most five plant photos can be identified together");
+        }
+        for (PlantIdentificationPhoto photo : photos) {
+            final MultipartFile image = photo == null ? null : photo.image();
+            if (image == null || image.isEmpty()) {
+                throw new IllegalArgumentException("Plant photos cannot be empty");
+            }
+            if (!JPEG_CONTENT_TYPE.equalsIgnoreCase(image.getContentType()) &&
+                    !PNG_CONTENT_TYPE.equalsIgnoreCase(image.getContentType())) {
+                throw new IllegalArgumentException("Plant photos must be JPEG or PNG images");
+            }
         }
     }
 
@@ -115,8 +144,19 @@ public class PlantIdentificationService {
     }
 
 
-    private byte[] buildBody(MultipartFile image, String boundary) throws IOException {
+    private byte[] buildBody(List<PlantIdentificationPhoto> photos, String boundary) throws IOException {
         final ByteArrayOutputStream output = new ByteArrayOutputStream();
+        for (PlantIdentificationPhoto photo : photos) {
+            writeImagePart(output, photo.image(), boundary);
+            writeTextPart(output, "organs", photo.normalizedOrgan(), boundary);
+        }
+        output.write(("--" + boundary + "--\r\n").getBytes(StandardCharsets.UTF_8));
+        return output.toByteArray();
+    }
+
+
+    private void writeImagePart(ByteArrayOutputStream output, MultipartFile image,
+                                String boundary) throws IOException {
         final String filename = image.getOriginalFilename() == null ? "plant.jpg" : image.getOriginalFilename();
         output.write(("--" + boundary + "\r\n").getBytes(StandardCharsets.UTF_8));
         output.write(("Content-Disposition: form-data; name=\"images\"; filename=\"" +
@@ -124,16 +164,25 @@ public class PlantIdentificationService {
         output.write(("Content-Type: " + image.getContentType() + "\r\n\r\n")
                          .getBytes(StandardCharsets.UTF_8));
         output.write(image.getBytes());
-        output.write(("\r\n--" + boundary + "--\r\n").getBytes(StandardCharsets.UTF_8));
-        return output.toByteArray();
+        output.write("\r\n".getBytes(StandardCharsets.UTF_8));
+    }
+
+
+    private void writeTextPart(ByteArrayOutputStream output, String name, String value,
+                               String boundary) throws IOException {
+        output.write(("--" + boundary + "\r\n").getBytes(StandardCharsets.UTF_8));
+        output.write(("Content-Disposition: form-data; name=\"" + name + "\"\r\n\r\n")
+                         .getBytes(StandardCharsets.UTF_8));
+        output.write(value.getBytes(StandardCharsets.UTF_8));
+        output.write("\r\n".getBytes(StandardCharsets.UTF_8));
     }
 
 
     private List<PlantIdentificationCandidate> parse(String responseBody, String language) {
         final JsonObject root = JsonParser.parseString(responseBody).getAsJsonObject();
         final String modelVersion = readString(root, "version");
-        final JsonArray results = root.has("results") && root.get("results").isJsonArray()
-                                      ? root.getAsJsonArray("results") : new JsonArray();
+        final Iterable<JsonElement> results = root.has("results") && root.get("results").isJsonArray()
+                                                  ? root.getAsJsonArray("results") : List.of();
         final List<PlantIdentificationCandidate> candidates = new ArrayList<>();
         for (JsonElement resultElement : results) {
             final JsonObject result = resultElement.getAsJsonObject();
@@ -237,5 +286,10 @@ public class PlantIdentificationService {
 
     private String encode(String value) {
         return URLEncoder.encode(value, StandardCharsets.UTF_8);
+    }
+
+
+    private String quotaRemaining(HttpResponse<?> response) {
+        return response.headers().firstValue("x-ratelimit-remaining").orElse(null);
     }
 }

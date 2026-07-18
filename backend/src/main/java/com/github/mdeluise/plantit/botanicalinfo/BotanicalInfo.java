@@ -76,6 +76,12 @@ public class BotanicalInfo implements Serializable, ImageTarget {
     @JoinColumn(name = "user_creator_id")
     private User userCreator;
     private String externalId;
+    @Transient
+    private String searchMatchReason;
+    @Transient
+    private Double searchMatchConfidence;
+    @Transient
+    private Set<String> catalogTags = new LinkedHashSet<>();
 
 
     public Long getId() {
@@ -248,6 +254,36 @@ public class BotanicalInfo implements Serializable, ImageTarget {
 
     public void setExternalId(String externalId) {
         this.externalId = externalId;
+    }
+
+
+    public String getSearchMatchReason() {
+        return searchMatchReason;
+    }
+
+
+    public void setSearchMatchReason(String searchMatchReason) {
+        this.searchMatchReason = searchMatchReason;
+    }
+
+
+    public Double getSearchMatchConfidence() {
+        return searchMatchConfidence;
+    }
+
+
+    public void setSearchMatchConfidence(Double searchMatchConfidence) {
+        this.searchMatchConfidence = searchMatchConfidence;
+    }
+
+
+    public Set<String> getCatalogTags() {
+        return catalogTags;
+    }
+
+
+    public void setCatalogTags(Set<String> catalogTags) {
+        this.catalogTags = catalogTags == null ? new LinkedHashSet<>() : catalogTags;
     }
 
 

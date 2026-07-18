@@ -31,6 +31,7 @@ class AddPlantPage extends StatefulWidget {
 class _AddPlantPageState extends State<AddPlantPage> {
   late final PlantDTO _toCreate;
   late Future<String> _initialPlantName;
+  bool _createSuggestedWateringReminder = true;
 
   Future<String> _getAndSetInitialPlantName() async {
     final String scientificName = widget.species.scientificName;
@@ -90,6 +91,9 @@ class _AddPlantPageState extends State<AddPlantPage> {
           );
         }
       }
+      if (_createSuggestedWateringReminder && createdPlant.id != null) {
+        await _createSuggestedReminder(createdPlant.id!);
+      }
       widget.env.logger.info("Plant successfully created");
       if (!mounted) return;
       widget.env.toastManager.showToast(context, ToastNotificationType.success,
@@ -98,6 +102,25 @@ class _AddPlantPageState extends State<AddPlantPage> {
     } catch (e, st) {
       widget.env.logger.error(e, st);
       throw AppException.withInnerException(e as Exception);
+    }
+  }
+
+  Future<void> _createSuggestedReminder(int plantId) async {
+    try {
+      final response = await widget.env.http.post(
+        'plant/$plantId/care-suggestion/reminder',
+        {},
+      );
+      if (response.statusCode != 200) {
+        widget.env.logger.warning(
+          'Plant was created, but its suggested watering reminder was not',
+        );
+      }
+    } catch (error, stackTrace) {
+      widget.env.logger.warning(
+        'Plant was created, but its suggested watering reminder failed: $error',
+      );
+      widget.env.logger.debug(stackTrace);
     }
   }
 
@@ -148,6 +171,10 @@ class _AddPlantPageState extends State<AddPlantPage> {
   void initState() {
     super.initState();
     _toCreate = PlantDTO(info: PlantInfoDTO());
+    _toCreate.info.growingEnvironment = 'INDOOR';
+    _toCreate.info.lightExposure = 'MEDIUM';
+    _toCreate.info.potMaterial = 'PLASTIC';
+    _toCreate.info.hasDrainage = true;
     _initialPlantName = _getAndSetInitialPlantName();
   }
 
@@ -186,7 +213,14 @@ class _AddPlantPageState extends State<AddPlantPage> {
                           localImage: widget.identificationImage,
                         ),
                       ),
-                      AddPlantBody(toCreate: _toCreate),
+                      AddPlantBody(
+                        toCreate: _toCreate,
+                        care: widget.species.care,
+                        createSuggestedReminder:
+                            _createSuggestedWateringReminder,
+                        onCreateSuggestedReminderChanged: (value) =>
+                            _createSuggestedWateringReminder = value,
+                      ),
                     ],
                   ),
                 ),

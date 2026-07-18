@@ -46,6 +46,18 @@ class PlantSearchScorerUnitTests {
     }
 
 
+    @Test
+    @DisplayName("Should expose a human-readable match reason and confidence")
+    void shouldExplainSearchMatch() {
+        final BotanicalInfo plant = createPlant("Epipremnum aureum", "Golden Pothos");
+
+        PlantSearchScorer.applyMatchMetadata("golden pothos", plant);
+
+        Assertions.assertEquals("EXACT_COMMON_NAME", plant.getSearchMatchReason());
+        Assertions.assertEquals(1.0, plant.getSearchMatchConfidence());
+    }
+
+
     private BotanicalInfo createPlant(String scientificName, String commonName) {
         final BotanicalInfo plant = new BotanicalInfo();
         plant.setSpecies(scientificName);

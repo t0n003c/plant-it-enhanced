@@ -2,6 +2,9 @@
 .github
 .idea
 .vscode
+.env
+backups
+data
 backend/target
 frontend/.dart_tool
 frontend/.flutter-plugins

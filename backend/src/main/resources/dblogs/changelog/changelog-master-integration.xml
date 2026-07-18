@@ -8,4 +8,7 @@
     <include file="/dblogs/changelog/changes/v1-1-0-common-name-search.xml"/>
     <include file="/dblogs/changelog/changes/v1-2-0-catalog-identity.xml"/>
     <include file="/dblogs/changelog/changes/v1-3-0-care-tasks.xml"/>
+    <include file="/dblogs/changelog/changes/v1-4-0-trustworthy-onboarding.xml"/>
+    <include file="/dblogs/changelog/changes/v1-5-0-field-observations.xml"/>
+    <include file="/dblogs/changelog/changes/v1-5-1-offline-hike-sessions.xml"/>
 </databaseChangeLog>

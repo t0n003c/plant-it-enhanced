@@ -39,6 +39,8 @@ class PlantCareEnrichmentServiceUnitTests {
         botanicalInfo.setId(42L);
         botanicalInfo.setSpecies("Monstera deliciosa");
         Mockito.when(botanicalInfoService.get(42L)).thenReturn(botanicalInfo);
+        Mockito.when(botanicalInfoService.updateCareInfo(Mockito.eq(42L), Mockito.any()))
+               .thenReturn(botanicalInfo);
     }
 
 
@@ -49,13 +51,12 @@ class PlantCareEnrichmentServiceUnitTests {
         Mockito.when(trefleCareProvider.isConfigured()).thenReturn(true);
         Mockito.when(trefleCareProvider.fetch("Monstera deliciosa")).thenReturn(Optional.empty());
         Mockito.when(curatedCareProvider.fetch("Monstera deliciosa")).thenReturn(Optional.of(curatedCare));
-        Mockito.when(botanicalInfoService.updateCareInfo(42L, curatedCare)).thenReturn(botanicalInfo);
-
         final BotanicalInfo result = service.refresh(42L);
 
         Assertions.assertSame(botanicalInfo, result);
-        Mockito.verify(botanicalInfoService).updateCareInfo(42L, curatedCare);
-        Mockito.verifyNoInteractions(perenualCareProvider);
+        Mockito.verify(botanicalInfoService).updateCareInfo(Mockito.eq(42L), Mockito.any());
+        Mockito.verify(perenualCareProvider).isConfigured();
+        Mockito.verify(perenualCareProvider, Mockito.never()).fetch(Mockito.anyString());
     }
 
 
@@ -69,7 +70,8 @@ class PlantCareEnrichmentServiceUnitTests {
 
         final PlantCareInfo result = service.preview("Monstera deliciosa");
 
-        Assertions.assertSame(curatedCare, result);
+        Assertions.assertEquals(curatedCare.getLight(), result.getLight());
+        Assertions.assertEquals(curatedCare.getSoilHumidity(), result.getSoilHumidity());
         Mockito.verify(botanicalInfoService, Mockito.never())
                .updateCareInfo(Mockito.anyLong(), Mockito.any());
     }
@@ -84,11 +86,9 @@ class PlantCareEnrichmentServiceUnitTests {
         Mockito.when(trefleCareProvider.fetch("Monstera deliciosa")).thenReturn(Optional.empty());
         Mockito.when(curatedCareProvider.fetch("Monstera deliciosa")).thenReturn(Optional.empty());
         Mockito.when(perenualCareProvider.fetch("Monstera deliciosa")).thenReturn(Optional.of(perenualCare));
-        Mockito.when(botanicalInfoService.updateCareInfo(42L, perenualCare)).thenReturn(botanicalInfo);
-
         service.refresh(42L);
 
-        Mockito.verify(botanicalInfoService).updateCareInfo(42L, perenualCare);
+        Mockito.verify(botanicalInfoService).updateCareInfo(Mockito.eq(42L), Mockito.any());
     }
 
 
@@ -98,12 +98,12 @@ class PlantCareEnrichmentServiceUnitTests {
         final PlantCareInfo trefleCare = careFrom("TREFLE");
         Mockito.when(trefleCareProvider.isConfigured()).thenReturn(true);
         Mockito.when(trefleCareProvider.fetch("Monstera deliciosa")).thenReturn(Optional.of(trefleCare));
-        Mockito.when(botanicalInfoService.updateCareInfo(42L, trefleCare)).thenReturn(botanicalInfo);
+        Mockito.when(curatedCareProvider.fetch("Monstera deliciosa")).thenReturn(Optional.empty());
 
         service.refresh(42L);
 
-        Mockito.verify(botanicalInfoService).updateCareInfo(42L, trefleCare);
-        Mockito.verifyNoInteractions(curatedCareProvider, perenualCareProvider);
+        Mockito.verify(botanicalInfoService).updateCareInfo(Mockito.eq(42L), Mockito.any());
+        Mockito.verify(curatedCareProvider).fetch("Monstera deliciosa");
     }
 
 
@@ -115,11 +115,9 @@ class PlantCareEnrichmentServiceUnitTests {
         Mockito.when(trefleCareProvider.fetch("Monstera deliciosa"))
                .thenThrow(new InfoExtractionException("Trefle returned HTTP 503"));
         Mockito.when(curatedCareProvider.fetch("Monstera deliciosa")).thenReturn(Optional.of(curatedCare));
-        Mockito.when(botanicalInfoService.updateCareInfo(42L, curatedCare)).thenReturn(botanicalInfo);
-
         service.refresh(42L);
 
-        Mockito.verify(botanicalInfoService).updateCareInfo(42L, curatedCare);
+        Mockito.verify(botanicalInfoService).updateCareInfo(Mockito.eq(42L), Mockito.any());
     }
 
 
@@ -130,11 +128,9 @@ class PlantCareEnrichmentServiceUnitTests {
         Mockito.when(trefleCareProvider.isConfigured()).thenReturn(false);
         Mockito.when(perenualCareProvider.isConfigured()).thenReturn(false);
         Mockito.when(curatedCareProvider.fetch("Monstera deliciosa")).thenReturn(Optional.of(curatedCare));
-        Mockito.when(botanicalInfoService.updateCareInfo(42L, curatedCare)).thenReturn(botanicalInfo);
-
         service.refresh(42L);
 
-        Mockito.verify(botanicalInfoService).updateCareInfo(42L, curatedCare);
+        Mockito.verify(botanicalInfoService).updateCareInfo(Mockito.eq(42L), Mockito.any());
     }
 
 
@@ -161,6 +157,32 @@ class PlantCareEnrichmentServiceUnitTests {
         Mockito.when(perenualCareProvider.fetch("Monstera deliciosa")).thenReturn(Optional.empty());
 
         Assertions.assertTrue(service.preview("Monstera deliciosa").isAllNull());
+    }
+
+
+    @Test
+    @DisplayName("Should merge complementary provider fields without overwriting higher-priority data")
+    void shouldMergeCareFieldByField() {
+        final PlantCareInfo trefleCare = careFrom("TREFLE");
+        trefleCare.setSoilHumidity(null);
+        final PlantCareInfo curatedCare = careFrom("CURATED_CATALOG");
+        curatedCare.setLight(9);
+        curatedCare.setHumidity(7);
+        final PlantCareInfo perenualCare = careFrom("PERENUAL");
+        perenualCare.setLight(2);
+        perenualCare.setHumidity(3);
+        Mockito.when(trefleCareProvider.isConfigured()).thenReturn(true);
+        Mockito.when(perenualCareProvider.isConfigured()).thenReturn(true);
+        Mockito.when(trefleCareProvider.fetch("Monstera deliciosa")).thenReturn(Optional.of(trefleCare));
+        Mockito.when(curatedCareProvider.fetch("Monstera deliciosa")).thenReturn(Optional.of(curatedCare));
+        Mockito.when(perenualCareProvider.fetch("Monstera deliciosa")).thenReturn(Optional.of(perenualCare));
+
+        final PlantCareInfo result = service.preview("Monstera deliciosa");
+
+        Assertions.assertEquals(6, result.getLight());
+        Assertions.assertEquals(7, result.getHumidity());
+        Assertions.assertEquals(6, result.getSoilHumidity());
+        Assertions.assertEquals("MULTIPLE", result.getSource());
     }
 
 

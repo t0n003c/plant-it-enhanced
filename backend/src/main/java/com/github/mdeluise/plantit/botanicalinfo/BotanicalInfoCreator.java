@@ -9,4 +9,5 @@ public enum BotanicalInfoCreator {
     PLANTNET,
     PERENUAL,
     CURATED_CATALOG,
+    TRUSTED_NAME_INDEX,
 }

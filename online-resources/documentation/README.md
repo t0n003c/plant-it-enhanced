@@ -1,34 +1,30 @@
-# Editing Project Documentation
+# Plant-it Enhanced documentation
 
-## Prerequisites
+This directory contains the maintained documentation for
+[`t0n003c/plant-it-enhanced`](https://github.com/t0n003c/plant-it-enhanced). Product and deployment
+changes should update these pages in the same pull request as the code.
 
-Before editing the project documentation, ensure that you have Python 3 installed on your system.
+## Preview locally
 
-## Previewing the Docs
+Python 3 is required. From this directory:
 
-1. Install project dependencies:
-   ```
-   pip install -r requirements.txt
-   ```
+```bash
+python3 -m venv .venv
+. .venv/bin/activate
+pip install -r requirements.txt
+mike serve
+```
 
-2. Navigate to the `docs/` directory.
+Open the local URL printed by Mike. Check both desktop and narrow mobile layouts, internal links,
+code blocks, and the light and dark themes before publishing.
 
-3. Edit the documentation files as needed.
+## Publish
 
-4. Preview the changes locally by running:
-   ```
-   mike serve
-   ```
+Publishing is for repository maintainers:
 
-   This command will start a local server to preview the documentation. Open your web browser and navigate to the specified URL to view the documentation.
+```bash
+mike deploy -b static-doc --alias-type redirect <version> latest
+```
 
-## Publishing Changes (only project collaborator)
-
-1. After editing and previewing your changes, you can publish them.
-
-2. Run the following command to deploy the changes:
-   ```
-   mike deploy -b static-doc --alias-type redirect <new_version> latest
-   ```
-
-   Replace `<new_version>` with the version number of your updated documentation.
+Replace `<version>` with the application documentation version, such as `0.15.1`. Do not publish
+documentation for a release until its container image is available from GHCR.

@@ -18,6 +18,7 @@ import com.github.mdeluise.plantit.botanicalinfo.care.PlantCareInfo;
 import com.github.mdeluise.plantit.exception.InfoExtractionException;
 import com.github.mdeluise.plantit.plantinfo.config.PerenualCareProperties;
 import com.github.mdeluise.plantit.plantinfo.config.PlantSearchProperties;
+import com.github.mdeluise.plantit.systeminfo.ProviderStatusRegistry;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class PerenualCareProvider {
+    private static final double MAPPED_CATEGORY_CONFIDENCE = 0.72;
     private static final int HTTP_SUCCESS_MIN = 200;
     private static final int HTTP_SUCCESS_MAX = 300;
     private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(10);
@@ -40,14 +42,23 @@ public class PerenualCareProvider {
     private final HttpClient httpClient;
     private final PerenualCareProperties properties;
     private final PlantSearchProperties searchProperties;
+    private final ProviderStatusRegistry providerStatusRegistry;
+
+
+    public PerenualCareProvider(HttpClient httpClient, PerenualCareProperties properties,
+                                PlantSearchProperties searchProperties) {
+        this(httpClient, properties, searchProperties, new ProviderStatusRegistry());
+    }
 
 
     @Autowired
     public PerenualCareProvider(HttpClient httpClient, PerenualCareProperties properties,
-                                PlantSearchProperties searchProperties) {
+                                PlantSearchProperties searchProperties,
+                                ProviderStatusRegistry providerStatusRegistry) {
         this.httpClient = httpClient;
         this.properties = properties;
         this.searchProperties = searchProperties;
+        this.providerStatusRegistry = providerStatusRegistry;
     }
 
 
@@ -112,9 +123,12 @@ public class PerenualCareProvider {
         final PlantCareInfo result = new PlantCareInfo();
         result.setLight(mapSunlight(details));
         result.setSoilHumidity(mapWatering(readString(details, "watering")));
+        final Instant verifiedAt = Instant.now();
+        final String reference = String.valueOf(id);
         result.setSource("PERENUAL");
-        result.setSourceReference(String.valueOf(id));
-        result.setLastVerifiedAt(Instant.now());
+        result.setSourceReference(reference);
+        result.setLastVerifiedAt(verifiedAt);
+        result.attributePopulatedFields("PERENUAL", reference, MAPPED_CATEGORY_CONFIDENCE, verifiedAt);
         return result.isAllNull() ? Optional.empty() : Optional.of(result);
     }
 
@@ -191,14 +205,19 @@ public class PerenualCareProvider {
             final HttpResponse<String> response = httpClient.send(
                 request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             if (response.statusCode() < HTTP_SUCCESS_MIN || response.statusCode() >= HTTP_SUCCESS_MAX) {
+                providerStatusRegistry.recordFailure(
+                    "PERENUAL", response.statusCode(),
+                    "Perenual care lookup returned HTTP " + response.statusCode(), quotaRemaining(response));
                 throw new InfoExtractionException(
                     "Perenual care lookup returned HTTP " + response.statusCode());
             }
+            providerStatusRegistry.recordSuccess("PERENUAL", response.statusCode(), quotaRemaining(response));
             return JsonParser.parseString(response.body()).getAsJsonObject();
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
             throw new InfoExtractionException(exception);
         } catch (IOException exception) {
+            providerStatusRegistry.recordFailure("PERENUAL", 0, exception.getMessage(), null);
             throw new InfoExtractionException(exception);
         }
     }
@@ -216,5 +235,10 @@ public class PerenualCareProvider {
 
     private String encode(String value) {
         return URLEncoder.encode(value, StandardCharsets.UTF_8);
+    }
+
+
+    private String quotaRemaining(HttpResponse<?> response) {
+        return response.headers().firstValue("x-ratelimit-remaining").orElse(null);
     }
 }

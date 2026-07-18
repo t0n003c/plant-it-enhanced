@@ -16,7 +16,9 @@ public class PlantCareInfoDTOConverter extends AbstractDTOConverter<PlantCareInf
         if (dto == null) {
             return new PlantCareInfo();
         }
-        return modelMapper.map(dto, PlantCareInfo.class);
+        final PlantCareInfo result = modelMapper.map(dto, PlantCareInfo.class);
+        result.setFieldProvenance(dto.getFieldProvenance());
+        return result;
     }
 
 
@@ -26,6 +28,7 @@ public class PlantCareInfoDTOConverter extends AbstractDTOConverter<PlantCareInf
         result.setLightRequirement(CareRequirementLevel.fromScale(data.getLight()));
         result.setWaterRequirement(CareRequirementLevel.fromScale(data.getSoilHumidity()));
         result.setAllNull(data.isAllNull());
+        result.setFieldProvenance(data.getFieldProvenance());
         return result;
     }
 }

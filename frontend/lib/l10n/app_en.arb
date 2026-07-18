@@ -147,6 +147,14 @@
   "careGuidanceDisclaimer": "General guidance only. Check the soil and your plant before watering.",
   "refreshCareGuide": "Refresh care guide",
   "careGuideUpdated": "Care guide updated",
+  "careDataProvidedByMultiple": "Multiple sources",
+  "careSourceWithConfidence": "{source} · {confidence}% confidence",
+  "@careSourceWithConfidence": {
+    "placeholders": {
+      "source": {"type": "String"},
+      "confidence": {"type": "int"}
+    }
+  },
   "careGuideNotFound": "No structured care guide was found. You can still enter care values manually.",
   "careProviderNotConfigured": "Care lookup is not configured on the server.",
   "careProviderUnavailable": "The configured care provider could not be reached. Try again later.",
@@ -276,10 +284,40 @@
   "numberOfPhotos": "Number of photos",
   "numberOfEvents": "Number of events",
   "searchInYourPlants": "Search in your plants",
-  "searchNewGreenFriends": "Search new green friends",
+  "searchNewGreenFriends": "Search houseplants, garden plants, and trail finds",
+  "trailPlant": "North American trail plant",
+  "avoidPlantContact": "Avoid contact · verify independently",
   "identifyByPhoto": "Identify by photo",
+  "searchMatchExactCommonName": "Exact common name",
+  "searchMatchCommonNamePrefix": "Common-name phrase",
+  "searchMatchCommonNameKeywords": "Common-name keywords",
+  "searchMatchCommonNameTypo": "Likely spelling match",
+  "searchMatchScientificName": "Scientific name",
+  "searchMatchScientificSynonym": "Scientific synonym",
+  "searchMatchRelatedName": "Related name",
+  "searchMatchLabel": "{reason} · {confidence}%",
+  "@searchMatchLabel": {
+    "placeholders": {
+      "reason": {"type": "String"},
+      "confidence": {"type": "int"}
+    }
+  },
   "takePlantPhoto": "Take a plant photo",
   "choosePlantPhoto": "Choose from gallery",
+  "guidedPhotoTitle": "Add a few plant views",
+  "guidedPhotoIntro": "A clear whole-plant photo plus a close leaf or flower view usually gives a more useful identification.",
+  "wholePlantView": "Whole plant",
+  "wholePlantPhotoHint": "Show the full shape of one plant in clear light.",
+  "leafView": "Leaf close-up",
+  "leafPhotoHint": "Optional: show one healthy leaf and its edge.",
+  "flowerView": "Flower or fruit",
+  "flowerPhotoHint": "Optional: add a flower or fruit when present.",
+  "identifyWithPhotos": "Identify with {count} photo(s)",
+  "@identifyWithPhotos": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "photoIdentificationPrivacy": "The selected photo is sent to Pl@ntNet for identification.",
   "identificationCandidates": "Identification suggestions by Pl@ntNet. Compare the alternatives before adding your plant.",
   "noIdentificationMatch": "No confident plant match was found. Try a clear photo of one plant, leaf, or flower.",
@@ -295,6 +333,39 @@
   "purchasedPrice": "Purchased price",
   "seller": "Seller",
   "location": "Location",
+  "personalizedCareProfile": "Personalized care profile",
+  "personalizedCareProfileHint": "These optional details make the first care schedule more realistic.",
+  "growingEnvironment": "Growing environment",
+  "indoors": "Indoors",
+  "outdoors": "Outdoors",
+  "greenhouse": "Greenhouse",
+  "observedLight": "Observed light",
+  "nearestWindow": "Nearest window direction",
+  "none": "None",
+  "north": "North",
+  "east": "East",
+  "south": "South",
+  "west": "West",
+  "potDiameterCm": "Pot diameter (cm)",
+  "potMaterial": "Pot material",
+  "plastic": "Plastic",
+  "terracotta": "Terracotta",
+  "glazedCeramic": "Glazed ceramic",
+  "selfWatering": "Self-watering pot",
+  "hasDrainageHole": "Container has a drainage hole",
+  "soilOrGrowingMedium": "Soil or growing medium",
+  "lastWatered": "Last watered",
+  "noWateringDate": "Not recorded",
+  "lastRepotted": "Last repotted",
+  "noRepottingDate": "Not recorded",
+  "createSuggestedWateringReminder": "Create this watering reminder",
+  "suggestedWateringSummary": "Start by checking the soil about every {days} days",
+  "@suggestedWateringSummary": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+  "careScheduleDisclaimer": "This is a starting point, not a command to water. Check the soil and plant first, then adjust the reminder from your care history.",
   "currency": "Currency",
   "plantUpdatedSuccessfully": "Plant updated successfully",
   "plantCreatedSuccessfully": "Plant created successfully",
@@ -326,6 +397,18 @@
   "noChangesDetected": "No changes detected",
   "plantDeletedSuccessfully": "Plant successfully deleted",
   "server": "Server",
+  "systemDiagnostics": "System diagnostics",
+  "refresh": "Refresh",
+  "tryAgain": "Try again",
+  "database": "Database",
+  "cache": "Cache",
+  "plantDataProviders": "Plant data providers",
+  "configured": "Configured",
+  "notConfigured": "Not configured",
+  "lastSuccess": "Last success",
+  "quotaRemaining": "Quota remaining",
+  "publicOutboundIp": "Public outbound IP",
+  "diagnosticsIpHint": "Set PUBLIC_OUTBOUND_IP in the server environment to display the address used for provider allowlists.",
   "notifications": "Notifications",
   "changeServer": "Change server",
   "serverUpdated": "Server successfully updated",
@@ -470,6 +553,133 @@
       "count": {
         "type": "num",
         "example": "1"
+      }
+    }
+  },
+  "trailJournal": "Trail journal",
+  "trailJournalSubtitle": "Keep wild observations separate from plants you care for at home.",
+  "recordTrailFind": "Record a trail find",
+  "noTrailObservations": "No trail observations yet. Take a photo on your next hike.",
+  "trailJournalLoadError": "Could not load your trail journal.",
+  "unidentifiedTrailFind": "Unidentified trail find",
+  "confirmedIdentification": "Confirmed identification",
+  "needsIdentification": "Needs identification",
+  "exactLocationPrivate": "Exact location saved privately",
+  "startWithPhoto": "Start with a plant photo",
+  "observationPhotoIntro": "Photograph the whole plant, then add a leaf or flower view when available.",
+  "fieldNotes": "Field notes",
+  "trailOrPark": "Trail or park",
+  "habitat": "Habitat, such as woodland edge or wet meadow",
+  "recordLocation": "Save my current location",
+  "recordingLocation": "Getting your location…",
+  "locationCaptured": "Location captured to about {meters} m accuracy",
+  "@locationCaptured": {
+    "placeholders": {
+      "meters": {
+        "type": "int",
+        "example": "12"
+      }
+    }
+  },
+  "removeLocation": "Remove saved location",
+  "locationPermissionDenied": "Location permission was not granted. You can still save this observation.",
+  "locationUnavailable": "Your location could not be read. You can still save this observation.",
+  "locationPrivacy": "Location privacy",
+  "privateLocation": "Private — exact coordinates stay in your account",
+  "obscuredLocation": "Obscured — use an approximate area when exporting",
+  "openLocation": "Open — allow exact coordinates in future exports",
+  "leaveWhatYouFind": "Leave what you find",
+  "leaveWhatYouFindHint": "Photograph wild plants without picking or tasting them. An app identification is never proof that a plant is safe to touch or eat.",
+  "chooseIdentification": "Confirm an identification",
+  "identificationOptional": "Choose a candidate only when it matches what you saw. You can save it as unidentified instead.",
+  "saveTrailObservation": "Save trail observation",
+  "saveOfflineDraft": "Save offline",
+  "saveAndSync": "Save and sync",
+  "observationSaved": "Trail observation saved",
+  "observationSavedOffline": "Trail find saved safely on this device",
+  "observationQueuedForSync": "Trail find saved offline and queued to sync",
+  "offlineStorageUnavailable": "Durable offline storage is unavailable on this device. Keep this screen open and try again when the server is reachable.",
+  "observationSaveError": "Could not save this observation.",
+  "observationPhotoUploadWarning": "The observation was saved, but one or more photos could not be uploaded.",
+  "identificationFailedSaveAnyway": "Identification is unavailable right now. You can still save the photos as an unidentified observation.",
+  "photosRequired": "Add at least one photo before saving.",
+  "deleteObservation": "Delete observation",
+  "deleteObservationConfirm": "Delete this observation and all of its photos?",
+  "changeObservationPhotos": "Retake or change photos",
+  "viewTrailJournal": "View trail journal",
+  "activeHike": "Active hike",
+  "addingToHike": "Adding this find to {name}",
+  "@addingToHike": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "River Bluff Loop"
+      }
+    }
+  },
+  "hikeSessions": "Hike sessions",
+  "hikeSessionIntro": "Group nearby finds into one field outing, even when you lose signal.",
+  "startHike": "Start a hike",
+  "hikeName": "Hike name",
+  "hikeNameHint": "River Bluff Loop",
+  "hikeNotesOptional": "Notes (optional)",
+  "hikeStarted": "Started at {time}",
+  "@hikeStarted": {
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "8:42 AM"
+      }
+    }
+  },
+  "finishHike": "Finish hike",
+  "finishHikeConfirm": "Finish this hike now? All saved finds will stay in your journal.",
+  "recentHikeCount": "{count, plural, =1{1 synchronized hike} other{{count} synchronized hikes}}",
+  "@recentHikeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "hikeSyncPending": "{count, plural, =1{1 hike is waiting to sync} other{{count} hikes are waiting to sync}}",
+  "@hikeSyncPending": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "1"
+      }
+    }
+  },
+  "syncNow": "Sync now",
+  "retrySync": "Retry sync",
+  "waitingToSync": "Waiting to sync",
+  "syncing": "Syncing…",
+  "syncFailed": "Sync failed",
+  "synced": "Synced",
+  "trailJournalOffline": "You are offline. New finds remain safely on this device and will sync when the server is reachable.",
+  "offlineDraftCount": "{count, plural, =1{1 offline find} other{{count} offline finds}}",
+  "@offlineDraftCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "savedTrailFinds": "Saved trail finds",
+  "discardOfflineDraft": "Discard offline find?",
+  "discardOfflineDraftConfirm": "This removes the locally saved photos and notes. If part of the find already synchronized, the server copy will also be deleted.",
+  "discard": "Discard",
+  "discardNeedsConnection": "This find has partially synchronized. Connect to the server before discarding it.",
+  "edit": "Edit",
+  "trailObservationCount": "{count, plural, =0{No observations} =1{1 observation} other{{count} observations}}",
+  "@trailObservationCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "12"
       }
     }
   }

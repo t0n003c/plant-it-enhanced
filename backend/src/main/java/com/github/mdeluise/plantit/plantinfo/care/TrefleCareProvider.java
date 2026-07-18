@@ -15,6 +15,7 @@ import com.github.mdeluise.plantit.botanicalinfo.care.PlantCareInfo;
 import com.github.mdeluise.plantit.exception.InfoExtractionException;
 import com.github.mdeluise.plantit.plantinfo.config.PlantSearchProperties;
 import com.github.mdeluise.plantit.plantinfo.config.TrefleCareProperties;
+import com.github.mdeluise.plantit.systeminfo.ProviderStatusRegistry;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -24,20 +25,30 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class TrefleCareProvider {
+    private static final double STRUCTURED_DATA_CONFIDENCE = 0.90;
     private static final int HTTP_SUCCESS_MIN = 200;
     private static final int HTTP_SUCCESS_MAX = 300;
     private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(10);
     private final HttpClient httpClient;
     private final TrefleCareProperties properties;
     private final PlantSearchProperties searchProperties;
+    private final ProviderStatusRegistry providerStatusRegistry;
+
+
+    public TrefleCareProvider(HttpClient httpClient, TrefleCareProperties properties,
+                              PlantSearchProperties searchProperties) {
+        this(httpClient, properties, searchProperties, new ProviderStatusRegistry());
+    }
 
 
     @Autowired
     public TrefleCareProvider(HttpClient httpClient, TrefleCareProperties properties,
-                              PlantSearchProperties searchProperties) {
+                              PlantSearchProperties searchProperties,
+                              ProviderStatusRegistry providerStatusRegistry) {
         this.httpClient = httpClient;
         this.properties = properties;
         this.searchProperties = searchProperties;
+        this.providerStatusRegistry = providerStatusRegistry;
     }
 
 
@@ -73,9 +84,11 @@ public class TrefleCareProvider {
         result.setPhMax(readDouble(growth, "ph_maximum"));
         result.setMinTemp(readTemperature(growth, "minimum_temperature"));
         result.setMaxTemp(readTemperature(growth, "maximum_temperature"));
+        final Instant verifiedAt = Instant.now();
         result.setSource("TREFLE");
         result.setSourceReference(slug);
-        result.setLastVerifiedAt(Instant.now());
+        result.setLastVerifiedAt(verifiedAt);
+        result.attributePopulatedFields("TREFLE", slug, STRUCTURED_DATA_CONFIDENCE, verifiedAt);
         return result.isAllNull() ? Optional.empty() : Optional.of(result);
     }
 
@@ -111,13 +124,18 @@ public class TrefleCareProvider {
             final HttpResponse<String> response = httpClient.send(
                 request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             if (response.statusCode() < HTTP_SUCCESS_MIN || response.statusCode() >= HTTP_SUCCESS_MAX) {
+                providerStatusRegistry.recordFailure(
+                    "TREFLE", response.statusCode(), "Trefle care lookup returned HTTP " + response.statusCode(),
+                    quotaRemaining(response));
                 throw new InfoExtractionException("Trefle care lookup returned HTTP " + response.statusCode());
             }
+            providerStatusRegistry.recordSuccess("TREFLE", response.statusCode(), quotaRemaining(response));
             return JsonParser.parseString(response.body()).getAsJsonObject();
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
             throw new InfoExtractionException(exception);
         } catch (IOException exception) {
+            providerStatusRegistry.recordFailure("TREFLE", 0, exception.getMessage(), null);
             throw new InfoExtractionException(exception);
         }
     }
@@ -177,5 +195,10 @@ public class TrefleCareProvider {
 
     private String encode(String value) {
         return URLEncoder.encode(value, StandardCharsets.UTF_8);
+    }
+
+
+    private String quotaRemaining(HttpResponse<?> response) {
+        return response.headers().firstValue("x-ratelimit-remaining").orElse(null);
     }
 }

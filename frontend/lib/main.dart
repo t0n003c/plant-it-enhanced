@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:plant_it/app_exception.dart';
 import 'package:plant_it/app_http_client.dart';
 import 'package:plant_it/commons.dart';
 import 'package:plant_it/environment.dart';
 import 'package:plant_it/change_notifiers.dart';
 import 'package:plant_it/notify_conf_notifier.dart';
+import 'package:plant_it/observation/trail_draft_repository.dart';
 import 'package:plant_it/set_server.dart';
 import 'package:plant_it/splash_screen.dart';
 import 'package:plant_it/template.dart';
@@ -20,6 +22,20 @@ void main() async {
   runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
     final prefs = await SharedPreferences.getInstance();
+    TrailDraftRepository trailDraftRepository = MemoryTrailDraftRepository();
+    Object? offlineStorageError;
+    StackTrace? offlineStorageStackTrace;
+    try {
+      await Hive.initFlutter();
+      trailDraftRepository = HiveTrailDraftRepository(
+        observationBox:
+            await Hive.openBox<dynamic>('trail_observation_drafts_v1'),
+        hikeSessionBox: await Hive.openBox<dynamic>('trail_hike_sessions_v1'),
+      );
+    } catch (error, stackTrace) {
+      offlineStorageError = error;
+      offlineStorageStackTrace = stackTrace;
+    }
     final isLoggedIn = prefs.containsKey('serverKey');
     final AppHttpClient http = AppHttpClient();
     final Environment env = Environment(
@@ -33,7 +49,15 @@ void main() async {
       notificationDispatcher: [],
       eventTypes: [],
       plants: [],
+      trailDraftRepository: trailDraftRepository,
+      durableTrailStorage: offlineStorageError == null,
     );
+    if (offlineStorageError != null) {
+      env.logger.warning(
+        'Durable offline storage is unavailable: $offlineStorageError',
+      );
+      env.logger.debug(offlineStorageStackTrace);
+    }
 
     if (isLoggedIn) {
       if (prefs.containsKey('serverURL')) {

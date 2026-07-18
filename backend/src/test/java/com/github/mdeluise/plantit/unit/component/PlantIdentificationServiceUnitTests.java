@@ -11,6 +11,7 @@ import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfo;
 import com.github.mdeluise.plantit.plantinfo.config.PlantNetProperties;
 import com.github.mdeluise.plantit.plantinfo.config.PlantSearchProperties;
 import com.github.mdeluise.plantit.plantinfo.identification.PlantIdentificationCandidate;
+import com.github.mdeluise.plantit.plantinfo.identification.PlantIdentificationPhoto;
 import com.github.mdeluise.plantit.plantinfo.identification.PlantIdentificationService;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
@@ -79,12 +80,40 @@ class PlantIdentificationServiceUnitTests {
         Assertions.assertTrue(query.get().contains("api-key=secret"));
         Assertions.assertTrue(query.get().contains("lang=en"));
         Assertions.assertTrue(requestBody.get().contains("name=\"images\""));
+        Assertions.assertTrue(requestBody.get().contains("name=\"organs\""));
+        Assertions.assertTrue(requestBody.get().contains("auto"));
         final BotanicalInfo botanicalInfo = result.get(0).botanicalInfo();
         Assertions.assertEquals("Monstera deliciosa", botanicalInfo.getSpecies());
         Assertions.assertEquals("Swiss cheese plant", botanicalInfo.getPreferredCommonName());
         Assertions.assertEquals("2877284", botanicalInfo.getCanonicalTaxonKey());
         Assertions.assertEquals("87469-1", botanicalInfo.getExternalReferences().get("POWO"));
         Assertions.assertEquals(0.94, result.get(0).confidence());
+    }
+
+
+    @Test
+    @DisplayName("Should submit several labeled views in one identification request")
+    void shouldSubmitMultipleOrganPhotos() {
+        final AtomicReference<String> requestBody = new AtomicReference<>();
+        server.createContext("/v2/identify/all", exchange -> {
+            requestBody.set(new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8));
+            respond(exchange, IDENTIFICATION_RESPONSE);
+        });
+        server.start();
+        final MockMultipartFile wholePlant = new MockMultipartFile(
+            "images", "whole.jpg", "image/jpeg", "whole".getBytes(StandardCharsets.UTF_8));
+        final MockMultipartFile leaf = new MockMultipartFile(
+            "images", "leaf.png", "image/png", "leaf".getBytes(StandardCharsets.UTF_8));
+
+        final List<PlantIdentificationCandidate> result = createService().identify(List.of(
+            new PlantIdentificationPhoto(wholePlant, "auto"),
+            new PlantIdentificationPhoto(leaf, "leaf")
+        ), "en");
+
+        Assertions.assertEquals(1, result.size());
+        Assertions.assertEquals(2, occurrences(requestBody.get(), "name=\"images\""));
+        Assertions.assertEquals(2, occurrences(requestBody.get(), "name=\"organs\""));
+        Assertions.assertTrue(requestBody.get().contains("leaf"));
     }
 
 
@@ -109,5 +138,10 @@ class PlantIdentificationServiceUnitTests {
         exchange.sendResponseHeaders(200, response.length);
         exchange.getResponseBody().write(response);
         exchange.close();
+    }
+
+
+    private int occurrences(String value, String token) {
+        return value.split(java.util.regex.Pattern.quote(token), -1).length - 1;
     }
 }

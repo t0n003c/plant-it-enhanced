@@ -16,7 +16,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
 @Service
-@Order(2)
+@Order(3)
 public class INaturalistPlantInfoExtractorStep extends AbstractPlantInfoExtractorStep {
     private final INaturalistRequestMaker requestMaker;
     private final BotanicalInfoService botanicalInfoService;

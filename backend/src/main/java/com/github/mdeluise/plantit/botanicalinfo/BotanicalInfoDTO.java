@@ -57,6 +57,13 @@ public class BotanicalInfoDTO {
     private String identificationProvider;
     @Schema(description = "Photo-identification model version.", accessMode = Schema.AccessMode.READ_ONLY)
     private String identificationModel;
+    @Schema(description = "Why this result matched the search query.", accessMode = Schema.AccessMode.READ_ONLY)
+    private String searchMatchReason;
+    @Schema(description = "Search relevance confidence from zero to one.", accessMode = Schema.AccessMode.READ_ONLY)
+    private Double searchMatchConfidence;
+    @Schema(description = "Reviewed catalog collections containing this plant.",
+            accessMode = Schema.AccessMode.READ_ONLY)
+    private Set<String> catalogTags = new LinkedHashSet<>();
 
 
     public Long getId() {
@@ -266,6 +273,36 @@ public class BotanicalInfoDTO {
 
     public void setIdentificationModel(String identificationModel) {
         this.identificationModel = identificationModel;
+    }
+
+
+    public String getSearchMatchReason() {
+        return searchMatchReason;
+    }
+
+
+    public void setSearchMatchReason(String searchMatchReason) {
+        this.searchMatchReason = searchMatchReason;
+    }
+
+
+    public Double getSearchMatchConfidence() {
+        return searchMatchConfidence;
+    }
+
+
+    public void setSearchMatchConfidence(Double searchMatchConfidence) {
+        this.searchMatchConfidence = searchMatchConfidence;
+    }
+
+
+    public Set<String> getCatalogTags() {
+        return catalogTags;
+    }
+
+
+    public void setCatalogTags(Set<String> catalogTags) {
+        this.catalogTags = catalogTags == null ? new LinkedHashSet<>() : catalogTags;
     }
 
 

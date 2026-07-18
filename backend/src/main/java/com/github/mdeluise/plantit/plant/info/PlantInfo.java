@@ -29,6 +29,22 @@ public class PlantInfo implements Serializable {
     private String seller;
     @Length(max = 100)
     private String location;
+    @Length(max = 16)
+    private String growingEnvironment;
+    @Length(max = 16)
+    private String lightExposure;
+    @Length(max = 8)
+    private String windowDirection;
+    private Double potDiameterCm;
+    @Length(max = 24)
+    private String potMaterial;
+    private Boolean hasDrainage;
+    @Length(max = 100)
+    private String soilType;
+    private Date lastWateredAt;
+    private Date lastRepottedAt;
+    private Double latitude;
+    private Double longitude;
 
 
     public Date getStartDate() {
@@ -121,6 +137,116 @@ public class PlantInfo implements Serializable {
     }
 
 
+    public String getGrowingEnvironment() {
+        return growingEnvironment;
+    }
+
+
+    public void setGrowingEnvironment(String growingEnvironment) {
+        this.growingEnvironment = growingEnvironment;
+    }
+
+
+    public String getLightExposure() {
+        return lightExposure;
+    }
+
+
+    public void setLightExposure(String lightExposure) {
+        this.lightExposure = lightExposure;
+    }
+
+
+    public String getWindowDirection() {
+        return windowDirection;
+    }
+
+
+    public void setWindowDirection(String windowDirection) {
+        this.windowDirection = windowDirection;
+    }
+
+
+    public Double getPotDiameterCm() {
+        return potDiameterCm;
+    }
+
+
+    public void setPotDiameterCm(Double potDiameterCm) {
+        this.potDiameterCm = potDiameterCm;
+    }
+
+
+    public String getPotMaterial() {
+        return potMaterial;
+    }
+
+
+    public void setPotMaterial(String potMaterial) {
+        this.potMaterial = potMaterial;
+    }
+
+
+    public Boolean getHasDrainage() {
+        return hasDrainage;
+    }
+
+
+    public void setHasDrainage(Boolean hasDrainage) {
+        this.hasDrainage = hasDrainage;
+    }
+
+
+    public String getSoilType() {
+        return soilType;
+    }
+
+
+    public void setSoilType(String soilType) {
+        this.soilType = soilType;
+    }
+
+
+    public Date getLastWateredAt() {
+        return lastWateredAt;
+    }
+
+
+    public void setLastWateredAt(Date lastWateredAt) {
+        this.lastWateredAt = lastWateredAt;
+    }
+
+
+    public Date getLastRepottedAt() {
+        return lastRepottedAt;
+    }
+
+
+    public void setLastRepottedAt(Date lastRepottedAt) {
+        this.lastRepottedAt = lastRepottedAt;
+    }
+
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
+
+
     @SuppressWarnings("BooleanExpressionComplexity") //FIXME
     @Override
     public boolean equals(Object o) {
@@ -135,14 +261,24 @@ public class PlantInfo implements Serializable {
                    Objects.equals(endDate, plantInfo.endDate) && plantState == plantInfo.plantState &&
                    Objects.equals(note, plantInfo.note) && Objects.equals(purchasedPrice, plantInfo.purchasedPrice) &&
                    Objects.equals(currencySymbol, plantInfo.currencySymbol) &&
-                   Objects.equals(seller, plantInfo.seller) && Objects.equals(location, plantInfo.location);
+                   Objects.equals(seller, plantInfo.seller) && Objects.equals(location, plantInfo.location) &&
+                   Objects.equals(growingEnvironment, plantInfo.growingEnvironment) &&
+                   Objects.equals(lightExposure, plantInfo.lightExposure) &&
+                   Objects.equals(windowDirection, plantInfo.windowDirection) &&
+                   Objects.equals(potDiameterCm, plantInfo.potDiameterCm) &&
+                   Objects.equals(potMaterial, plantInfo.potMaterial) &&
+                   Objects.equals(hasDrainage, plantInfo.hasDrainage) && Objects.equals(soilType, plantInfo.soilType) &&
+                   Objects.equals(lastWateredAt, plantInfo.lastWateredAt) &&
+                   Objects.equals(lastRepottedAt, plantInfo.lastRepottedAt) &&
+                   Objects.equals(latitude, plantInfo.latitude) && Objects.equals(longitude, plantInfo.longitude);
     }
 
 
     @Override
     public int hashCode() {
         return Objects.hash(startDate, personalName, endDate, plantState, note, purchasedPrice, currencySymbol, seller,
-                            location
+                            location, growingEnvironment, lightExposure, windowDirection, potDiameterCm, potMaterial,
+                            hasDrainage, soilType, lastWateredAt, lastRepottedAt, latitude, longitude
         );
     }
 }

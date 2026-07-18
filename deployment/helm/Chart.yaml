@@ -1,14 +1,15 @@
 apiVersion: v2
-name: Plant-it
-description: Self-hosted, open source gardening companion app
+name: plant-it-enhanced
+description: Self-hosted gardening and private field-journal companion
 type: application
-version: 0.1.0
-icon: https://github.com/MDeLuise/plant-it/blob/main/images/plant-it-logo.png?raw=true
+version: 0.15.1
+appVersion: "0.15.1"
+icon: https://github.com/t0n003c/plant-it-enhanced/blob/main/images/plant-it-logo.png?raw=true
 keywords:
   - plants
   - companion
 sources:
-  - https://github.com/MDeLuise/plant-it
+  - https://github.com/t0n003c/plant-it-enhanced
 maintainers:
-  - name: MDeLuise
-    url: https://massimilianodeluise.com/
+  - name: t0n003c
+    url: https://github.com/t0n003c

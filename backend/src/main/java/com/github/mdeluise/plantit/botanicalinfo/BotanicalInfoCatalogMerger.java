@@ -64,6 +64,7 @@ public final class BotanicalInfoCatalogMerger {
         mergeScientificIdentity(target, source, newerVerifiedSource);
         mergeSynonyms(target, source);
         mergeCommonNames(target, source);
+        mergeCatalogTags(target, source);
         mergeExternalReferences(target, source);
         mergeCareInfo(target.getPlantCareInfo(), source.getPlantCareInfo());
         if (clean(target.getCanonicalTaxonKey()) == null) {
@@ -188,6 +189,16 @@ public final class BotanicalInfoCatalogMerger {
     }
 
 
+    private static void mergeCatalogTags(BotanicalInfo target, BotanicalInfo source) {
+        if (target.getCatalogTags() == null) {
+            target.setCatalogTags(new LinkedHashSet<>());
+        }
+        if (source.getCatalogTags() != null) {
+            target.getCatalogTags().addAll(source.getCatalogTags());
+        }
+    }
+
+
     private static boolean hasSharedProviderReference(BotanicalInfo left, BotanicalInfo right) {
         for (Map.Entry<String, String> reference : left.getExternalReferences().entrySet()) {
             final String rightReference = right.getExternalReferences().get(reference.getKey());
@@ -209,32 +220,7 @@ public final class BotanicalInfoCatalogMerger {
 
 
     private static void mergeCareInfo(PlantCareInfo target, PlantCareInfo source) {
-        if (target.getLight() == null) {
-            target.setLight(source.getLight());
-        }
-        if (target.getHumidity() == null) {
-            target.setHumidity(source.getHumidity());
-        }
-        if (target.getSoilHumidity() == null) {
-            target.setSoilHumidity(source.getSoilHumidity());
-        }
-        if (target.getMinTemp() == null) {
-            target.setMinTemp(source.getMinTemp());
-        }
-        if (target.getMaxTemp() == null) {
-            target.setMaxTemp(source.getMaxTemp());
-        }
-        if (target.getPhMin() == null) {
-            target.setPhMin(source.getPhMin());
-        }
-        if (target.getPhMax() == null) {
-            target.setPhMax(source.getPhMax());
-        }
-        if (target.getSource() == null && source.getSource() != null) {
-            target.setSource(source.getSource());
-            target.setSourceReference(source.getSourceReference());
-            target.setLastVerifiedAt(source.getLastVerifiedAt());
-        }
+        target.fillMissingFieldsFrom(source);
     }
 
 
