@@ -131,18 +131,17 @@ public class INaturalistRequestMaker {
         ));
         candidates.sort(candidateComparator());
 
-        final Map<String, BotanicalInfo> verifiedResults = new LinkedHashMap<>();
+        final Map<String, RankedCandidate> verifiedResults = new LinkedHashMap<>();
         candidates.stream()
                   .limit(Math.min(MAXIMUM_GBIF_VERIFICATIONS, size + 2L))
-                  .map(RankedCandidate::botanicalInfo)
-                  .map(gbifTaxonomyVerifier::verify)
+                  .map(this::verifyCandidate)
                   .forEach(candidate -> mergeCandidate(verifiedResults, candidate));
         return verifiedResults.values().stream()
-                  .filter(candidate -> PlantSearchScorer.evaluate(searchTerm, candidate).isRelevant())
-                  .sorted((left, right) -> Integer.compare(
-                      PlantSearchScorer.score(searchTerm, right), PlantSearchScorer.score(searchTerm, left)
-                  ))
+                  .filter(candidate -> PlantSearchScorer.evaluate(
+                      searchTerm, candidate.botanicalInfo()).isRelevant())
+                  .sorted(candidateComparator())
                   .limit(size)
+                  .map(RankedCandidate::botanicalInfo)
                   .peek(candidate -> PlantSearchScorer.applyMatchMetadata(searchTerm, candidate))
                   .toList();
     }
@@ -181,6 +180,7 @@ public class INaturalistRequestMaker {
         if (PlantSearchScorer.evaluate(searchTerm, botanicalInfo).isRelevant()) {
             candidates.add(new RankedCandidate(
                 botanicalInfo,
+                isExactMatch(searchTerm, matchedTerm),
                 PlantSearchScorer.score(searchTerm, botanicalInfo),
                 readLong(result, "observations_count")
             ));
@@ -193,14 +193,27 @@ public class INaturalistRequestMaker {
     }
 
 
-    private void mergeCandidate(Map<String, BotanicalInfo> results, BotanicalInfo candidate) {
-        final String normalizedSpecies = PlantNameNormalizer.normalize(candidate.getSpecies());
-        final BotanicalInfo existing = results.get(normalizedSpecies);
+    private RankedCandidate verifyCandidate(RankedCandidate candidate) {
+        final BotanicalInfo verified = gbifTaxonomyVerifier.verify(candidate.botanicalInfo());
+        return new RankedCandidate(
+            verified, candidate.exactProviderMatch(), candidate.score(), candidate.popularity());
+    }
+
+
+    private void mergeCandidate(Map<String, RankedCandidate> results, RankedCandidate candidate) {
+        final String normalizedSpecies = PlantNameNormalizer.normalize(candidate.botanicalInfo().getSpecies());
+        final RankedCandidate existing = results.get(normalizedSpecies);
         if (existing == null) {
             results.put(normalizedSpecies, candidate);
             return;
         }
-        BotanicalInfoCatalogMerger.mergeInto(existing, candidate);
+        BotanicalInfoCatalogMerger.mergeInto(existing.botanicalInfo(), candidate.botanicalInfo());
+        results.put(normalizedSpecies, new RankedCandidate(
+            existing.botanicalInfo(),
+            existing.exactProviderMatch() || candidate.exactProviderMatch(),
+            Math.max(existing.score(), candidate.score()),
+            Math.max(existing.popularity(), candidate.popularity())
+        ));
     }
 
 
@@ -231,9 +244,16 @@ public class INaturalistRequestMaker {
 
 
     private Comparator<RankedCandidate> candidateComparator() {
-        return Comparator.comparingInt(RankedCandidate::score)
+        return Comparator.comparing(RankedCandidate::exactProviderMatch)
                          .reversed()
+                         .thenComparing(Comparator.comparingInt(RankedCandidate::score).reversed())
                          .thenComparing(Comparator.comparingLong(RankedCandidate::popularity).reversed());
+    }
+
+
+    private boolean isExactMatch(String searchTerm, String matchedTerm) {
+        return matchedTerm != null &&
+                   PlantNameNormalizer.normalize(searchTerm).equals(PlantNameNormalizer.normalize(matchedTerm));
     }
 
 
@@ -305,6 +325,7 @@ public class INaturalistRequestMaker {
     }
 
 
-    private record RankedCandidate(BotanicalInfo botanicalInfo, int score, long popularity) {
+    private record RankedCandidate(BotanicalInfo botanicalInfo, boolean exactProviderMatch,
+                                   int score, long popularity) {
     }
 }
