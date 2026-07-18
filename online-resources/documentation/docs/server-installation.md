@@ -320,8 +320,10 @@ https://plants.example.com/flutter_service_worker.js
 ```
 
 Replace `plants.example.com` with the real hostname, close every open app tab or installed PWA
-window, and reopen it. A private window is a useful non-destructive check. Purging CDN/browser
-caches does not delete MySQL accounts, plants, photos, or reminders.
+window, then visit `https://plants.example.com/update.html` and choose **Refresh the app safely**.
+That page unregisters only Flutter's service worker and app-shell caches; it does not clear
+cookies, local storage, IndexedDB, accounts, plants, photos, reminders, or unsynchronized Trail
+Journal drafts. A private window is also a useful non-destructive check.
 
 Database migrations are additive. The v0.14 and v0.15 migrations add catalog provenance, care
 context, field observations, named hikes, and idempotent synchronization references without
