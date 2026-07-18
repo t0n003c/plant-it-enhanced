@@ -27,6 +27,12 @@ class SpeciesDTO {
   double? identificationConfidence;
   String? identificationProvider;
   String? identificationModel;
+  String? identificationProject;
+  String? identificationProjectTitle;
+  double? contextualIdentificationScore;
+  List<IdentificationEvidenceDTO> identificationEvidence;
+  String? establishmentMeans;
+  String? establishmentPlace;
   String? searchMatchReason;
   double? searchMatchConfidence;
   List<String> catalogTags;
@@ -58,6 +64,12 @@ class SpeciesDTO {
     this.identificationConfidence,
     this.identificationProvider,
     this.identificationModel,
+    this.identificationProject,
+    this.identificationProjectTitle,
+    this.contextualIdentificationScore,
+    this.identificationEvidence = const [],
+    this.establishmentMeans,
+    this.establishmentPlace,
     this.searchMatchReason,
     this.searchMatchConfidence,
     this.catalogTags = const [],
@@ -101,6 +113,20 @@ class SpeciesDTO {
           (json['identificationConfidence'] as num?)?.toDouble(),
       identificationProvider: json['identificationProvider'],
       identificationModel: json['identificationModel'],
+      identificationProject: json['identificationProject'],
+      identificationProjectTitle: json['identificationProjectTitle'],
+      contextualIdentificationScore:
+          (json['contextualIdentificationScore'] as num?)?.toDouble(),
+      identificationEvidence:
+          (json['identificationEvidence'] as List<dynamic>? ?? [])
+              .map(
+                (value) => IdentificationEvidenceDTO.fromJson(
+                  value as Map<String, dynamic>,
+                ),
+              )
+              .toList(),
+      establishmentMeans: json['establishmentMeans'],
+      establishmentPlace: json['establishmentPlace'],
       searchMatchReason: json['searchMatchReason'],
       searchMatchConfidence:
           (json['searchMatchConfidence'] as num?)?.toDouble(),
@@ -137,6 +163,23 @@ class SpeciesDTO {
       if (imageContentType != null) 'imageContentType': imageContentType,
       'creator': creator,
       if (externalId != null) 'externalId': externalId,
+      if (identificationConfidence != null)
+        'identificationConfidence': identificationConfidence,
+      if (identificationProvider != null)
+        'identificationProvider': identificationProvider,
+      if (identificationModel != null)
+        'identificationModel': identificationModel,
+      if (identificationProject != null)
+        'identificationProject': identificationProject,
+      if (identificationProjectTitle != null)
+        'identificationProjectTitle': identificationProjectTitle,
+      if (contextualIdentificationScore != null)
+        'contextualIdentificationScore': contextualIdentificationScore,
+      if (identificationEvidence.isNotEmpty)
+        'identificationEvidence':
+            identificationEvidence.map((evidence) => evidence.toMap()).toList(),
+      if (establishmentMeans != null) 'establishmentMeans': establishmentMeans,
+      if (establishmentPlace != null) 'establishmentPlace': establishmentPlace,
       'catalogTags': catalogTags,
     };
   }
@@ -180,6 +223,46 @@ class SpeciesDTO {
     }
     return findName((name) => name.preferred)?.name.trim() ??
         findName((name) => true)?.name.trim();
+  }
+}
+
+class IdentificationEvidenceDTO {
+  final String code;
+  final double adjustment;
+  final String source;
+  final String? sourceReference;
+  final int? observationCount;
+  final String? detail;
+
+  const IdentificationEvidenceDTO({
+    required this.code,
+    required this.adjustment,
+    required this.source,
+    this.sourceReference,
+    this.observationCount,
+    this.detail,
+  });
+
+  factory IdentificationEvidenceDTO.fromJson(Map<String, dynamic> json) {
+    return IdentificationEvidenceDTO(
+      code: json['code'] as String,
+      adjustment: (json['adjustment'] as num?)?.toDouble() ?? 0,
+      source: json['source'] as String? ?? '',
+      sourceReference: json['sourceReference'] as String?,
+      observationCount: (json['observationCount'] as num?)?.toInt(),
+      detail: json['detail'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'code': code,
+      'adjustment': adjustment,
+      'source': source,
+      if (sourceReference != null) 'sourceReference': sourceReference,
+      if (observationCount != null) 'observationCount': observationCount,
+      if (detail != null) 'detail': detail,
+    };
   }
 }
 

@@ -60,6 +60,13 @@ class _SearchResultCardState extends State<SearchResultCard> {
             tag:
                 '${widget.species.identificationProvider ?? 'AI'} ${(widget.species.identificationConfidence! * 100).round()}%',
           ),
+        if (widget.species.identificationProject != null)
+          TagChip(
+            tag: AppLocalizations.of(context).identificationRegionalFlora(
+              widget.species.identificationProjectTitle ??
+                  widget.species.identificationProject!,
+            ),
+          ),
         if (widget.species.searchMatchReason != null &&
             widget.species.searchMatchConfidence != null)
           TagChip(

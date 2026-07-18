@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http_parser/http_parser.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:plant_it/search/identification_context.dart';
 
 class AppHttpClient {
   late final http.Client _inner;
@@ -107,13 +108,23 @@ class AppHttpClient {
     List<XFile> images,
     List<String> organs,
     String language,
-  ) async {
+  ) {
+    return identifyPlantWithContext(images, organs, language);
+  }
+
+  Future<http.Response> identifyPlantWithContext(
+    List<XFile> images,
+    List<String> organs,
+    String language, {
+    IdentificationContext? context,
+  }) async {
     if (images.isEmpty || images.length != organs.length) {
       throw ArgumentError('Identification images and organ labels must match');
     }
     final uri = _prependBackendURL('plant-identification').replace(
       queryParameters: {
         'language': language,
+        ...?context?.toQueryParameters(),
       },
     );
     final request = http.MultipartRequest('POST', uri);

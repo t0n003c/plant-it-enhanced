@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -71,16 +73,78 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Prairie Loop'), findsNWidgets(2));
+    expect(find.text('Prairie Loop'), findsOneWidget);
+    expect(find.text('Trail dashboard'), findsOneWidget);
+    expect(find.text('All finds'), findsOneWidget);
+    expect(find.text('Needs ID'), findsOneWidget);
+    expect(find.text('Pending'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('trail-journal-search')),
+      findsOneWidget,
+    );
+    await tester.scrollUntilVisible(
+      find.text('Finish hike'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Finish hike'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Purple trail flower'),
+      500,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('Purple trail flower'), findsOneWidget);
     expect(find.text('1 offline find'), findsOneWidget);
-    expect(find.text('Retry sync'), findsOneWidget);
-    expect(find.text('Retry'), findsNWidgets(2));
-    expect(find.text('Finish hike'), findsOneWidget);
+    expect(find.text('Retry'), findsWidgets);
     expect(
       find.textContaining('New finds remain safely on this device'),
       findsOneWidget,
     );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('identification inbox reuses a saved field photo',
+      (tester) async {
+    tester.view.physicalSize = const Size(390, 1600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+    final client = _ReviewTrailHttpClient()
+      ..backendUrl = 'https://plants.example.test/api/';
+    final env = Environment(
+      prefs: prefs,
+      http: client,
+      backendVersion: 'test',
+      credentials: Credentials(
+        username: 'hiker',
+        email: 'hiker@example.com',
+      ),
+      notificationDispatcher: [],
+      eventTypes: [],
+      plants: [],
+      trailDraftRepository: MemoryTrailDraftRepository(),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: ObservationJournalPage(env: env),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Unknown white flower'), findsOneWidget);
+    await tester.tap(find.text('Unknown white flower'));
+    await tester.pumpAndSettle();
+    expect(find.text('Review identification'), findsOneWidget);
+    await tester.tap(find.text('Review identification'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Run identification again'), findsOneWidget);
+    expect(client.requestedUrls, contains('image/content/field-photo-1'));
     expect(tester.takeException(), isNull);
   });
 }
@@ -97,5 +161,52 @@ class _OfflineTrailHttpClient extends AppHttpClient {
     Map<String, dynamic>? body,
   ) async {
     return http.Response('{"message":"Offline for test"}', 503);
+  }
+}
+
+class _ReviewTrailHttpClient extends AppHttpClient {
+  final List<String> requestedUrls = [];
+
+  @override
+  Future<http.Response> get(String url) async {
+    requestedUrls.add(url);
+    if (url.startsWith('observation?')) {
+      return http.Response(
+        '''
+        {
+          "content": [{
+            "id": 42,
+            "observedAt": "2026-07-18T14:30:00Z",
+            "displayName": "Unknown white flower",
+            "trailName": "Oak Ridge",
+            "habitat": "Woodland edge",
+            "locationPrivacy": "PRIVATE",
+            "status": "UNIDENTIFIED",
+            "imageIds": ["field-photo-1"]
+          }]
+        }
+        ''',
+        200,
+        headers: {'content-type': 'application/json'},
+      );
+    }
+    if (url == 'hike-session') {
+      return http.Response(
+        '[]',
+        200,
+        headers: {'content-type': 'application/json'},
+      );
+    }
+    if (url == 'image/content/field-photo-1') {
+      return http.Response.bytes(
+        base64Decode(
+          'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwC'
+          'AAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+        ),
+        200,
+        headers: {'content-type': 'image/png'},
+      );
+    }
+    return http.Response('Not found', 404);
   }
 }

@@ -43,6 +43,9 @@
     }
   },
   "search": "Search",
+  "home": "Home",
+  "trail": "Trail",
+  "settings": "Settings",
   "today": "today",
   "yesterday": "yesterday",
   "nDaysAgo": "{count} {count, plural, =1{day} other{days}} ago",
@@ -318,8 +321,17 @@
       "count": {"type": "int"}
     }
   },
-  "photoIdentificationPrivacy": "The selected photo is sent to Pl@ntNet for identification.",
+  "photoIdentificationPrivacy": "Selected photos are sent to Pl@ntNet. If you opt in to field location, the server uses a coarsened area to choose a regional flora; exact coordinates stay self-hosted.",
   "identificationCandidates": "Identification suggestions by Pl@ntNet. Compare the alternatives before adding your plant.",
+  "identificationRegionalFlora": "Regional flora: {project}",
+  "@identificationRegionalFlora": {
+    "description": "Shows which regional Pl@ntNet flora was used for identification.",
+    "placeholders": {
+      "project": {
+        "type": "String"
+      }
+    }
+  },
   "noIdentificationMatch": "No confident plant match was found. Try a clear photo of one plant, leaf, or flower.",
   "custom": "Custom",
   "addPlant": "Add Plant",
@@ -680,6 +692,127 @@
       "count": {
         "type": "int",
         "example": "12"
+      }
+    }
+  },
+  "candidateRank": "Candidate {rank}",
+  "@candidateRank": {
+    "placeholders": {
+      "rank": {
+        "type": "int",
+        "example": "1"
+      }
+    }
+  },
+  "providerPhotoScore": "Photo {score}%",
+  "@providerPhotoScore": {
+    "placeholders": {
+      "score": {
+        "type": "int",
+        "example": "87"
+      }
+    }
+  },
+  "contextRankScore": "Context rank {score}%",
+  "@contextRankScore": {
+    "placeholders": {
+      "score": {
+        "type": "int",
+        "example": "94"
+      }
+    }
+  },
+  "regionalFloraEvidence": "Regional flora supports this candidate: {flora}",
+  "@regionalFloraEvidence": {
+    "placeholders": {
+      "flora": {
+        "type": "String",
+        "example": "Northern America"
+      }
+    }
+  },
+  "nearbySeasonalEvidence": "{count, plural, =1{1 nearby research-grade observation in this season} other{{count} nearby research-grade observations in this season}}",
+  "@nearbySeasonalEvidence": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "18"
+      }
+    }
+  },
+  "habitatRecordedEvidence": "Habitat recorded: {habitat}. It is shown for comparison but is not scored without a source-backed habitat range.",
+  "@habitatRecordedEvidence": {
+    "placeholders": {
+      "habitat": {
+        "type": "String",
+        "example": "Woodland edge"
+      }
+    }
+  },
+  "elevationRecordedEvidence": "Elevation recorded: {elevation} m. It is not scored without a source-backed elevation range.",
+  "@elevationRecordedEvidence": {
+    "placeholders": {
+      "elevation": {
+        "type": "String",
+        "example": "181"
+      }
+    }
+  },
+  "viewEvidenceSource": "View {source} evidence",
+  "@viewEvidenceSource": {
+    "placeholders": {
+      "source": {
+        "type": "String",
+        "example": "iNaturalist"
+      }
+    }
+  },
+  "nativeStatus": "Native",
+  "introducedStatus": "Introduced",
+  "endemicStatus": "Endemic",
+  "statusInPlace": "{status} in {place}",
+  "@statusInPlace": {
+    "placeholders": {
+      "status": {
+        "type": "String",
+        "example": "Native"
+      },
+      "place": {
+        "type": "String",
+        "example": "United States"
+      }
+    }
+  },
+  "contactHazardCompareHint": "Possible contact hazard. Do not touch it; compare lookalikes and follow local ranger or public-health guidance.",
+  "contextRankingExplanation": "Photo confidence remains separate. Context can make only a small, source-backed ranking adjustment.",
+  "identificationSafetyReminder": "Identification suggestions can be wrong. Never use this app to decide whether a wild plant is edible, medicinal, or safe to touch.",
+  "runIdentificationAgain": "Run identification again",
+  "trailDashboard": "Trail dashboard",
+  "allFinds": "All finds",
+  "needsIdShort": "Needs ID",
+  "pendingSyncShort": "Pending",
+  "identificationInbox": "Identification inbox",
+  "reviewIdentification": "Review identification",
+  "reviewObservationError": "The saved photos could not be prepared for identification. Check the connection and try again.",
+  "noJournalMatches": "No trail finds match these filters.",
+  "clearFilters": "Clear filters",
+  "searchTrailJournal": "Search names, trails, habitats, or notes",
+  "filterByHike": "Filter by hike",
+  "allHikes": "All hikes",
+  "allDates": "All dates",
+  "all": "All",
+  "clear": "Clear",
+  "confirmed": "Confirmed",
+  "activeHikeSummary": "{duration} · {count, plural, =0{No finds yet} =1{1 find} other{{count} finds}}",
+  "@activeHikeSummary": {
+    "placeholders": {
+      "duration": {
+        "type": "String",
+        "example": "1h 24m"
+      },
+      "count": {
+        "type": "int",
+        "example": "3"
       }
     }
   }

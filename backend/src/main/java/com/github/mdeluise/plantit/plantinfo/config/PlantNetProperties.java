@@ -13,6 +13,10 @@ public class PlantNetProperties {
     private int maximumResults;
     @Value("${plantnet.minimum-confidence}")
     private double minimumConfidence;
+    @Value("${plantnet.location-project-enabled:true}")
+    private boolean locationProjectEnabled;
+    @Value("${plantnet.location-precision-degrees:0.5}")
+    private double locationPrecisionDegrees;
 
 
     public String getUrl() {
@@ -32,6 +36,16 @@ public class PlantNetProperties {
 
     public double getMinimumConfidence() {
         return minimumConfidence;
+    }
+
+
+    public boolean isLocationProjectEnabled() {
+        return locationProjectEnabled;
+    }
+
+
+    public double getLocationPrecisionDegrees() {
+        return locationPrecisionDegrees;
     }
 
 

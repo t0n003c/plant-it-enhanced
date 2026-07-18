@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -9,6 +8,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:plant_it/search/add_custom.dart';
 import 'package:plant_it/search/guided_photo_sheet.dart';
 import 'package:plant_it/search/photo_source_sheet.dart';
+import 'package:plant_it/search/plant_search_repository.dart';
 import 'package:plant_it/search/search_result.dart';
 
 class SeachPage extends StatefulWidget {
@@ -27,6 +27,7 @@ class _SeachPageState extends State<SeachPage> {
   static const int _minimumSearchLength = 2;
   final TextEditingController _searchController = TextEditingController();
   final controller = PageController(viewportFraction: .8, keepPage: true);
+  late final PlantSearchRepository _repository;
   List<SpeciesDTO> _result = [];
   Timer? _debounce;
   bool _loading = true;
@@ -51,34 +52,16 @@ class _SeachPageState extends State<SeachPage> {
       _loading = true;
       _errorMessage = null;
     });
-    final String url;
-    if (normalizedTerm.isEmpty) {
-      url = "botanical-info";
-    } else {
-      final Locale locale = Localizations.localeOf(context);
-      url = Uri(
-        path: "botanical-info/search",
-        queryParameters: {
-          "q": normalizedTerm,
-          "locale": locale.languageCode,
-          if (locale.countryCode != null && locale.countryCode!.isNotEmpty)
-            "region": locale.countryCode!,
-        },
-      ).toString();
-    }
     try {
-      final response = await widget.env.http.get(url);
+      final Locale locale = Localizations.localeOf(context);
+      final List<SpeciesDTO> result = await _repository.search(
+        term: normalizedTerm,
+        language: locale.languageCode,
+        region: locale.countryCode,
+      );
       if (!mounted || requestId != _requestSequence) return;
-      if (response.statusCode != 200) {
-        final dynamic errorBody = json.decode(utf8.decode(response.bodyBytes));
-        throw Exception(errorBody is Map
-            ? errorBody["message"] ?? "Plant search failed"
-            : "Plant search failed");
-      }
-      final List<dynamic> responseBody =
-          json.decode(utf8.decode(response.bodyBytes));
       setState(() {
-        _result = responseBody.map((p) => SpeciesDTO.fromJson(p)).toList();
+        _result = result;
       });
     } catch (e, st) {
       if (!mounted || requestId != _requestSequence) return;
@@ -135,26 +118,14 @@ class _SeachPageState extends State<SeachPage> {
       _searchController.clear();
     });
     try {
-      final response = await widget.env.http.identifyPlant(
-        selection.images,
-        selection.organs,
-        locale.languageCode,
+      final List<SpeciesDTO> candidates = await _repository.identify(
+        images: selection.images,
+        organs: selection.organs,
+        language: locale.languageCode,
       );
       if (!mounted || requestId != _requestSequence) return;
-      final dynamic body = json.decode(utf8.decode(response.bodyBytes));
-      if (response.statusCode != 200) {
-        throw Exception(
-          body is Map
-              ? body['message'] ?? 'Plant identification failed'
-              : 'Plant identification failed',
-        );
-      }
       setState(() {
-        _result = (body as List<dynamic>)
-            .map((candidate) =>
-                SpeciesDTO.fromJson(candidate as Map<String, dynamic>))
-            .take(3)
-            .toList();
+        _result = candidates.take(3).toList(growable: false);
         if (_result.isEmpty) {
           _errorMessage = AppLocalizations.of(context).noIdentificationMatch;
         }
@@ -191,6 +162,7 @@ class _SeachPageState extends State<SeachPage> {
   @override
   void initState() {
     super.initState();
+    _repository = PlantSearchRepository(widget.env.http);
     _fetchAndSetResult("");
   }
 

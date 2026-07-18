@@ -40,6 +40,11 @@ Plant-it helps you remember the last time you did a treatment of your plants, wh
 * See why a search result matched and its match confidence
 * See attributable iNaturalist photos for image-less search results without replacing your own photos
 * Take guided whole-plant, leaf, and flower photos, compare the top matches, and add the plant
+* Optionally use a coarsened field location to select a closer Pl@ntNet regional flora while exact
+  observation coordinates remain on the self-hosted server
+* Compare visual confidence with bounded, attributable regional and nearby seasonal evidence
+* Review unidentified finds from saved photos and filter the Trail dashboard by status, hike, date,
+  names, habitats, trails, or notes
 * Verify accepted scientific taxonomy through GBIF, with iNaturalist discovery and FloraCodex fallback
 * View field-level sources and confidence for light, moisture, temperature, and pH guidance
 * Create a personalized care reminder from placement, light, pot, drainage, and soil details
@@ -93,11 +98,17 @@ plants where they grow and observe local trail rules.
 ### Trail journal
 
 Trail observations are separate from cultivated plants. Saving a wild find never creates a
-watering reminder or adds it to **My Green Friends**. Start from the Trail Journal card on the home
-screen or the central add button, start an optional named hike, take a whole-plant photo, optionally
-add leaf and flower views, and either confirm one of the identification candidates or save it as
-unidentified for later. Photo-first drafts are written to durable device storage before sync, and
-the journal shows pending or failed uploads with explicit edit, retry, and discard actions.
+watering reminder or adds it to **My Green Friends**. Open the dedicated **Trail** tab from the
+bottom navigation, start an optional named hike, take a whole-plant photo, optionally add leaf and
+flower views, and either confirm one of the identification candidates or save it as unidentified
+for later. Photo-first drafts are written to durable device storage before sync, and the journal
+shows pending or failed uploads with explicit edit, retry, and discard actions.
+
+The Trail dashboard summarizes all finds, pending uploads, and observations that still need an
+identification. Search and filters work across names, trails, habitats, notes, dates, and named
+hikes. An unidentified saved observation can be reopened from the **Identification inbox** and run
+through identification again using the original self-hosted photos. A partially synchronized find
+is represented once while its retry draft is pending.
 
 Location is always opt-in. Exact coordinates and photo metadata remain in the authenticated,
 self-hosted account, and the initial sharing preference is **Private**. Obscured and open settings
@@ -137,6 +148,23 @@ and—when present—a flower close-up. Plant-it sends the photos together, show
 suggestions, and lets you confirm before adding anything. Opening a search result loads a cached
 care preview without saving the species. When the plant is added, Plant-it keeps the first photo in
 your own upload directory and attaches the preview to the saved catalog entry.
+
+For Trail Journal identification, an explicitly captured location can select a closer Pl@ntNet
+regional flora before the photos are evaluated. The server rounds the coordinates to a half-degree
+grid by default; exact coordinates remain in the self-hosted observation. The candidate card names
+the regional flora when one was applied. Set `PLANTNET_LOCATION_PROJECT_ENABLED=false` to keep all
+identification requests on the world flora, or adjust the privacy/accuracy tradeoff with
+`PLANTNET_LOCATION_PRECISION_DEGREES`.
+
+When contextual identification is enabled, the server also checks public, research-grade
+iNaturalist observations around the same coarsened grid point for the observation month and its two
+adjacent months. Nearby evidence can make only a bounded adjustment; the Pl@ntNet photo confidence
+remains visible separately. Habitat and elevation are displayed as field context but are not scored
+without a source-backed ecological range. Native, introduced, or endemic status appears only when
+iNaturalist supplies it for the configured place. Configure the radius and response bound with
+`IDENTIFICATION_OCCURRENCE_RADIUS_KM` and `IDENTIFICATION_OCCURRENCE_RESULT_LIMIT`, or disable this
+lookup with `IDENTIFICATION_CONTEXT_ENABLED=false`. Keep `INATURALIST_PLACE_ID` aligned with
+`PLANT_SEARCH_REGION`; the example place ID `1` is the United States.
 
 Plant-it combines Trefle, its bundled Extension-sourced catalog, and optional Perenual field by
 field. A lower-priority source fills only missing values. The bundled catalog covers 80 frequently
@@ -188,21 +216,28 @@ cp compose.nas.example.yaml compose.yaml
 cp .env.example .env
 ```
 
-In `.env`, use absolute paths appropriate for the NAS, set the existing Docker network name, and
-choose the host ports you want Dockge to expose:
+In `.env`, use absolute paths appropriate for the NAS and set the existing Docker network shared
+with Nginx Proxy Manager:
 
 ```dotenv
 PLANTIT_UPLOAD_PATH=/volume1/docker/plantit/upload_dir
 PLANTIT_DB_PATH=/volume1/docker/plantit/db
 PLANTIT_PROXY_NETWORK=TinhnasNetwork
-PLANTIT_API_HOST_PORT=8346
-PLANTIT_WEB_HOST_PORT=3372
+TRUSTED_PROXY_CIDRS=172.20.0.0/16
+TRUSTED_CLIENT_IP_HEADERS=CF-Connecting-IP,X-Forwarded-For
+ALLOWED_ORIGINS=https://plants.example.com
 ```
+
+Replace `172.20.0.0/16` with the exact subnet reported for `TinhnasNetwork`. The hardened NAS
+example publishes no host ports: Nginx Proxy Manager reaches the stable `plantit-server` network
+alias on ports `3000` and `8080`. A single public hostname can route `/` to port `3000` and `/api/`
+to port `8080`, which also avoids cross-origin browser configuration. Cloudflare Tunnel should
+continue to target Nginx Proxy Manager, not MySQL, Redis, or the Plant-it container directly.
 
 Do not add `container_name`; Compose-generated names avoid conflicts with abandoned containers from
 older stacks. The server has `pull_policy: always`, so a Dockge redeploy checks GHCR for a newer
 `latest` image. See the maintained [server installation guide](online-resources/documentation/docs/server-installation.md)
-for first deployment, reverse-proxy, and `.env` details.
+for the Cloudflare Tunnel, Nginx Proxy Manager, trusted-proxy, and `.env` configuration.
 
 ### Safe upgrades
 

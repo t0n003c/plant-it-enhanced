@@ -1,14 +1,17 @@
 package com.github.mdeluise.plantit.botanicalinfo;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
 import com.github.mdeluise.plantit.botanicalinfo.care.PlantCareInfoDTO;
+import com.github.mdeluise.plantit.plantinfo.identification.PlantIdentificationEvidence;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(name = "Botanical info", description = "Represents a plant's botanical info.")
@@ -69,6 +72,24 @@ public class BotanicalInfoDTO {
     private String identificationProvider;
     @Schema(description = "Photo-identification model version.", accessMode = Schema.AccessMode.READ_ONLY)
     private String identificationModel;
+    @Schema(description = "Geographic or thematic flora used for photo identification.",
+            accessMode = Schema.AccessMode.READ_ONLY)
+    private String identificationProject;
+    @Schema(description = "Display title of the flora used for photo identification.",
+            accessMode = Schema.AccessMode.READ_ONLY)
+    private String identificationProjectTitle;
+    @Schema(description = "Provider confidence with small, attributable contextual adjustments.",
+            accessMode = Schema.AccessMode.READ_ONLY)
+    private Double contextualIdentificationScore;
+    @Schema(description = "Signals considered when contextually ranking an identification.",
+            accessMode = Schema.AccessMode.READ_ONLY)
+    private List<PlantIdentificationEvidence> identificationEvidence = new ArrayList<>();
+    @Schema(description = "Attributable regional establishment status, when available.",
+            accessMode = Schema.AccessMode.READ_ONLY)
+    private String establishmentMeans;
+    @Schema(description = "Place to which the establishment status applies.",
+            accessMode = Schema.AccessMode.READ_ONLY)
+    private String establishmentPlace;
     @Schema(description = "Why this result matched the search query.", accessMode = Schema.AccessMode.READ_ONLY)
     private String searchMatchReason;
     @Schema(description = "Search relevance confidence from zero to one.", accessMode = Schema.AccessMode.READ_ONLY)
@@ -335,6 +356,66 @@ public class BotanicalInfoDTO {
 
     public void setIdentificationModel(String identificationModel) {
         this.identificationModel = identificationModel;
+    }
+
+
+    public String getIdentificationProject() {
+        return identificationProject;
+    }
+
+
+    public void setIdentificationProject(String identificationProject) {
+        this.identificationProject = identificationProject;
+    }
+
+
+    public String getIdentificationProjectTitle() {
+        return identificationProjectTitle;
+    }
+
+
+    public void setIdentificationProjectTitle(String identificationProjectTitle) {
+        this.identificationProjectTitle = identificationProjectTitle;
+    }
+
+
+    public Double getContextualIdentificationScore() {
+        return contextualIdentificationScore;
+    }
+
+
+    public void setContextualIdentificationScore(Double contextualIdentificationScore) {
+        this.contextualIdentificationScore = contextualIdentificationScore;
+    }
+
+
+    public List<PlantIdentificationEvidence> getIdentificationEvidence() {
+        return identificationEvidence;
+    }
+
+
+    public void setIdentificationEvidence(List<PlantIdentificationEvidence> identificationEvidence) {
+        this.identificationEvidence = identificationEvidence == null ? new ArrayList<>() : identificationEvidence;
+    }
+
+
+    public String getEstablishmentMeans() {
+        return establishmentMeans;
+    }
+
+
+    public void setEstablishmentMeans(String establishmentMeans) {
+        this.establishmentMeans = establishmentMeans;
+    }
+
+
+    public String getEstablishmentPlace() {
+        return establishmentPlace;
+    }
+
+
+    public void setEstablishmentPlace(String establishmentPlace) {
+        this.establishmentPlace = establishmentPlace;
     }
 
 

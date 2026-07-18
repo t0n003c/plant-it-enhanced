@@ -25,12 +25,16 @@ services:
         condition: service_healthy
     volumes:
       - "${PLANTIT_UPLOAD_PATH:?Set PLANTIT_UPLOAD_PATH in .env}:/upload-dir"
-    ports:
-      - "${PLANTIT_API_HOST_PORT:-8346}:8080"
-      - "${PLANTIT_WEB_HOST_PORT:-3372}:3000"
+    # Nginx Proxy Manager reaches these ports over the shared proxy network.
+    # They are intentionally not published on the NAS host.
+    expose:
+      - "8080"
+      - "3000"
     networks:
-      - backend
-      - proxy
+      backend:
+      proxy:
+        aliases:
+          - plantit-server
     healthcheck:
       test:
         - CMD-SHELL

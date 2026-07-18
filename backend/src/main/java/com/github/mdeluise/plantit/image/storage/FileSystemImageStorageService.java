@@ -5,9 +5,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -34,6 +31,8 @@ import com.github.mdeluise.plantit.observation.Observation;
 import com.github.mdeluise.plantit.plant.Plant;
 import com.github.mdeluise.plantit.plant.PlantAvatarMode;
 import com.github.mdeluise.plantit.plant.PlantRepository;
+import com.github.mdeluise.plantit.proxy.RemoteImageContent;
+import com.github.mdeluise.plantit.proxy.RemoteImageFetcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,13 +40,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
@@ -60,6 +55,7 @@ public class FileSystemImageStorageService implements ImageStorageService {
     private final PlantRepository plantRepository;
     private final int maxOriginImgSize;
     private final AuthenticatedUserService authenticatedUserService;
+    private final RemoteImageFetcher remoteImageFetcher;
     private final Logger logger = LoggerFactory.getLogger(FileSystemImageStorageService.class);
 
 
@@ -70,7 +66,8 @@ public class FileSystemImageStorageService implements ImageStorageService {
                                          ObservationImageRepository observationImageRepository,
                                          PlantRepository plantRepository,
                                          @Value("${image.max_origin_size}") int maxOriginImgSize,
-                                         AuthenticatedUserService authenticatedUserService) {
+                                         AuthenticatedUserService authenticatedUserService,
+                                         RemoteImageFetcher remoteImageFetcher) {
         this.rootLocation = rootLocation;
         this.imageRepository = imageRepository;
         this.plantImageRepository = plantImageRepository;
@@ -78,6 +75,7 @@ public class FileSystemImageStorageService implements ImageStorageService {
         this.plantRepository = plantRepository;
         this.maxOriginImgSize = maxOriginImgSize;
         this.authenticatedUserService = authenticatedUserService;
+        this.remoteImageFetcher = remoteImageFetcher;
     }
 
 
@@ -164,10 +162,12 @@ public class FileSystemImageStorageService implements ImageStorageService {
             throw new UnsupportedOperationException("URL images can be linked only to Botanical Info entities");
         }
         try {
-            new URL(url).toURI();
-        } catch (URISyntaxException e) {
-            logger.error("Provided URL not correct", e);
-            throw new MalformedURLException(e.getMessage());
+            remoteImageFetcher.validate(url);
+        } catch (IOException invalidRemoteImage) {
+            logger.error("Provided remote image URL is not allowed", invalidRemoteImage);
+            final MalformedURLException malformedUrl = new MalformedURLException(invalidRemoteImage.getMessage());
+            malformedUrl.initCause(invalidRemoteImage);
+            throw malformedUrl;
         }
         final BotanicalInfoImage entityImage = new BotanicalInfoImage();
         entityImage.setTarget((BotanicalInfo) linkedEntity);
@@ -269,18 +269,8 @@ public class FileSystemImageStorageService implements ImageStorageService {
 
 
     private ImageContentResponse fetchRemoteImage(String url) throws IOException {
-        try {
-            final RestTemplate restTemplate = new RestTemplate();
-            final ResponseEntity<byte[]> response = restTemplate.getForEntity(new URI(url), byte[].class);
-            final MediaType contentType = response.getHeaders().getContentType();
-            if (response.getStatusCode() != HttpStatus.OK || response.getBody() == null || contentType == null ||
-                    !"image".equalsIgnoreCase(contentType.getType())) {
-                throw new IOException("Failed to retrieve valid image content from URL: " + url);
-            }
-            return new ImageContentResponse(response.getBody(), contentType);
-        } catch (URISyntaxException | RestClientException exception) {
-            throw new IOException("Failed to retrieve image content from URL: " + url, exception);
-        }
+        final RemoteImageContent image = remoteImageFetcher.fetch(url);
+        return new ImageContentResponse(image.content(), MediaType.parseMediaType(image.contentType()));
     }
 
 

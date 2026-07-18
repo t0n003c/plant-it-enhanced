@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -9,8 +8,11 @@ import 'package:plant_it/dto/species_dto.dart';
 import 'package:plant_it/environment.dart';
 import 'package:plant_it/observation/offline_hike_session.dart';
 import 'package:plant_it/observation/offline_observation_draft.dart';
+import 'package:plant_it/observation/identification_candidate_card.dart';
 import 'package:plant_it/observation/trail_sync_service.dart';
 import 'package:plant_it/search/guided_photo_sheet.dart';
+import 'package:plant_it/search/identification_context.dart';
+import 'package:plant_it/search/plant_search_repository.dart';
 import 'package:plant_it/search/photo_source_sheet.dart';
 import 'package:plant_it/toast/toast_manager.dart';
 import 'package:uuid/uuid.dart';
@@ -43,6 +45,7 @@ class _AddObservationPageState extends State<AddObservationPage> {
   late final String _localId;
   late final DateTime _createdAt;
   late DateTime _observedAt;
+  late final PlantSearchRepository _searchRepository;
   double? _latitude;
   double? _longitude;
   double? _accuracyMeters;
@@ -61,6 +64,7 @@ class _AddObservationPageState extends State<AddObservationPage> {
     _localId = draft?.localId ?? const Uuid().v4();
     _createdAt = draft?.createdAt ?? now;
     _observedAt = draft?.observedAt ?? now;
+    _searchRepository = PlantSearchRepository(widget.env.http);
     if (draft != null) {
       _displayNameController.text = draft.displayName ?? '';
       _trailController.text = draft.trailName ?? '';
@@ -142,25 +146,23 @@ class _AddObservationPageState extends State<AddObservationPage> {
     if (_photos.isEmpty) return;
     setState(() => _identifying = true);
     try {
-      final response = await widget.env.http.identifyPlant(
-        _photos,
-        _organs,
-        Localizations.localeOf(context).languageCode,
+      final Locale locale = Localizations.localeOf(context);
+      final List<SpeciesDTO> candidates = await _searchRepository.identify(
+        images: _photos,
+        organs: _organs,
+        language: locale.languageCode,
+        context: IdentificationContext(
+          observedAt: _observedAt,
+          latitude: _latitude,
+          longitude: _longitude,
+          elevationMeters: _elevationMeters,
+          habitat: _habitatController.text,
+          region: locale.countryCode,
+        ),
       );
-      final dynamic body = json.decode(utf8.decode(response.bodyBytes));
-      if (response.statusCode != 200) {
-        throw Exception(
-          body is Map
-              ? body['message'] ?? 'Plant identification failed'
-              : 'Plant identification failed',
-        );
-      }
       if (!mounted) return;
       setState(() {
-        _candidates = (body as List<dynamic>)
-            .map((item) => SpeciesDTO.fromJson(item as Map<String, dynamic>))
-            .take(3)
-            .toList();
+        _candidates = candidates.take(3).toList(growable: false);
         if (_candidates.isEmpty) {
           _identificationError =
               AppLocalizations.of(context).identificationFailedSaveAnyway;
@@ -211,6 +213,9 @@ class _AddObservationPageState extends State<AddObservationPage> {
         _elevationMeters = position.altitude;
         _locationPrivacy = 'PRIVATE';
       });
+      if (_photos.isNotEmpty) {
+        await _identifyPhotos();
+      }
     } catch (error, stackTrace) {
       widget.env.logger.warning('Could not capture field location: $error');
       widget.env.logger.debug(stackTrace);
@@ -435,6 +440,8 @@ class _AddObservationPageState extends State<AddObservationPage> {
             _activeHikeCard(context),
           ],
           const SizedBox(height: 14),
+          _locationSection(context),
+          const SizedBox(height: 14),
           _photoSection(context),
           if (_identifying) ...[
             const SizedBox(height: 16),
@@ -459,8 +466,29 @@ class _AddObservationPageState extends State<AddObservationPage> {
             ),
             const SizedBox(height: 5),
             Text(AppLocalizations.of(context).identificationOptional),
+            const SizedBox(height: 5),
+            Text(
+              AppLocalizations.of(context).contextRankingExplanation,
+              style: const TextStyle(color: Colors.white70),
+            ),
             const SizedBox(height: 8),
-            ..._candidates.map((candidate) => _candidateTile(candidate)),
+            ..._candidates.asMap().entries.map(
+                  (entry) => IdentificationCandidateCard(
+                    candidate: entry.value,
+                    env: widget.env,
+                    rank: entry.key + 1,
+                    selected: _selectedCandidate == entry.value,
+                    onSelected: (candidate) {
+                      setState(() => _selectedCandidate = candidate);
+                    },
+                  ),
+                ),
+            const SizedBox(height: 8),
+            _messageCard(
+              Icons.health_and_safety_outlined,
+              AppLocalizations.of(context).identificationSafetyReminder,
+              const Color(0xFFFFD166),
+            ),
           ],
           const SizedBox(height: 20),
           TextField(
@@ -500,8 +528,6 @@ class _AddObservationPageState extends State<AddObservationPage> {
               alignLabelWithHint: true,
             ),
           ),
-          const SizedBox(height: 18),
-          _locationSection(context),
         ],
       ),
     );
@@ -611,60 +637,21 @@ class _AddObservationPageState extends State<AddObservationPage> {
                     : AppLocalizations.of(context).changeObservationPhotos,
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _candidateTile(SpeciesDTO candidate) {
-    final Locale locale = Localizations.localeOf(context);
-    final String commonName = candidate.preferredCommonNameFor(
-          locale.languageCode,
-          region: locale.countryCode,
-        ) ??
-        candidate.scientificName;
-    return Card(
-      color: _selectedCandidate == candidate
-          ? const Color(0xFF315D4E)
-          : const Color(0xFF182C25),
-      child: RadioListTile<SpeciesDTO>(
-        value: candidate,
-        groupValue: _selectedCandidate,
-        activeColor: const Color(0xFFC7F9CC),
-        onChanged: (value) => setState(() => _selectedCandidate = value),
-        title: Text(
-          commonName,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (commonName != candidate.scientificName)
-              Text(
-                candidate.scientificName,
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontStyle: FontStyle.italic,
+            if (_photos.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                key: const ValueKey('rerun-trail-identification-button'),
+                onPressed: _identifying ? null : _identifyPhotos,
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(52),
+                  foregroundColor: Colors.white,
+                ),
+                icon: const Icon(Icons.refresh),
+                label: Text(
+                  AppLocalizations.of(context).runIdentificationAgain,
                 ),
               ),
-            if (candidate.identificationConfidence != null)
-              Text(
-                '${candidate.identificationProvider ?? 'AI'} '
-                '${(candidate.identificationConfidence! * 100).round()}%',
-                style: const TextStyle(color: Colors.white70),
-              ),
-            if (candidate.catalogTags.contains('CONTACT_HAZARD'))
-              Text(
-                AppLocalizations.of(context).avoidPlantContact,
-                style: const TextStyle(
-                  color: Color(0xFFFFD166),
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
+            ],
           ],
         ),
       ),

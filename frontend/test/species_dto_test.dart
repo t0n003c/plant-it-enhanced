@@ -42,6 +42,20 @@ void main() {
       'imageAttribution': '(c) Example Photographer, CC BY',
       'creator': 'INATURALIST',
       'externalId': '67710',
+      'identificationConfidence': 0.82,
+      'contextualIdentificationScore': 0.94,
+      'identificationEvidence': [
+        {
+          'code': 'NEARBY_SEASONAL_OCCURRENCES',
+          'adjustment': 0.1,
+          'source': 'iNaturalist',
+          'sourceReference': 'https://www.inaturalist.org/observations',
+          'observationCount': 42,
+          'detail': '6,7,8',
+        }
+      ],
+      'establishmentMeans': 'native',
+      'establishmentPlace': 'United States',
       'catalogTags': ['NORTH_AMERICAN_TRAIL'],
     });
 
@@ -55,6 +69,11 @@ void main() {
     expect(species.imageSource, 'INATURALIST');
     expect(species.imageLicenseCode, 'cc-by');
     expect(species.imageAttribution, '(c) Example Photographer, CC BY');
+    expect(species.identificationConfidence, 0.82);
+    expect(species.contextualIdentificationScore, 0.94);
+    expect(species.identificationEvidence.single.observationCount, 42);
+    expect(species.establishmentMeans, 'native');
+    expect(species.establishmentPlace, 'United States');
     expect(
         species.preferredCommonNameFor('es', region: 'MX'), 'Lengua de suegra');
     expect(species.preferredCommonNameFor('en', region: 'US'), 'Snake Plant');
@@ -63,5 +82,19 @@ void main() {
     expect(species.toMap()['catalogTags'], ['NORTH_AMERICAN_TRAIL']);
     expect(species.toMap()['imageSourceUrl'],
         'https://www.inaturalist.org/photos/12345');
+    expect(species.toMap()['contextualIdentificationScore'], 0.94);
+    expect(
+      species.toMap()['identificationEvidence'],
+      [
+        {
+          'code': 'NEARBY_SEASONAL_OCCURRENCES',
+          'adjustment': 0.1,
+          'source': 'iNaturalist',
+          'sourceReference': 'https://www.inaturalist.org/observations',
+          'observationCount': 42,
+          'detail': '6,7,8',
+        }
+      ],
+    );
   });
 }

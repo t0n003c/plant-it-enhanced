@@ -4,10 +4,11 @@ This roadmap records the product direction for the maintained fork. Each milesto
 self-hosting friendly: optional cloud providers may enrich the experience, but core search, care,
 and backup workflows must continue to work without API keys.
 
-The v0.14 onboarding milestone and the first two v0.15 Trail Mode phases are implemented. The next
-phase adds contextual identification and field-safety signals. Trail Mode deliberately separates a
-wild observation from an owned plant so a trail find never receives care reminders unless the user
-explicitly adds a cultivated plant to their collection.
+The v0.14 onboarding milestone and the contextual-identification foundation of v0.15 Trail Mode are
+implemented. The next work completes source-backed lookalike and range data before moving into maps
+and portable observations. Trail Mode deliberately separates a wild observation from an owned
+plant so a trail find never receives care reminders unless the user explicitly adds a cultivated
+plant to their collection.
 
 ## v0.14 — Trustworthy plant onboarding
 
@@ -44,17 +45,23 @@ explicitly adds a cultivated plant to their collection.
 
 ### Phase 3 — Contextual identification and field safety
 
-- [ ] Rerank identification candidates using region, season, elevation, habitat, and nearby
-      occurrence evidence without presenting those signals as certainty.
-- [ ] Show comparable candidates, common lookalikes, contact hazards, and confidence before the
-      user confirms an identification.
-- [ ] Add native, introduced, and invasive status only where an attributable regional source is
-      available.
-- [ ] Keep wild-plant safety language prominent and never infer edibility or medicinal safety.
+- [x] Use an opt-in, server-coarsened field location to choose a nearby Pl@ntNet flora, show which
+      flora was used, and keep exact observation coordinates on the self-hosted server.
+- [x] Rerank candidates with bounded regional-flora and nearby seasonal-occurrence evidence while
+      retaining the provider's visual confidence as a separate value.
+- [x] Show captured habitat and elevation for comparison without scoring either field until a
+      source-backed ecological range is available for that taxon.
+- [x] Show comparable candidates, contact hazards, evidence, and confidence before confirmation.
+- [ ] Label common lookalikes only where a reviewed, attributable source supports the relationship.
+- [x] Show native, introduced, or endemic status only when iNaturalist returns it for the configured
+      place; add invasive status only after an attributable regional source is selected.
+- [x] Keep wild-plant safety language prominent and never infer edibility or medicinal safety.
 
 ### Phase 4 — Life list and portable observations
 
-- [ ] Add a map, timeline filters, species counts, and an unidentified-observation inbox.
+- [x] Add Trail dashboard counts, text/date/hike/status filters, and an unidentified-observation
+      inbox that can rerun identification from already saved photos.
+- [ ] Add a privacy-aware observation map and distinct-species life-list counts.
 - [ ] Export observations and photos as JSON, CSV, and GeoJSON with private or obscured locations.
 - [ ] Add optional, review-before-publish iNaturalist integration; never publish automatically.
 
@@ -85,4 +92,6 @@ explicitly adds a cultivated plant to their collection.
 - Every displayed care value must say where it came from and when it was checked.
 - Provider photos fill only missing images and retain their source, license, and attribution.
 - Provider credentials stay on the server. Photos are uploaded only after an explicit user action.
+- Forwarded client addresses are trusted only from configured reverse-proxy CIDRs, and remote
+  provider images pass an explicit host, address, redirect, type, and size policy.
 - Releases require backend tests, frontend analysis/tests, and a production web build.

@@ -195,14 +195,14 @@ Feature: Integration tests regards botanical info managements
       | 6     | 5        |         |         | 2     | 1     |
     When user updates botanical info "foo"
       | synonyms | family | genus | species | creator | externalId | image_id | image_url                | image_content |
-      | synonym1 | fam    | gen   | foo     | USER    |            |          | https://dummyimage.com/1 |               |
+      | synonym1 | fam    | gen   | foo     | USER    |            |          | https://static.inaturalist.org/photos/1/medium.jpg |               |
     Then response is ok
     * species "foo" is
       | scientific_name | synonyms | family | genus | species | creator | externalId |
       | foo             | synonym1 | fam    | gen   | foo     | USER    |            |
     * species "foo" has this image
       | image_id | image_url                | image_content |
-      |          | https://dummyimage.com/1 |               |
+      |          | https://static.inaturalist.org/photos/1/medium.jpg |               |
     * species "foo" has this care
       | light | humidity | minTemp | maxTemp | phMax | phMin |
       | 6     | 5        |         |         | 2     | 1     |

@@ -2,8 +2,7 @@ package com.github.mdeluise.plantit.unit.service;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -24,8 +23,8 @@ import com.github.mdeluise.plantit.image.PlantImageRepository;
 import com.github.mdeluise.plantit.image.storage.FileSystemImageStorageService;
 import com.github.mdeluise.plantit.plant.Plant;
 import com.github.mdeluise.plantit.plant.PlantRepository;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpServer;
+import com.github.mdeluise.plantit.proxy.RemoteImageContent;
+import com.github.mdeluise.plantit.proxy.RemoteImageFetcher;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -56,6 +55,8 @@ class FileSystemImageStorageServiceUnitTests {
     private PlantRepository plantRepository;
     @Mock
     private AuthenticatedUserService authenticatedUserService;
+    @Mock
+    private RemoteImageFetcher remoteImageFetcher;
     private FileSystemImageStorageService fileSystemImageStorageService;
 
 
@@ -64,7 +65,7 @@ class FileSystemImageStorageServiceUnitTests {
         fileSystemImageStorageService =
             new FileSystemImageStorageService(tmpDir.toString(), imageRepository, plantImageRepository,
                                               observationImageRepository, plantRepository, 10000000,
-                                              authenticatedUserService
+                                              authenticatedUserService, remoteImageFetcher
             );
     }
 
@@ -103,6 +104,20 @@ class FileSystemImageStorageServiceUnitTests {
         ArgumentCaptor<BotanicalInfoImage> argument = ArgumentCaptor.forClass(BotanicalInfoImage.class);
         Mockito.verify(imageRepository).save(argument.capture());
         Assertions.assertThat(argument.getValue().getPath()).startsWith(tmpDir.toString());
+    }
+
+
+    @Test
+    @DisplayName("Should reject a remote image URL outside the outbound policy")
+    void shouldRejectDisallowedRemoteImage() throws IOException {
+        final String remoteUrl = "https://untrusted.example.test/plant.jpg";
+        final BotanicalInfo imageTarget = new BotanicalInfo();
+        Mockito.when(remoteImageFetcher.validate(remoteUrl)).thenThrow(new IOException("host is not allowed"));
+
+        Assertions.assertThatThrownBy(() -> fileSystemImageStorageService.save(remoteUrl, imageTarget))
+                  .isInstanceOf(MalformedURLException.class)
+                  .hasMessageContaining("host is not allowed");
+        Mockito.verify(imageRepository, Mockito.never()).save(Mockito.any());
     }
 
 
@@ -197,25 +212,21 @@ class FileSystemImageStorageServiceUnitTests {
     @Test
     @DisplayName("Should use a botanical image fallback when the preferred URL is unavailable")
     void shouldGetRemoteFallbackContent() throws IOException {
-        final byte[] content = "fallback-image".getBytes(StandardCharsets.UTF_8);
-        final HttpServer server = HttpServer.create(new InetSocketAddress(0), 0);
-        server.createContext("/missing", exchange -> respond(exchange, 404, "text/plain", new byte[0]));
-        server.createContext("/fallback", exchange -> respond(exchange, 200, "image/jpeg", content));
-        server.start();
-        try {
-            final String baseUrl = "http://127.0.0.1:" + server.getAddress().getPort();
-            final BotanicalInfoImage toGet = new BotanicalInfoImage();
-            toGet.setUrl(baseUrl + "/missing");
-            toGet.setFallbackUrl(baseUrl + "/fallback");
-            Mockito.when(imageRepository.findById(toGet.getId())).thenReturn(Optional.of(toGet));
+        final byte[] content = {1, 2, 3};
+        final String primaryUrl = "https://images.example.test/missing.jpg";
+        final String fallbackUrl = "https://images.example.test/fallback.jpg";
+        final BotanicalInfoImage toGet = new BotanicalInfoImage();
+        toGet.setUrl(primaryUrl);
+        toGet.setFallbackUrl(fallbackUrl);
+        Mockito.when(imageRepository.findById(toGet.getId())).thenReturn(Optional.of(toGet));
+        Mockito.when(remoteImageFetcher.fetch(primaryUrl)).thenThrow(new IOException("unavailable"));
+        Mockito.when(remoteImageFetcher.fetch(fallbackUrl))
+               .thenReturn(new RemoteImageContent(MediaType.IMAGE_JPEG_VALUE, content));
 
-            final ImageContentResponse result = fileSystemImageStorageService.getImageContentInternal(toGet.getId());
+        final ImageContentResponse result = fileSystemImageStorageService.getImageContentInternal(toGet.getId());
 
-            Assertions.assertThat(result.getContent()).isEqualTo(content);
-            Assertions.assertThat(result.getType()).isEqualTo(MediaType.IMAGE_JPEG);
-        } finally {
-            server.stop(0);
-        }
+        Assertions.assertThat(result.getContent()).isEqualTo(content);
+        Assertions.assertThat(result.getType()).isEqualTo(MediaType.IMAGE_JPEG);
     }
 
 
@@ -443,13 +454,5 @@ class FileSystemImageStorageServiceUnitTests {
         Mockito.when(plantImageRepository.countByTargetOwner(authenticatedUser)).thenReturn(countWanted);
 
         Assertions.assertThat(fileSystemImageStorageService.count()).as("count is correct").isEqualTo(countWanted);
-    }
-
-
-    private void respond(HttpExchange exchange, int status, String contentType, byte[] content) throws IOException {
-        exchange.getResponseHeaders().set("Content-Type", contentType);
-        exchange.sendResponseHeaders(status, content.length);
-        exchange.getResponseBody().write(content);
-        exchange.close();
     }
 }

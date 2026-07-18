@@ -1,5 +1,7 @@
 package com.github.mdeluise.plantit.security;
 
+import java.util.Arrays;
+
 import com.github.mdeluise.plantit.security.apikey.ApiKeyFilter;
 import com.github.mdeluise.plantit.security.jwt.JwtTokenFilter;
 import com.github.mdeluise.plantit.security.ratelimit.RateLimitFilter;
@@ -117,7 +119,7 @@ public class ApplicationSecurityConfig {
                                                 .permitAll()
                                                 .anyRequest()
                                                 .authenticated())
-                   .headers(h -> h.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
+                   .headers(h -> h.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                    .authenticationManager(authenticationManager)
                    .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
                    .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
@@ -133,12 +135,19 @@ public class ApplicationSecurityConfig {
 
     @Bean
     public WebMvcConfigurer corsConfigurer(@Value("${server.cors.allowed-origins}") String allowedOrigins) {
+        final String[] originPatterns = Arrays.stream(allowedOrigins.split(","))
+                                              .map(String::trim)
+                                              .filter(origin -> !origin.isEmpty())
+                                              .toArray(String[]::new);
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins(allowedOrigins)
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTION");
+                        .allowedOriginPatterns(originPatterns)
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedHeaders("Authorization", "Content-Type", "Key")
+                        .exposedHeaders("RateLimit-Limit", "RateLimit-Remaining", "Retry-After")
+                        .maxAge(3600);
             }
         };
     }

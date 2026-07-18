@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:plant_it/environment.dart';
+import 'package:plant_it/event/add_new_event.dart';
 import 'package:plant_it/event/events_done_section.dart';
 import 'package:plant_it/floating_tabbar.dart';
 import 'package:plant_it/event/reminder_section.dart';
@@ -36,30 +37,41 @@ class _EventsPageState extends State<EventsPage> {
       }
     }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 8.0,
-        vertical: 32,
+    return Scaffold(
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => Navigator.of(context).push<bool>(
+          MaterialPageRoute(
+            builder: (context) => AddNewEventPage(env: widget.env),
+          ),
+        ),
+        icon: const Icon(Icons.event_available_outlined),
+        label: Text(AppLocalizations.of(context).addNewEvent),
       ),
-      child: Column(
-        children: [
-          FloatingTabBar(
-            titles: [
-              AppLocalizations.of(context).careTasks,
-              AppLocalizations.of(context).calendar,
-              AppLocalizations.of(context).events,
-            ],
-            callbacks: [
-              () => _onTabSelected(0),
-              () => _onTabSelected(1),
-              () => _onTabSelected(2),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Expanded(
-            child: getCurrentSection(),
-          ),
-        ],
+      body: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 8.0,
+          vertical: 32,
+        ),
+        child: Column(
+          children: [
+            FloatingTabBar(
+              titles: [
+                AppLocalizations.of(context).careTasks,
+                AppLocalizations.of(context).calendar,
+                AppLocalizations.of(context).events,
+              ],
+              callbacks: [
+                () => _onTabSelected(0),
+                () => _onTabSelected(1),
+                () => _onTabSelected(2),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Expanded(
+              child: getCurrentSection(),
+            ),
+          ],
+        ),
       ),
     );
   }

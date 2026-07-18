@@ -63,8 +63,6 @@ set at least:
 
 ```dotenv
 PLANTIT_IMAGE=ghcr.io/t0n003c/plant-it-enhanced:latest
-PLANTIT_API_HOST_PORT=8346
-PLANTIT_WEB_HOST_PORT=3372
 PLANTIT_UPLOAD_PATH=/volume1/docker/plantit/upload_dir
 PLANTIT_DB_PATH=/volume1/docker/plantit/db
 PLANTIT_PROXY_NETWORK=TinhnasNetwork
@@ -95,7 +93,8 @@ docker compose logs --since=10m server
 
 The NAS example intentionally does not set `container_name`. Compose-generated names prevent stale
 containers from a previous project from blocking deployment. It also uses `pull_policy: always`, so
-a redeploy checks GHCR for the current `latest` image.
+a redeploy checks GHCR for the current `latest` image. Ports `3000` and `8080` are exposed only on
+the shared Docker network and are not published on the NAS host.
 
 ## Network design
 
@@ -116,7 +115,8 @@ browser / reverse proxy
 
 For a local deployment, `compose.example.yaml` uses a normal bridge network named `app`. For a NAS
 behind a reverse proxy, `compose.nas.example.yaml` replaces that side with the existing external
-network named by `PLANTIT_PROXY_NETWORK`. Only the server is attached to it.
+network named by `PLANTIT_PROXY_NETWORK`. Only the server is attached to it, with the stable network
+alias `plantit-server`.
 
 ## How `.env` is used
 
@@ -159,10 +159,22 @@ Do not commit `.env`, paste it into an issue, or expose it through a reverse pro
 Common-name search and the bundled catalog work with every provider key blank.
 
 - `PLANTNET_API_KEY`: optional guided photo identification
+- `PLANTNET_LOCATION_PROJECT_ENABLED`: use an opt-in Trail Journal location to choose a closer
+  Pl@ntNet flora; defaults to `true`
+- `PLANTNET_LOCATION_PRECISION_DEGREES`: coordinate grid used for that lookup; defaults to `0.5`,
+  while exact observation coordinates remain self-hosted
+- `IDENTIFICATION_CONTEXT_ENABLED`: add bounded, source-linked iNaturalist occurrence evidence to
+  photo candidate ranking; defaults to `true`
+- `IDENTIFICATION_OCCURRENCE_RADIUS_KM`: search radius around the coarsened point; defaults to
+  `100` km and is bounded by the server
+- `IDENTIFICATION_OCCURRENCE_RESULT_LIMIT`: maximum species-count rows requested per cached context;
+  defaults to `200` and is bounded by the server
 - `TREFLE_TOKEN`: optional structured plant data
 - `PERENUAL_API_KEY`: optional care fallback; free-plan coverage is limited
 - `FLORACODEX_KEY`: optional final plant-data fallback
 - `INATURALIST_ENABLED`: common-name discovery; defaults to `true`
+- `INATURALIST_PLACE_ID`: preferred place for localized names and establishment status; `1` is the
+  United States, so update it together with `PLANT_SEARCH_REGION`
 - `PLANT_SEARCH_LOCALE` and `PLANT_SEARCH_REGION`: fallback language and region for older clients
 - `GBIF_MIN_CONFIDENCE`: threshold for accepted-taxonomy verification
 
@@ -192,15 +204,87 @@ account uses IP restrictions, authorize the NAS's public outbound IP.
 - `SMTP_*`: optional password-reset and notification email delivery
 - `NTFY_ENABLED` and `GOTIFY_ENABLED`: optional notification dispatchers
 
-## Reverse proxy
+## Cloudflare Tunnel and Nginx Proxy Manager
 
-Route the application hostname to server container port `3000` and the API hostname or path to
-server container port `8080`. The NAS Compose service is reachable as `server` on the external
-proxy network. Never route `db:3306` or `cache:6379`.
+The recommended public request path is:
 
-Use HTTPS for mobile geolocation. When the frontend and API use different origins, set
-`ALLOWED_ORIGINS` to the frontend origin or leave `*` while validating the deployment. Enter the API
-base URL without `/api` when the app asks for a server address.
+```text
+browser -> Cloudflare -> Cloudflare Tunnel -> Nginx Proxy Manager -> plantit-server
+                                                               |-> /      :3000
+                                                               `-> /api/  :8080
+```
+
+Cloudflare Tunnel remains the only public ingress. It should send the Plant-it hostname to Nginx
+Proxy Manager. Do not point the tunnel at MySQL, Redis, or Plant-it directly, and do not forward NAS
+router ports for this stack.
+
+In Nginx Proxy Manager, create one Proxy Host for `plants.example.com`:
+
+- forward the main host to `plantit-server` on port `3000` using `http`;
+- add a custom location `/api/` forwarded to `plantit-server` on port `8080` using `http`;
+- enable the normal exploit protections;
+- add `client_max_body_size 50m;` in the advanced configuration so guided multi-photo requests fit
+  the application request limit.
+
+Nginx Proxy Manager and the Plant-it server must both join `TinhnasNetwork` (or the network named by
+`PLANTIT_PROXY_NETWORK`). The same-origin layout means the server address entered in Plant-it is
+simply `https://plants.example.com`, without `/api`.
+
+Set an exact CORS origin even though same-origin requests do not require CORS:
+
+```dotenv
+ALLOWED_ORIGINS=https://plants.example.com
+```
+
+### Trusted client addresses
+
+Cloudflare supplies the original visitor in
+[`CF-Connecting-IP`](https://developers.cloudflare.com/fundamentals/reference/http-headers/#cf-connecting-ip),
+but Plant-it accepts that header only when the immediate connection came from a configured trusted
+proxy. Find the Nginx Proxy Manager network subnet:
+
+```bash
+docker network inspect TinhnasNetwork \
+  --format '{{range .IPAM.Config}}{{println .Subnet}}{{end}}'
+```
+
+Then put the exact reported subnet in `.env`:
+
+```dotenv
+TRUSTED_PROXY_CIDRS=172.20.0.0/16
+TRUSTED_CLIENT_IP_HEADERS=CF-Connecting-IP,X-Forwarded-For
+```
+
+Do not copy the example subnet blindly and do not use all private address ranges. Leave
+`TRUSTED_PROXY_CIDRS` empty if the API is accessed directly. Plant-it ignores forwarding headers
+from every address outside this list, preventing a direct caller from choosing a different
+rate-limit identity.
+
+Cloudflare recommends `CF-Connecting-IP` for the original visitor because it contains one
+consistent address. Do not enable Cloudflare's **Remove visitor IP headers** transform for this
+hostname. If the NPM host is also reachable from an untrusted non-Cloudflare ingress, restrict that
+ingress before trusting the Cloudflare header.
+
+In Cloudflare, bypass caching for `/api/*`. Use HTTPS at the public hostname because browser
+geolocation and camera behavior require a secure context. Cloudflare Tunnel uses
+[outbound-only connections](https://developers.cloudflare.com/tunnel/), so no inbound router port
+is required.
+
+### Image proxy restrictions
+
+Remote catalog photos are fetched only from the public provider hosts in
+`IMAGE_PROXY_ALLOWED_HOSTS`. Every redirect is checked again, private/link-local destinations are
+blocked, and only common raster image types are returned. If a legitimate provider adopts a new
+CDN, or a custom species uses a remote image host, add only that exact hostname after verifying it:
+
+```dotenv
+IMAGE_PROXY_ALLOWED_HOSTS=static.inaturalist.org,inaturalist-open-data.s3.amazonaws.com,bs.plantnet.org,new.example-cdn.test
+IMAGE_PROXY_ALLOWED_PORTS=80,443
+IMAGE_PROXY_ALLOW_PRIVATE_ADDRESSES=false
+```
+
+Never set `IMAGE_PROXY_ALLOW_PRIVATE_ADDRESSES=true` on the NAS. It would permit the application to
+reach internal services through the image endpoint.
 
 ## Upgrade safely
 
