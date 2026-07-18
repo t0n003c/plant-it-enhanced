@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.15.7 - 2026-07-18 - Single-destination reverse proxy
+
+- Proxy `/api/` from the bundled frontend on port `3000` to the backend on port `8080`, allowing
+  Cloudflare Tunnel and Nginx Proxy Manager to use one reliable upstream destination.
+- Preserve forwarded HTTPS and securely retain the immediate upstream for trusted client-address
+  resolution across the loopback hop, and allow the documented 50 MB guided-photo request limit.
+- Remove the custom `/api/` location as a required Nginx Proxy Manager setup step while retaining
+  compatibility with deployments that route it directly to port `8080`.
+
 ## 0.15.6 - 2026-07-18 - Cross-provider common-name ranking
 
 - Add reviewed kale, Thai pepper, Thai chili, and Thai chile aliases, resolving them to

@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ClientIpResolver {
     private static final String X_FORWARDED_FOR = "x-forwarded-for";
+    private static final String INTERNAL_PROXY_SOURCE = "X-Plantit-Proxy-Source";
     private final List<IpAddressMatcher> trustedProxies;
     private final List<String> trustedHeaders;
 
@@ -37,8 +38,9 @@ public class ClientIpResolver {
     public String resolve(HttpServletRequest request) {
         final String remoteAddress = normalizeIpLiteral(request.getRemoteAddr())
             .orElse(request.getRemoteAddr());
-        if (!isTrustedProxy(remoteAddress)) {
-            return remoteAddress;
+        final String proxyAddress = resolveImmediateProxyAddress(request, remoteAddress);
+        if (!isTrustedProxy(proxyAddress)) {
+            return proxyAddress;
         }
 
         for (String headerName : trustedHeaders) {
@@ -53,7 +55,15 @@ public class ClientIpResolver {
                 return resolved.get();
             }
         }
-        return remoteAddress;
+        return proxyAddress;
+    }
+
+
+    private String resolveImmediateProxyAddress(HttpServletRequest request, String remoteAddress) {
+        if (!isLoopbackAddress(remoteAddress)) {
+            return remoteAddress;
+        }
+        return normalizeIpLiteral(request.getHeader(INTERNAL_PROXY_SOURCE)).orElse(remoteAddress);
     }
 
 
@@ -84,6 +94,15 @@ public class ClientIpResolver {
 
     private boolean isTrustedProxy(String address) {
         return trustedProxies.stream().anyMatch(matcher -> matcher.matches(address));
+    }
+
+
+    private static boolean isLoopbackAddress(String address) {
+        try {
+            return InetAddress.getByName(address).isLoopbackAddress();
+        } catch (UnknownHostException invalidAddress) {
+            return false;
+        }
     }
 
 
