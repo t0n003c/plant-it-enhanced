@@ -10,6 +10,7 @@ import 'package:plant_it/environment.dart';
 import 'package:plant_it/plant_add/add_plant_page.dart';
 import 'package:plant_it/search/species_details_page.dart';
 import 'package:plant_it/search/tag.dart';
+import 'package:plant_it/species_image_url.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:plant_it/theme.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -35,8 +36,10 @@ class SearchResultCard extends StatefulWidget {
 }
 
 class _SearchResultCardState extends State<SearchResultCard> {
-  String? _url;
   Future<Uint8List>? _identificationImageBytes;
+
+  String? get _url =>
+      resolveSpeciesImageUrl(widget.species, widget.env.http.backendUrl);
 
   Widget _buildPlantLabels(BuildContext context) {
     final Locale locale = Localizations.localeOf(context);
@@ -124,13 +127,6 @@ class _SearchResultCardState extends State<SearchResultCard> {
     if (widget.identificationImage != null) {
       _identificationImageBytes = widget.identificationImage!.readAsBytes();
     }
-    if (widget.species.id != null) {
-      _url =
-          "${widget.env.http.backendUrl}image/content/${widget.species.imageId}";
-    } else if (widget.species.imageUrl != null) {
-      _url =
-          "${widget.env.http.backendUrl}proxy?url=${widget.species.imageUrl}";
-    }
   }
 
   @override
@@ -150,8 +146,7 @@ class _SearchResultCardState extends State<SearchResultCard> {
       );
     }
     return CachedNetworkImage(
-      imageUrl:
-          _url ?? "${widget.env.http.backendUrl}image/content/non-existing-id",
+      imageUrl: _url ?? missingSpeciesImageUrl(widget.env.http.backendUrl),
       httpHeaders: {
         "Key": widget.env.http.key!,
       },

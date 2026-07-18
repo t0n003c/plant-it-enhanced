@@ -38,6 +38,7 @@ Plant-it helps you remember the last time you did a treatment of your plants, wh
 * Save finds offline, group them into named hikes, and retry interrupted synchronization without
   duplicating observations or photos
 * See why a search result matched and its match confidence
+* See attributable iNaturalist photos for image-less search results without replacing your own photos
 * Take guided whole-plant, leaf, and flower photos, compare the top matches, and add the plant
 * Verify accepted scientific taxonomy through GBIF, with iNaturalist discovery and FloraCodex fallback
 * View field-level sources and confidence for light, moisture, temperature, and pH guidance
@@ -55,6 +56,11 @@ iNaturalist, FloraCodex, and future providers are combined into one catalog entr
 of creating a new copy for each provider. Scientific synonyms, localized common names,
 provider references, and missing care values are merged while existing values are
 preserved. Personal `USER` entries remain private copies and are never auto-merged.
+
+Search results that do not already have a photo are enriched from iNaturalist when one is
+available. Plant-it retains the provider's source page, license code, and attribution and uses a
+smaller square thumbnail if the preferred medium image cannot be loaded. Existing local and
+user-selected images always take precedence.
 
 The reviewed offline index contains 160 taxa and nearly 600 everyday-name and synonym examples and
 works without an API key. The web app sends its current language and region with each search.
@@ -228,6 +234,9 @@ checks MySQL, Redis, provider configuration and recent provider responses. See
 The Field Journal migrations add owner-scoped observations, named hike sessions, durable retry
 references, and observation-image links. They do not convert or modify existing plants, care
 reminders, diaries, or photos.
+
+The search-result photography migration adds optional image fallback and attribution columns. It
+does not replace or delete any existing image.
 
 See [Server installation](online-resources/documentation/docs/server-installation.md) for the full
 configuration reference.

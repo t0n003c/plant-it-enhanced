@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import com.github.mdeluise.plantit.botanicalinfo.care.PlantCareInfo;
+import com.github.mdeluise.plantit.image.BotanicalInfoImage;
 import com.github.mdeluise.plantit.plantinfo.search.PlantNameNormalizer;
 
 /**
@@ -67,6 +68,7 @@ public final class BotanicalInfoCatalogMerger {
         mergeCatalogTags(target, source);
         mergeExternalReferences(target, source);
         mergeCareInfo(target.getPlantCareInfo(), source.getPlantCareInfo());
+        mergeImage(target, source);
         if (clean(target.getCanonicalTaxonKey()) == null) {
             target.setCanonicalTaxonKey(clean(source.getCanonicalTaxonKey()));
         }
@@ -74,6 +76,15 @@ public final class BotanicalInfoCatalogMerger {
             target.setLastVerifiedAt(source.getLastVerifiedAt());
         }
         return target;
+    }
+
+
+    public static boolean hasUsableImage(BotanicalInfo botanicalInfo) {
+        if (botanicalInfo == null || botanicalInfo.getImage() == null) {
+            return false;
+        }
+        final BotanicalInfoImage image = botanicalInfo.getImage();
+        return clean(image.getId()) != null || clean(image.getUrl()) != null || image.getContent() != null;
     }
 
 
@@ -195,6 +206,22 @@ public final class BotanicalInfoCatalogMerger {
         }
         if (source.getCatalogTags() != null) {
             target.getCatalogTags().addAll(source.getCatalogTags());
+        }
+    }
+
+
+    private static void mergeImage(BotanicalInfo target, BotanicalInfo source) {
+        if (!hasUsableImage(source)) {
+            return;
+        }
+        if (!hasUsableImage(target)) {
+            target.setImage(source.getImage());
+            return;
+        }
+        final String targetUrl = clean(target.getImage().getUrl());
+        final String sourceUrl = clean(source.getImage().getUrl());
+        if (targetUrl != null && targetUrl.equals(sourceUrl)) {
+            target.getImage().fillMissingMetadataFrom(source.getImage());
         }
     }
 

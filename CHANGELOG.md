@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased - Search-result photography
+
+- Enrich image-less trusted and saved search results with iNaturalist's default species photos
+  without replacing an existing local or user-selected image.
+- Preserve provider, source page, license, attribution, and a square-image fallback when a species
+  photo is saved.
+- Correct image selection for saved species, safely encode nested provider URLs, and retry a
+  fallback thumbnail when the preferred remote image is unavailable.
+- Display provider photo credit in species details and invalidate earlier image-less search caches.
+- Add additive image-provenance columns plus backend and frontend regression coverage.
+
 ## 0.15.1 - 2026-07-18 - Offline trail capture
 
 - Store photo-first trail drafts, notes, optional GPS accuracy/elevation, and hike sessions in

@@ -15,6 +15,11 @@ class SpeciesDTO {
   SpeciesCareInfoDTO care;
   String? imageId;
   String? imageUrl;
+  String? imageFallbackUrl;
+  String? imageSource;
+  String? imageSourceUrl;
+  String? imageLicenseCode;
+  String? imageAttribution;
   Uint8List? imageContent;
   String? imageContentType;
   String creator;
@@ -41,6 +46,11 @@ class SpeciesDTO {
     required this.care,
     this.imageId,
     this.imageUrl,
+    this.imageFallbackUrl,
+    this.imageSource,
+    this.imageSourceUrl,
+    this.imageLicenseCode,
+    this.imageAttribution,
     this.imageContent,
     this.imageContentType,
     required this.creator,
@@ -78,6 +88,11 @@ class SpeciesDTO {
       care: SpeciesCareInfoDTO.fromJson(json['plantCareInfo']),
       imageId: json['imageId'],
       imageUrl: json['imageUrl'],
+      imageFallbackUrl: json['imageFallbackUrl'],
+      imageSource: json['imageSource'],
+      imageSourceUrl: json['imageSourceUrl'],
+      imageLicenseCode: json['imageLicenseCode'],
+      imageAttribution: json['imageAttribution'],
       imageContent: json['imageContent'],
       imageContentType: json['imageContentType'],
       creator: json['creator'],
@@ -113,12 +128,25 @@ class SpeciesDTO {
       'plantCareInfo': care.toMap(),
       if (imageId != null) 'imageId': imageId,
       if (imageUrl != null) 'imageUrl': imageUrl,
+      if (imageFallbackUrl != null) 'imageFallbackUrl': imageFallbackUrl,
+      if (imageSource != null) 'imageSource': imageSource,
+      if (imageSourceUrl != null) 'imageSourceUrl': imageSourceUrl,
+      if (imageLicenseCode != null) 'imageLicenseCode': imageLicenseCode,
+      if (imageAttribution != null) 'imageAttribution': imageAttribution,
       if (imageContent != null) 'imageContent': imageContent,
       if (imageContentType != null) 'imageContentType': imageContentType,
       'creator': creator,
       if (externalId != null) 'externalId': externalId,
       'catalogTags': catalogTags,
     };
+  }
+
+  void clearImageMetadata() {
+    imageFallbackUrl = null;
+    imageSource = null;
+    imageSourceUrl = null;
+    imageLicenseCode = null;
+    imageAttribution = null;
   }
 
   String? preferredCommonNameFor(String language, {String? region}) {

@@ -35,7 +35,15 @@ class INaturalistRequestMakerUnitTests {
               "iconic_taxon_name": "Plantae",
               "preferred_common_name": "Snake Plant",
               "matched_term": "Snake Plant",
-              "observations_count": 10000
+              "observations_count": 10000,
+              "default_photo": {
+                "id": 12345,
+                "license_code": "cc-by",
+                "attribution": "(c) Example Photographer, CC BY",
+                "url": "https://static.inaturalist.org/photos/12345/square.jpeg",
+                "square_url": "https://static.inaturalist.org/photos/12345/square.jpeg",
+                "medium_url": "https://static.inaturalist.org/photos/12345/medium.jpeg"
+              }
             },
             {
               "id": 99999,
@@ -107,6 +115,16 @@ class INaturalistRequestMakerUnitTests {
         Assertions.assertTrue(result.getSynonyms().contains("Sansevieria trifasciata"));
         Assertions.assertTrue(result.getCommonNames().stream()
                                     .anyMatch(name -> "Mother-in-Law's Tongue".equals(name.getName())));
+        Assertions.assertNotNull(result.getImage());
+        Assertions.assertNull(result.getImage().getId());
+        Assertions.assertEquals("https://static.inaturalist.org/photos/12345/medium.jpeg",
+                                result.getImage().getUrl());
+        Assertions.assertEquals("https://static.inaturalist.org/photos/12345/square.jpeg",
+                                result.getImage().getFallbackUrl());
+        Assertions.assertEquals("INATURALIST", result.getImage().getSource());
+        Assertions.assertEquals("https://www.inaturalist.org/photos/12345", result.getImage().getSourceUrl());
+        Assertions.assertEquals("cc-by", result.getImage().getLicenseCode());
+        Assertions.assertEquals("(c) Example Photographer, CC BY", result.getImage().getAttribution());
     }
 
 

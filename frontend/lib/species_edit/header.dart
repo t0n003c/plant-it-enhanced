@@ -7,6 +7,7 @@ import 'package:plant_it/app_exception.dart';
 import 'package:plant_it/dto/species_dto.dart';
 import 'package:plant_it/environment.dart';
 import 'package:plant_it/image_provider_helper.dart';
+import 'package:plant_it/species_image_url.dart';
 import 'package:plant_it/theme.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -37,14 +38,8 @@ class _EditSpeciesImageHeaderState extends State<EditSpeciesImageHeader> {
   }
 
   void _setInitialImage() {
-    String? imageUrl;
-    if (widget.species.imageUrl != null) {
-      imageUrl =
-          "${widget.env.http.backendUrl}proxy?url=${widget.species.imageUrl}";
-    } else if (widget.species.imageId != null) {
-      imageUrl =
-          "${widget.env.http.backendUrl}image/content/${widget.species.imageId}";
-    }
+    final String? imageUrl =
+        resolveSpeciesImageUrl(widget.species, widget.env.http.backendUrl);
 
     if (imageUrl != null) {
       _imageToDisplay = CachedNetworkImageProvider(
@@ -118,12 +113,17 @@ class _EditSpeciesImageHeaderState extends State<EditSpeciesImageHeader> {
             TextButton(
               onPressed: () async {
                 try {
-                  final response = await widget.env.http.get("proxy?url=$url");
+                  final String proxyPath = Uri(
+                    path: 'proxy',
+                    queryParameters: {'url': url},
+                  ).toString();
+                  final response = await widget.env.http.get(proxyPath);
                   if (response.statusCode == 200) {
                     final imageBytes = response.bodyBytes;
                     widget.species.imageContent = null;
                     widget.species.imageId = null;
                     widget.species.imageUrl = url;
+                    widget.species.clearImageMetadata();
                     setState(() {
                       _loading = true;
                       _imageToDisplay = MemoryImage(imageBytes);
@@ -167,6 +167,7 @@ class _EditSpeciesImageHeaderState extends State<EditSpeciesImageHeader> {
     widget.species.imageContent = await pickedImage.readAsBytes();
     widget.species.imageId = null;
     widget.species.imageUrl = null;
+    widget.species.clearImageMetadata();
     ImageProvider<Object> uploaded = await ImageProviderHelper.getImageProvider(
         pickedImage, widget.env.logger);
     setState(() {

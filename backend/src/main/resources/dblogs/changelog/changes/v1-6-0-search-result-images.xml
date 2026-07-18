@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+
+    <changeSet id="addBotanicalImageProvenance" author="t0n003c">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="entity_images"/>
+            <not>
+                <columnExists tableName="entity_images" columnName="source_provider"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="entity_images">
+            <column name="fallback_url" type="varchar(255)"/>
+            <column name="source_provider" type="varchar(32)"/>
+            <column name="source_url" type="varchar(512)"/>
+            <column name="license_code" type="varchar(64)"/>
+            <column name="attribution" type="varchar(1024)"/>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

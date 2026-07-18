@@ -29,7 +29,7 @@ public abstract class AbstractPlantInfoExtractorStep implements PlantInfoExtract
         final Set<BotanicalInfo> result = new LinkedHashSet<>();
         extractPlantsInternal(partialPlantScientificName, size, locale, region)
             .forEach(candidate -> addOrMerge(result, candidate));
-        if (result.size() < size && next != null) {
+        if (shouldQueryNext(result, size)) {
             next.extractPlants(partialPlantScientificName, size, locale, region)
                 .forEach(candidate -> addOrMerge(result, candidate));
         }
@@ -64,5 +64,11 @@ public abstract class AbstractPlantInfoExtractorStep implements PlantInfoExtract
             return;
         }
         BotanicalInfoCatalogMerger.mergeInto(existing, candidate);
+    }
+
+
+    private boolean shouldQueryNext(Set<BotanicalInfo> result, int size) {
+        return next != null && (result.size() < size || result.stream().anyMatch(
+            botanicalInfo -> !BotanicalInfoCatalogMerger.hasUsableImage(botanicalInfo)));
     }
 }

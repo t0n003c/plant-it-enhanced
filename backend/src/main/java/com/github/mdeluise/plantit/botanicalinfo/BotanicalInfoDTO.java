@@ -42,6 +42,18 @@ public class BotanicalInfoDTO {
     private String imageId;
     @Schema(description = "URL of the botanical info image.")
     private String imageUrl;
+    @Schema(description = "Fallback URL used when the preferred botanical image is unavailable.")
+    private String imageFallbackUrl;
+    @Schema(description = "Provider of the botanical image.", accessMode = Schema.AccessMode.READ_ONLY)
+    private String imageSource;
+    @Schema(description = "Source page for the botanical image.", accessMode = Schema.AccessMode.READ_ONLY)
+    private String imageSourceUrl;
+    @Schema(description = "License code supplied by the botanical image provider.",
+            accessMode = Schema.AccessMode.READ_ONLY)
+    private String imageLicenseCode;
+    @Schema(description = "Attribution supplied by the botanical image provider.",
+            accessMode = Schema.AccessMode.READ_ONLY)
+    private String imageAttribution;
     @Schema(description = "Content of the botanical info image.", accessMode = Schema.AccessMode.WRITE_ONLY)
     private byte[] imageContent;
     @Schema(description = "Content type of the botanical info image.", accessMode = Schema.AccessMode.WRITE_ONLY)
@@ -193,6 +205,56 @@ public class BotanicalInfoDTO {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+
+    public String getImageFallbackUrl() {
+        return imageFallbackUrl;
+    }
+
+
+    public void setImageFallbackUrl(String imageFallbackUrl) {
+        this.imageFallbackUrl = imageFallbackUrl;
+    }
+
+
+    public String getImageSource() {
+        return imageSource;
+    }
+
+
+    public void setImageSource(String imageSource) {
+        this.imageSource = imageSource;
+    }
+
+
+    public String getImageSourceUrl() {
+        return imageSourceUrl;
+    }
+
+
+    public void setImageSourceUrl(String imageSourceUrl) {
+        this.imageSourceUrl = imageSourceUrl;
+    }
+
+
+    public String getImageLicenseCode() {
+        return imageLicenseCode;
+    }
+
+
+    public void setImageLicenseCode(String imageLicenseCode) {
+        this.imageLicenseCode = imageLicenseCode;
+    }
+
+
+    public String getImageAttribution() {
+        return imageAttribution;
+    }
+
+
+    public void setImageAttribution(String imageAttribution) {
+        this.imageAttribution = imageAttribution;
     }
 
 

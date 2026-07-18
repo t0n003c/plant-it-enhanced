@@ -46,6 +46,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -192,6 +193,10 @@ public class FileSystemImageStorageService implements ImageStorageService {
             throw new UnsupportedOperationException("Could not find suitable class for linkedEntity");
         }
         entityImage.setUrl(toClone.getUrl());
+        if (entityImage instanceof BotanicalInfoImage botanicalImage &&
+                toClone instanceof BotanicalInfoImage sourceBotanicalImage) {
+            botanicalImage.copyMetadataFrom(sourceBotanicalImage);
+        }
         if (toClone.getPath() != null) {
             final String resultPath = toClone.getPath().replace(toClone.getId(), entityImage.getId());
             try {
@@ -240,24 +245,41 @@ public class FileSystemImageStorageService implements ImageStorageService {
         final EntityImageImpl image =
             imageRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
         if (image.getUrl() != null) {
-            try {
-                final RestTemplate restTemplate = new RestTemplate();
-                final ResponseEntity<byte[]> response = restTemplate.getForEntity(new URI(image.getUrl()), byte[].class);
-
-                if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-                    final MediaType contentType = restTemplate.headForHeaders(new URI(image.getUrl())).getContentType();
-                    return new ImageContentResponse(response.getBody(), contentType);
-                } else {
-                    throw new IOException("Failed to retrieve image content from URL: " + image.getUrl());
-                }
-            } catch (URISyntaxException e) {
-                throw new IOException("Invalid image URL: " + image.getUrl(), e);
-            }
+            return getRemoteImageContent(image);
         } else {
             final MediaType contentType = MediaType.parseMediaType(image.getContentType());
             final Path imagePath = Paths.get(rootLocation + "/" + image.getId() + "." + contentType.getSubtype());
             final byte[] imageBytes = Files.readAllBytes(imagePath);
             return new ImageContentResponse(imageBytes, contentType);
+        }
+    }
+
+
+    private ImageContentResponse getRemoteImageContent(EntityImageImpl image) throws IOException {
+        try {
+            return fetchRemoteImage(image.getUrl());
+        } catch (IOException primaryFailure) {
+            if (image instanceof BotanicalInfoImage botanicalImage &&
+                    botanicalImage.getFallbackUrl() != null && !botanicalImage.getFallbackUrl().isBlank()) {
+                return fetchRemoteImage(botanicalImage.getFallbackUrl());
+            }
+            throw primaryFailure;
+        }
+    }
+
+
+    private ImageContentResponse fetchRemoteImage(String url) throws IOException {
+        try {
+            final RestTemplate restTemplate = new RestTemplate();
+            final ResponseEntity<byte[]> response = restTemplate.getForEntity(new URI(url), byte[].class);
+            final MediaType contentType = response.getHeaders().getContentType();
+            if (response.getStatusCode() != HttpStatus.OK || response.getBody() == null || contentType == null ||
+                    !"image".equalsIgnoreCase(contentType.getType())) {
+                throw new IOException("Failed to retrieve valid image content from URL: " + url);
+            }
+            return new ImageContentResponse(response.getBody(), contentType);
+        } catch (URISyntaxException | RestClientException exception) {
+            throw new IOException("Failed to retrieve image content from URL: " + url, exception);
         }
     }
 
