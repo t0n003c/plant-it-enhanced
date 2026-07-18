@@ -53,6 +53,8 @@ class PlantSearchQualityCorpusTests {
         result.add(plant("Maranta leuconeura", List.of("Prayer Plant"), List.of()));
         result.add(plant("Curio rowleyanus", List.of("String of Pearls"), List.of("Senecio rowleyanus")));
         result.add(plant("Beaucarnea recurvata", List.of("Ponytail Palm"), List.of()));
+        result.add(plant("Brassica oleracea", List.of("Kale", "Curly Kale"), List.of()));
+        result.add(plant("Capsicum annuum", List.of("Thai Pepper", "Thai Chili"), List.of()));
         return result;
     }
 

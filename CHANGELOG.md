@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.15.6 - 2026-07-18 - Cross-provider common-name ranking
+
+- Add reviewed kale, Thai pepper, Thai chili, and Thai chile aliases, resolving them to
+  `Brassica oleracea` and `Capsicum annuum` for taxonomy and licensed-photo enrichment.
+- Rank merged provider results by match confidence before applying the result limit, preventing a
+  full page of fuzzy catalog matches from hiding an exact downstream provider match.
+- Suppress unrelated common-name typo coincidences when the merged results contain a strong match,
+  while preserving typo tolerance when the user actually misspells a plant name.
+- Continue to external discovery when a complete local result page contains no strong match, even
+  when every weak result already has an image.
+- Add an Extension-sourced sunlight and soil-moisture profile for kale and invalidate stale search
+  results created before the new mappings and ranking behavior.
+- Document the diagnostic signature of a misrouted `/api/` custom location: HTTP 200 with Flutter
+  HTML is a proxy failure; the ping response must be exactly `pong`.
+
 ## 0.15.5 - 2026-07-18 - Trusted alias photo enrichment
 
 - Resolve exact reviewed everyday names to their accepted scientific identity before taxonomy and

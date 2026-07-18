@@ -1,5 +1,7 @@
 package com.github.mdeluise.plantit.plantinfo.search;
 
+import java.util.Comparator;
+
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalCommonName;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfo;
 
@@ -24,6 +26,7 @@ public final class PlantSearchScorer {
     private static final double CONTAINS_CONFIDENCE = 0.42;
     private static final double ONE_TYPO_CONFIDENCE = 0.82;
     private static final double TWO_TYPOS_CONFIDENCE = 0.68;
+    private static final double STRONG_MATCH_CONFIDENCE = 0.90;
 
     private PlantSearchScorer() {
     }
@@ -31,6 +34,21 @@ public final class PlantSearchScorer {
 
     public static int score(String query, BotanicalInfo botanicalInfo) {
         return evaluate(query, botanicalInfo).score();
+    }
+
+
+    public static Comparator<BotanicalInfo> relevanceComparator(String query) {
+        return Comparator.comparingDouble(
+            (BotanicalInfo candidate) -> evaluate(query, candidate).confidence()
+        ).reversed().thenComparing(
+            Comparator.comparingInt((BotanicalInfo candidate) -> score(query, candidate)).reversed()
+        );
+    }
+
+
+    public static boolean isStrongMatch(String query, BotanicalInfo botanicalInfo) {
+        final PlantSearchMatch match = evaluate(query, botanicalInfo);
+        return match.isRelevant() && match.confidence() >= STRONG_MATCH_CONFIDENCE;
     }
 
 

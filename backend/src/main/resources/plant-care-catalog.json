@@ -112,6 +112,12 @@
       "sourceReference": "https://plants.ces.ncsu.edu/plants/lactuca-sativa/"
     },
     {
+      "scientificNames": ["Brassica oleracea", "Brassica oleracea var. sabellica"],
+      "light": 8,
+      "soilHumidity": 7,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/brassica-oleracea/"
+    },
+    {
       "scientificNames": ["Helianthus annuus"],
       "light": 9,
       "soilHumidity": 5,
