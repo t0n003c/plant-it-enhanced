@@ -1,7 +1,6 @@
-site_name: Plant-it docs
-site_url: https://docs.plant-it.org/
-repo_url: https://github.com/MDeLuise/plant-it
-repo_name: MDeLuise/plant-it
+site_name: Plant-it Enhanced docs
+repo_url: https://github.com/t0n003c/plant-it-enhanced
+repo_name: t0n003c/plant-it-enhanced
 edit_uri: tree/main/online-resources/documentation/docs
 
 markdown_extensions:
@@ -21,14 +20,8 @@ nav:
 extra:
     social:
       - icon: fontawesome/brands/github
-        link: https://github.com/MDeLuise/plant-it
+        link: https://github.com/t0n003c/plant-it-enhanced
         name: Repository on GitHub
-      - icon: fontawesome/solid/user
-        link: https://massimilianodeluise.com
-        name: Personal site
-      - icon: simple/buymeacoffee
-        link: https://buymeacoffee.com/mdeluise
-        name: Buy me a coffe
     version:
       provider: mike
 

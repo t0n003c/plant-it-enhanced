@@ -26,8 +26,11 @@ import com.github.mdeluise.plantit.image.ImageContentResponse;
 import com.github.mdeluise.plantit.image.ImageRepository;
 import com.github.mdeluise.plantit.image.ImageTarget;
 import com.github.mdeluise.plantit.image.ImageUtility;
+import com.github.mdeluise.plantit.image.ObservationImage;
+import com.github.mdeluise.plantit.image.ObservationImageRepository;
 import com.github.mdeluise.plantit.image.PlantImage;
 import com.github.mdeluise.plantit.image.PlantImageRepository;
+import com.github.mdeluise.plantit.observation.Observation;
 import com.github.mdeluise.plantit.plant.Plant;
 import com.github.mdeluise.plantit.plant.PlantAvatarMode;
 import com.github.mdeluise.plantit.plant.PlantRepository;
@@ -52,6 +55,7 @@ public class FileSystemImageStorageService implements ImageStorageService {
     private final String rootLocation;
     private final ImageRepository imageRepository;
     private final PlantImageRepository plantImageRepository;
+    private final ObservationImageRepository observationImageRepository;
     private final PlantRepository plantRepository;
     private final int maxOriginImgSize;
     private final AuthenticatedUserService authenticatedUserService;
@@ -62,12 +66,14 @@ public class FileSystemImageStorageService implements ImageStorageService {
     @SuppressWarnings("ParameterNumber") //FIXME
     public FileSystemImageStorageService(@Value("${upload.location}") String rootLocation,
                                          ImageRepository imageRepository, PlantImageRepository plantImageRepository,
+                                         ObservationImageRepository observationImageRepository,
                                          PlantRepository plantRepository,
                                          @Value("${image.max_origin_size}") int maxOriginImgSize,
                                          AuthenticatedUserService authenticatedUserService) {
         this.rootLocation = rootLocation;
         this.imageRepository = imageRepository;
         this.plantImageRepository = plantImageRepository;
+        this.observationImageRepository = observationImageRepository;
         this.plantRepository = plantRepository;
         this.maxOriginImgSize = maxOriginImgSize;
         this.authenticatedUserService = authenticatedUserService;
@@ -113,6 +119,9 @@ public class FileSystemImageStorageService implements ImageStorageService {
             } else if (linkedEntity instanceof Plant p) {
                 entityImage = new PlantImage();
                 ((PlantImage) entityImage).setTarget(p);
+            } else if (linkedEntity instanceof Observation observation) {
+                entityImage = new ObservationImage();
+                ((ObservationImage) entityImage).setTarget(observation);
             } else {
                 throw new UnsupportedOperationException("Could not find suitable class for linkedEntity");
             }
@@ -176,6 +185,9 @@ public class FileSystemImageStorageService implements ImageStorageService {
         } else if (linkedEntity instanceof Plant p) {
             entityImage = new PlantImage();
             ((PlantImage) entityImage).setTarget(p);
+        } else if (linkedEntity instanceof Observation observation) {
+            entityImage = new ObservationImage();
+            ((ObservationImage) entityImage).setTarget(observation);
         } else {
             throw new UnsupportedOperationException("Could not find suitable class for linkedEntity");
         }
@@ -205,6 +217,11 @@ public class FileSystemImageStorageService implements ImageStorageService {
         } else if (result instanceof BotanicalInfoImage b &&
                        !b.getTarget().isAccessibleToUser(authenticatedUserService.getAuthenticatedUser())) {
             logger.warn("User not authorized to operate on image " + id);
+            throw new UnauthorizedException();
+        } else if (result instanceof ObservationImage observationImage &&
+                       !Objects.equals(observationImage.getTarget().getOwner().getId(),
+                                       authenticatedUserService.getAuthenticatedUser().getId())) {
+            logger.warn("User not authorized to operate on observation image " + id);
             throw new UnauthorizedException();
         }
         return result;
@@ -317,12 +334,19 @@ public class FileSystemImageStorageService implements ImageStorageService {
 
     @Override
     public Collection<String> getAllIds(ImageTarget linkedEntity) {
-        return plantImageRepository.findAllIdsPlantByImageTargetOrderBySavedAtDesc((Plant) linkedEntity);
+        if (linkedEntity instanceof Plant plant) {
+            return plantImageRepository.findAllIdsPlantByImageTargetOrderBySavedAtDesc(plant);
+        }
+        if (linkedEntity instanceof Observation observation) {
+            return observationImageRepository.findAllIdsByObservationOrderBySavedAtDesc(observation);
+        }
+        throw new UnsupportedOperationException("Could not find images for linked entity");
     }
 
 
     @Override
     public int count() {
-        return plantImageRepository.countByTargetOwner(authenticatedUserService.getAuthenticatedUser());
+        final var user = authenticatedUserService.getAuthenticatedUser();
+        return plantImageRepository.countByTargetOwner(user) + observationImageRepository.countByTargetOwner(user);
     }
 }

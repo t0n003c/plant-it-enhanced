@@ -2,8 +2,6 @@ name: CI and container image
 
 on:
   pull_request:
-    branches:
-      - main
   push:
     branches:
       - main
@@ -24,6 +22,28 @@ env:
   IMAGE_NAME: ghcr.io/t0n003c/plant-it-enhanced
 
 jobs:
+  deployment:
+    name: Deployment and docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+
+      - name: Validate Compose examples
+        run: |
+          cp .env.example .env
+          docker compose -f compose.example.yaml config --quiet
+          docker compose -f compose.nas.example.yaml config --quiet
+
+      - name: Build documentation
+        run: |
+          python3 -m venv /tmp/plantit-docs-venv
+          /tmp/plantit-docs-venv/bin/pip install --disable-pip-version-check \
+            -r online-resources/documentation/requirements.txt
+          /tmp/plantit-docs-venv/bin/mkdocs build --strict \
+            --config-file online-resources/documentation/mkdocs.yml \
+            --site-dir /tmp/plantit-docs-site
+
   backend:
     name: Backend tests
     runs-on: ubuntu-latest

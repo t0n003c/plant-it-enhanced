@@ -33,7 +33,7 @@ RUN --mount=type=cache,target=/root/.pub-cache flutter build web --release
 FROM ${RUNTIME_BASE} AS runtime
 
 LABEL org.opencontainers.image.source="https://github.com/t0n003c/plant-it-enhanced" \
-      org.opencontainers.image.description="Plant-it with common-name-first, taxonomy-verified plant search" \
+      org.opencontainers.image.description="Self-hosted plant care, trusted search, and private offline trail journal" \
       org.opencontainers.image.licenses="GPL-3.0-only"
 
 RUN apk add --no-cache nginx netcat-openbsd && \

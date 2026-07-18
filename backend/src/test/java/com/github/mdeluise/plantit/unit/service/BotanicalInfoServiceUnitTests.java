@@ -224,6 +224,36 @@ class BotanicalInfoServiceUnitTests {
 
 
     @Test
+    @DisplayName("Should resolve a repeated catalog submission without saving a duplicate")
+    void shouldResolveRepeatedCatalogSubmission() throws MalformedURLException {
+        final BotanicalInfo existing = new BotanicalInfo();
+        existing.setId(1L);
+        existing.setCreator(BotanicalInfoCreator.INATURALIST);
+        existing.setExternalId("inat-1");
+        existing.setCanonicalTaxonKey("11041822");
+        existing.setSpecies("Dracaena trifasciata");
+
+        final BotanicalInfo repeated = new BotanicalInfo();
+        repeated.setCreator(BotanicalInfoCreator.INATURALIST);
+        repeated.setExternalId("inat-1");
+        repeated.setCanonicalTaxonKey("11041822");
+        repeated.setSpecies("Dracaena trifasciata");
+
+        Mockito.when(botanicalInfoRepository.findAllByCanonicalTaxonKey("11041822"))
+               .thenReturn(List.of(existing));
+        Mockito.when(botanicalInfoRepository.findAllByCreatorAndExternalId(
+            BotanicalInfoCreator.INATURALIST, "inat-1")).thenReturn(List.of(existing));
+        Mockito.when(botanicalInfoRepository.findAllBySpeciesIgnoreCase("Dracaena trifasciata"))
+               .thenReturn(List.of(existing));
+
+        final BotanicalInfo result = botanicalInfoService.resolveOrSave(repeated);
+
+        Assertions.assertThat(result).isSameAs(existing);
+        Mockito.verify(botanicalInfoRepository, Mockito.never()).save(Mockito.any());
+    }
+
+
+    @Test
     @DisplayName("Should get a botanical info by ID")
     void shouldGetBotanicalInfoById() {
         final Long botanicalInfoId = 1L;

@@ -1,38 +1,36 @@
-# Support
+# Support and contributing
 
-## Ask for help
-If you need support using Plant-it come find us!
+## Get help
 
-* [Github issues for questions and support](https://github.com/MDeLuise/plant-it/issues)
-* [Follow me on linkedin to remain in contact](https://www.linkedin.com/in/massimiliano-de-luise-370464209)
+Search or open an issue in the
+[Plant-it Enhanced issue tracker](https://github.com/t0n003c/plant-it-enhanced/issues). Include the
+application version from **More → System diagnostics**, the relevant service logs, the deployment
+method, and the steps that reproduce the problem. Remove passwords, API keys, JWTs, private
+coordinates, and personal photos before posting.
 
-## Support the project
-If you find this project helpful and would like to supporting it, consider [buying me a coffee](https://www.buymeacoffee.com/mdeluise). Your generosity helps keep this project alive and ensures its continued development and improvement.
+For deployment problems, these commands usually provide the most useful starting point:
 
-## Contributing
-Feel free to contribute and help improve the project.
+```bash
+docker compose config --quiet
+docker compose ps
+docker compose logs --since=10m server db cache
+```
 
-### Contributing Translations to the Project
-If you're interested in contributing transactions to enhance the app, you can get started by following the guide provided [here](https://github.com/MDeLuise/plant-it/discussions/148). Your support and contributions are greatly appreciated.
+## Report a provider problem
 
-### Bug Report, Feature Request and Question
-You can submit any of this in the [github issues section of the repository](https://github.com/MDeLuise/plant-it/issues/new/choose). Chose the right template and then fill the required info.
+State whether the issue affects ordinary name search, Pl@ntNet photo identification, Trefle,
+Perenual, iNaturalist, GBIF, or FloraCodex. Copy the HTTP status from diagnostics, but never the API
+key. A provider being unconfigured should not break the bundled catalog or ordinary app use.
 
-### Bug fix
-If you fix a bug, please follow the contribution guideline in order to merge the fix in the repository.
+## Contribute
 
-### Feature development
-Let's discuss first possible solutions for the development before start working on that, please [open a feature request issue](https://github.com/MDeLuise/plant-it/issues/new?assignees=&labels=Status:+Created,Type:+Feature+Request&projects=&template=feature_request.yml).
+1. Fork or clone the repository.
+2. Create a focused branch.
+3. Add tests and documentation with the change.
+4. Run backend verification and frontend analysis/tests.
+5. Open a pull request against `t0n003c/plant-it-enhanced`.
 
-### Contribution guideline
-To fix a bug or create a feature, follow these steps:
-
-1. Fork the repo
-1. Create a new branch (`git checkout -b awesome-feature`)
-1. Make changes or add new changes
-1. Commit your changes (`git add -A; git commit -m 'Awesome new feature'`)
-1. Push to the branch (`git push origin awesome-feature`)
-1. Create a Pull Request
-
-#### Conventions
-Commits should follow the [semantic commit specification](https://www.conventionalcommits.org/en/v1.0.0/), although not mandatory.
+Plant-it Enhanced is derived from
+[`MDeLuise/plant-it`](https://github.com/MDeLuise/plant-it) and remains GPLv3 licensed. Changes
+intended for the upstream project can also be proposed there when they do not depend on fork-only
+features.

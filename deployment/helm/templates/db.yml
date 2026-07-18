@@ -23,6 +23,15 @@ spec:
         - name: db-data
           mountPath: {{ .Values.dbMountPath }}
         env:
+        - name: MYSQL_DATABASE
+          value: "{{ .Values.configmap.data.MYSQL_DATABASE }}"
+        - name: MYSQL_USER
+          value: "{{ .Values.configmap.data.MYSQL_USERNAME }}"
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.secret.name }}
+              key: MYSQL_PSW
         - name: MYSQL_ROOT_PASSWORD
           valueFrom:
             secretKeyRef:

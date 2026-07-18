@@ -109,6 +109,19 @@ public class BotanicalInfoController {
     }
 
 
+    @PostMapping("/resolve")
+    @Operation(
+        summary = "Resolve or save botanical info.",
+        description = "Idempotently returns an equivalent catalog taxon or saves it when it is new."
+    )
+    public ResponseEntity<BotanicalInfoDTO> resolve(@RequestBody BotanicalInfoDTO candidate)
+        throws MalformedURLException {
+        final BotanicalInfo result = botanicalInfoService.resolveOrSave(
+            botanicalInfoDtoConverter.convertFromDTO(candidate));
+        return ResponseEntity.ok(botanicalInfoDtoConverter.convertToDTO(result));
+    }
+
+
     @GetMapping("/{id}")
     @Operation(summary = "Get a botanical info.", description = "Get the botanical info with the specified `id`.")
     public ResponseEntity<BotanicalInfoDTO> get(@PathVariable Long id) {

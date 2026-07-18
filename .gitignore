@@ -1,4 +1,5 @@
 *.DS_Store
+.smbdelete*
 
 online-resources/**/public
 online-resources/**/node_modules
