@@ -36,6 +36,45 @@ class ClientIpResolverUnitTests {
 
 
     @Test
+    @DisplayName("Should preserve the trusted upstream across the bundled loopback proxy")
+    void shouldResolveClientAcrossBundledProxy() {
+        final ClientIpResolver resolver = resolver();
+        final MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setRemoteAddr("127.0.0.1");
+        request.addHeader("X-Plantit-Proxy-Source", "172.20.0.8");
+        request.addHeader("CF-Connecting-IP", "198.51.100.25");
+
+        Assertions.assertEquals("198.51.100.25", resolver.resolve(request));
+    }
+
+
+    @Test
+    @DisplayName("Should reject forwarded identity from an untrusted bundled-proxy caller")
+    void shouldRejectSpoofingAcrossBundledProxy() {
+        final ClientIpResolver resolver = resolver();
+        final MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setRemoteAddr("127.0.0.1");
+        request.addHeader("X-Plantit-Proxy-Source", "203.0.113.12");
+        request.addHeader("CF-Connecting-IP", "198.51.100.25");
+
+        Assertions.assertEquals("203.0.113.12", resolver.resolve(request));
+    }
+
+
+    @Test
+    @DisplayName("Should ignore the internal source marker on non-loopback connections")
+    void shouldIgnoreInternalMarkerFromRemoteCaller() {
+        final ClientIpResolver resolver = resolver();
+        final MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setRemoteAddr("203.0.113.12");
+        request.addHeader("X-Plantit-Proxy-Source", "172.20.0.8");
+        request.addHeader("CF-Connecting-IP", "198.51.100.25");
+
+        Assertions.assertEquals("203.0.113.12", resolver.resolve(request));
+    }
+
+
+    @Test
     @DisplayName("Should walk X-Forwarded-For from the trusted proxy side")
     void shouldIgnoreSpoofedLeftmostForwardedAddress() {
         final ClientIpResolver resolver = new ClientIpResolver("172.20.0.0/16", "X-Forwarded-For");

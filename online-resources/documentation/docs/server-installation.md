@@ -228,8 +228,9 @@ The recommended public request path is:
 
 ```text
 browser -> Cloudflare -> Cloudflare Tunnel -> Nginx Proxy Manager -> plantit-server
-                                                               |-> /      :3000
-                                                               `-> /api/  :8080
+                                                               `-> :3000
+                                                                   |-> Flutter files
+                                                                   `-> /api/ -> :8080
 ```
 
 Cloudflare Tunnel remains the only public ingress. It should send the Plant-it hostname to Nginx
@@ -239,25 +240,30 @@ router ports for this stack.
 In Nginx Proxy Manager, create one Proxy Host for `plants.example.com`:
 
 - forward the main host to `plantit-server` on port `3000` using `http`;
-- add a custom location `/api/` forwarded to `plantit-server` on port `8080` using `http`;
 - enable the normal exploit protections;
 - add `client_max_body_size 50m;` in the advanced configuration so guided multi-photo requests fit
   the application request limit.
+
+Plant-it 0.15.7 and later proxy `/api/` to the backend inside the application container. A separate
+Nginx Proxy Manager custom location is therefore unnecessary. An existing `/api/` location pointed
+directly at `plantit-server:8080` remains compatible, but using only the main port `3000` destination
+is simpler and also works when a Cloudflare Tunnel bypasses location-specific proxy rules.
 
 Nginx Proxy Manager and the Plant-it server must both join `TinhnasNetwork` (or the network named by
 `PLANTIT_PROXY_NETWORK`). The same-origin layout means the server address entered in Plant-it is
 simply `https://plants.example.com`, without `/api`.
 
-After saving the Proxy Host and its custom location, verify the API route itself rather than relying
-on an HTTP 200 status alone:
+After saving the Proxy Host, verify the API route itself rather than relying on an HTTP 200 status
+alone:
 
 ```bash
 curl -fsS https://plants.example.com/api/info/ping
 ```
 
 The complete response must be `pong`. If it is Flutter HTML (usually beginning with
-`<!DOCTYPE html>`), `/api/` is still reaching port `3000`; recreate the Nginx Proxy Manager custom
-location with `/api/`, `http`, `plantit-server`, and port `8080`. A misrouted API path also prevents
+`<!DOCTYPE html>`), confirm that `/version.json` reports 0.15.7 or later and force-recreate the server
+from the current `latest` image. As a legacy fallback, add an Nginx Proxy Manager custom location
+for `/api/` using `http`, `plantit-server`, and port `8080`. A misrouted API path also prevents
 catalog images from loading because authenticated `/api/proxy` requests receive HTML instead of an
 image. Run `./scripts/verify-deployment.sh https://plants.example.com` after correcting the route.
 
@@ -285,6 +291,10 @@ Then put the exact reported subnet in `.env`:
 TRUSTED_PROXY_CIDRS=172.20.0.0/16
 TRUSTED_CLIENT_IP_HEADERS=CF-Connecting-IP,X-Forwarded-For
 ```
+
+The bundled port `3000` proxy securely carries Nginx Proxy Manager's immediate source address to
+the backend, so keep `TRUSTED_PROXY_CIDRS` set to the actual shared proxy-network subnet; do not add
+the container loopback range. Direct clients cannot use the internal marker to become trusted.
 
 Do not copy the example subnet blindly and do not use all private address ranges. Leave
 `TRUSTED_PROXY_CIDRS` empty if the API is accessed directly. Plant-it ignores forwarding headers
