@@ -144,6 +144,28 @@ public class BotanicalInfoService {
     }
 
 
+    @CacheEvict(cacheNames = "botanical-info", allEntries = true)
+    @Transactional
+    public BotanicalInfo resolveOrSave(BotanicalInfo candidate) throws MalformedURLException {
+        if (candidate.isUserCreated()) {
+            final User authenticated = authenticatedUserService.getAuthenticatedUser();
+            candidate.setUserCreator(authenticated);
+            final Optional<BotanicalInfo> existing = botanicalInfoRepository
+                .findBySpeciesAndCreatorAndUserCreator(candidate.getSpecies(), candidate.getCreator(), authenticated);
+            if (existing.isPresent()) {
+                return existing.get();
+            }
+        } else {
+            BotanicalInfoCatalogMerger.prepareCanonicalIdentity(candidate);
+            final Optional<BotanicalInfo> existing = findCatalogMatch(candidate);
+            if (existing.isPresent()) {
+                return existing.get();
+            }
+        }
+        return save(candidate);
+    }
+
+
     private Optional<BotanicalInfo> findCatalogMergeTarget(BotanicalInfo candidate) {
         if (candidate.isUserCreated()) {
             return Optional.empty();

@@ -5,19 +5,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:plant_it/dto/observation_dto.dart';
 import 'package:plant_it/dto/species_dto.dart';
 import 'package:plant_it/environment.dart';
+import 'package:plant_it/observation/offline_hike_session.dart';
+import 'package:plant_it/observation/offline_observation_draft.dart';
+import 'package:plant_it/observation/trail_sync_service.dart';
 import 'package:plant_it/search/guided_photo_sheet.dart';
 import 'package:plant_it/search/photo_source_sheet.dart';
 import 'package:plant_it/toast/toast_manager.dart';
+import 'package:uuid/uuid.dart';
 
 class AddObservationPage extends StatefulWidget {
   final Environment env;
+  final OfflineHikeSession? activeHike;
+  final OfflineObservationDraft? initialDraft;
 
   const AddObservationPage({
     super.key,
     required this.env,
+    this.activeHike,
+    this.initialDraft,
   });
 
   @override
@@ -33,12 +40,54 @@ class _AddObservationPageState extends State<AddObservationPage> {
   List<String> _organs = [];
   List<SpeciesDTO> _candidates = [];
   SpeciesDTO? _selectedCandidate;
-  Position? _position;
+  late final String _localId;
+  late final DateTime _createdAt;
+  late DateTime _observedAt;
+  double? _latitude;
+  double? _longitude;
+  double? _accuracyMeters;
+  double? _elevationMeters;
   String _locationPrivacy = 'PRIVATE';
   bool _identifying = false;
   bool _gettingLocation = false;
   bool _saving = false;
   String? _identificationError;
+
+  @override
+  void initState() {
+    super.initState();
+    final OfflineObservationDraft? draft = widget.initialDraft;
+    final DateTime now = DateTime.now();
+    _localId = draft?.localId ?? const Uuid().v4();
+    _createdAt = draft?.createdAt ?? now;
+    _observedAt = draft?.observedAt ?? now;
+    if (draft != null) {
+      _displayNameController.text = draft.displayName ?? '';
+      _trailController.text = draft.trailName ?? '';
+      _habitatController.text = draft.habitat ?? '';
+      _notesController.text = draft.notes ?? '';
+      _latitude = draft.latitude;
+      _longitude = draft.longitude;
+      _accuracyMeters = draft.accuracyMeters;
+      _elevationMeters = draft.elevationMeters;
+      _locationPrivacy = draft.locationPrivacy;
+      _photos = draft.photos
+          .map(
+            (photo) => XFile.fromData(
+              photo.bytes,
+              name: photo.name,
+              mimeType: photo.contentType,
+            ),
+          )
+          .toList();
+      _organs = draft.photos.map((photo) => photo.organ).toList();
+      if (draft.selectedTaxon != null) {
+        _selectedCandidate = SpeciesDTO.fromJson(draft.selectedTaxon!);
+      }
+    } else if (widget.activeHike != null) {
+      _trailController.text = widget.activeHike!.name;
+    }
+  }
 
   Future<void> _startGuidedCapture(ImageSource source) async {
     Navigator.of(context).pop();
@@ -156,7 +205,10 @@ class _AddObservationPageState extends State<AddObservationPage> {
       );
       if (!mounted) return;
       setState(() {
-        _position = position;
+        _latitude = position.latitude;
+        _longitude = position.longitude;
+        _accuracyMeters = position.accuracy;
+        _elevationMeters = position.altitude;
         _locationPrivacy = 'PRIVATE';
       });
     } catch (error, stackTrace) {
@@ -173,18 +225,106 @@ class _AddObservationPageState extends State<AddObservationPage> {
     }
   }
 
-  Future<SpeciesDTO?> _persistSelectedTaxon() async {
-    final SpeciesDTO? selected = _selectedCandidate;
-    if (selected == null || selected.id != null) return selected;
-    final response =
-        await widget.env.http.post('botanical-info', selected.toMap());
-    final dynamic body = json.decode(utf8.decode(response.bodyBytes));
-    if (response.statusCode != 200) {
-      throw Exception(
-        body is Map ? body['message'] ?? 'Could not save taxon' : body,
+  Future<OfflineObservationDraft> _buildDraft() async {
+    final OfflineObservationDraft? initial = widget.initialDraft;
+    final List<OfflineObservationPhoto> storedPhotos = [];
+    for (int index = 0; index < _photos.length; index++) {
+      final OfflineObservationPhoto? existing = initial != null &&
+              index < initial.photos.length &&
+              initial.photos[index].name == _photos[index].name
+          ? initial.photos[index]
+          : null;
+      storedPhotos.add(
+        OfflineObservationPhoto(
+          localId: existing?.localId ?? const Uuid().v4(),
+          name: _photos[index].name,
+          contentType: _photos[index].mimeType ?? 'image/jpeg',
+          organ: _organs[index],
+          bytes: await _photos[index].readAsBytes(),
+          serverImageId: existing?.serverImageId,
+        ),
       );
     }
-    return SpeciesDTO.fromJson(body as Map<String, dynamic>);
+    final SpeciesDTO? selected = _selectedCandidate;
+    final Map<String, dynamic>? selectedTaxon = selected == null
+        ? null
+        : <String, dynamic>{
+            ...selected.toMap(),
+            if (selected.identificationConfidence != null)
+              'identificationConfidence': selected.identificationConfidence,
+            if (selected.identificationProvider != null)
+              'identificationProvider': selected.identificationProvider,
+            if (selected.identificationModel != null)
+              'identificationModel': selected.identificationModel,
+          };
+    final OfflineHikeSession? activeHike = widget.activeHike;
+    return OfflineObservationDraft(
+      localId: _localId,
+      accountScope: widget.env.offlineAccountScope,
+      createdAt: _createdAt,
+      updatedAt: DateTime.now(),
+      observedAt: _observedAt,
+      serverObservationId: initial?.serverObservationId,
+      botanicalInfoId: selected?.id ?? initial?.botanicalInfoId,
+      selectedTaxon: selectedTaxon,
+      displayName: _displayNameController.text,
+      trailName: _trailController.text,
+      habitat: _habitatController.text,
+      notes: _notesController.text,
+      latitude: _latitude,
+      longitude: _longitude,
+      accuracyMeters: _accuracyMeters,
+      elevationMeters: _elevationMeters,
+      locationPrivacy: _locationPrivacy,
+      status: selected == null ? 'UNIDENTIFIED' : 'CONFIRMED',
+      identificationConfidence: selected?.identificationConfidence,
+      identificationProvider: selected?.identificationProvider,
+      hikeSessionLocalId: initial?.hikeSessionLocalId ?? activeHike?.localId,
+      hikeSessionId: initial?.hikeSessionId ?? activeHike?.serverId,
+      hikeSessionName: initial?.hikeSessionName ?? activeHike?.name,
+      photos: storedPhotos,
+      syncState: TrailSyncState.pending,
+      retryCount: initial?.retryCount ?? 0,
+    );
+  }
+
+  Future<void> _saveOffline() async {
+    final AppLocalizations localizations = AppLocalizations.of(context);
+    if (!widget.env.durableTrailStorage) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(localizations.offlineStorageUnavailable)),
+      );
+      return;
+    }
+    if (_photos.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(localizations.photosRequired)),
+      );
+      return;
+    }
+    setState(() => _saving = true);
+    try {
+      final OfflineObservationDraft draft = await _buildDraft();
+      await widget.env.trailDraftRepository.saveObservationDraft(draft);
+      if (!mounted) return;
+      widget.env.toastManager.showToast(
+        context,
+        ToastNotificationType.success,
+        localizations.observationSavedOffline,
+      );
+      Navigator.of(context).pop(true);
+    } catch (error, stackTrace) {
+      widget.env.logger.error(error, stackTrace);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            error.toString().replaceFirst('Exception: ', ''),
+          ),
+        ),
+      );
+      setState(() => _saving = false);
+    }
   }
 
   Future<void> _saveObservation() async {
@@ -197,64 +337,36 @@ class _AddObservationPageState extends State<AddObservationPage> {
     }
     setState(() => _saving = true);
     try {
-      final SpeciesDTO? taxon = await _persistSelectedTaxon();
-      final observation = ObservationDTO(
-        botanicalInfoId: taxon?.id,
-        observedAt: DateTime.now(),
-        displayName: _displayNameController.text,
-        trailName: _trailController.text,
-        habitat: _habitatController.text,
-        notes: _notesController.text,
-        latitude: _position?.latitude,
-        longitude: _position?.longitude,
-        accuracyMeters: _position?.accuracy,
-        elevationMeters: _position?.altitude,
-        locationPrivacy: _locationPrivacy,
-        status: taxon == null ? 'UNIDENTIFIED' : 'CONFIRMED',
-        identificationConfidence: taxon?.identificationConfidence,
-        identificationProvider: taxon?.identificationProvider,
-      );
-      final response =
-          await widget.env.http.post('observation', observation.toMap());
-      final dynamic body = json.decode(utf8.decode(response.bodyBytes));
-      if (response.statusCode != 200) {
-        throw Exception(
-          body is Map
-              ? body['message'] ?? localizations.observationSaveError
-              : localizations.observationSaveError,
-        );
-      }
-      final ObservationDTO created =
-          ObservationDTO.fromJson(body as Map<String, dynamic>);
-      bool photoUploadFailed = false;
-      for (int index = 0; index < _photos.length; index++) {
-        final uploadResponse = await widget.env.http.uploadObservationImage(
-          _photos[index],
-          created.id!,
-          description: _organs[index],
-        );
-        if (uploadResponse.statusCode != 200) photoUploadFailed = true;
-      }
+      final OfflineObservationDraft draft = await _buildDraft();
+      await widget.env.trailDraftRepository.saveObservationDraft(draft);
+      final bool synchronized = await TrailSyncService(
+        http: widget.env.http,
+        repository: widget.env.trailDraftRepository,
+        accountScope: widget.env.offlineAccountScope,
+      ).synchronizeObservation(draft.localId);
       if (!mounted) return;
+      if (!synchronized && !widget.env.durableTrailStorage) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(localizations.offlineStorageUnavailable)),
+        );
+        setState(() => _saving = false);
+        return;
+      }
       widget.env.toastManager.showToast(
         context,
-        photoUploadFailed
-            ? ToastNotificationType.warning
-            : ToastNotificationType.success,
-        photoUploadFailed
-            ? localizations.observationPhotoUploadWarning
-            : localizations.observationSaved,
+        synchronized
+            ? ToastNotificationType.success
+            : ToastNotificationType.warning,
+        synchronized
+            ? localizations.observationSaved
+            : localizations.observationQueuedForSync,
       );
       Navigator.of(context).pop(true);
     } catch (error, stackTrace) {
       widget.env.logger.error(error, stackTrace);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            error.toString().replaceFirst('Exception: ', ''),
-          ),
-        ),
+        SnackBar(content: Text(localizations.observationSaveError)),
       );
       setState(() => _saving = false);
     }
@@ -275,30 +387,53 @@ class _AddObservationPageState extends State<AddObservationPage> {
       appBar: AppBar(title: Text(AppLocalizations.of(context).recordTrailFind)),
       bottomNavigationBar: SafeArea(
         minimum: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-        child: FilledButton.icon(
-          key: const ValueKey('save-trail-observation-button'),
-          onPressed: _saving ? null : _saveObservation,
-          style: FilledButton.styleFrom(
-            minimumSize: const Size.fromHeight(58),
-            backgroundColor: const Color(0xFFC7F9CC),
-            foregroundColor: const Color(0xFF10231C),
-          ),
-          icon: _saving
-              ? const SizedBox.square(
-                  dimension: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Icon(Icons.bookmark_add_outlined),
-          label: Text(
-            AppLocalizations.of(context).saveTrailObservation,
-            style: const TextStyle(fontWeight: FontWeight.w700),
-          ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            OutlinedButton.icon(
+              key: const ValueKey('save-offline-observation-button'),
+              onPressed: _saving ? null : _saveOffline,
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(54),
+                foregroundColor: Colors.white,
+                side: const BorderSide(color: Colors.white70),
+              ),
+              icon: const Icon(Icons.offline_pin_outlined),
+              label: Text(AppLocalizations.of(context).saveOfflineDraft),
+            ),
+            const SizedBox(height: 8),
+            FilledButton.icon(
+              key: const ValueKey('save-trail-observation-button'),
+              onPressed: _saving ? null : _saveObservation,
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(58),
+                backgroundColor: const Color(0xFFC7F9CC),
+                foregroundColor: const Color(0xFF10231C),
+              ),
+              icon: _saving
+                  ? const SizedBox.square(
+                      dimension: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.cloud_upload_outlined),
+              label: Text(
+                AppLocalizations.of(context).saveAndSync,
+                style: const TextStyle(fontWeight: FontWeight.w700),
+              ),
+            ),
+          ],
         ),
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         children: [
           _safetyCard(context),
+          if (widget.activeHike != null ||
+              widget.initialDraft?.hikeSessionName != null) ...[
+            const SizedBox(height: 12),
+            _activeHikeCard(context),
+          ],
           const SizedBox(height: 14),
           _photoSection(context),
           if (_identifying) ...[
@@ -330,6 +465,7 @@ class _AddObservationPageState extends State<AddObservationPage> {
           const SizedBox(height: 20),
           TextField(
             controller: _displayNameController,
+            maxLength: 120,
             decoration: InputDecoration(
               labelText: AppLocalizations.of(context).name,
               hintText: AppLocalizations.of(context).unidentifiedTrailFind,
@@ -338,6 +474,7 @@ class _AddObservationPageState extends State<AddObservationPage> {
           const SizedBox(height: 14),
           TextField(
             controller: _trailController,
+            maxLength: 120,
             decoration: InputDecoration(
               labelText: AppLocalizations.of(context).trailOrPark,
               prefixIcon: const Icon(Icons.route_outlined),
@@ -346,6 +483,7 @@ class _AddObservationPageState extends State<AddObservationPage> {
           const SizedBox(height: 14),
           TextField(
             controller: _habitatController,
+            maxLength: 120,
             decoration: InputDecoration(
               labelText: AppLocalizations.of(context).habitat,
               prefixIcon: const Icon(Icons.forest_outlined),
@@ -356,6 +494,7 @@ class _AddObservationPageState extends State<AddObservationPage> {
             controller: _notesController,
             minLines: 3,
             maxLines: 6,
+            maxLength: 8500,
             decoration: InputDecoration(
               labelText: AppLocalizations.of(context).fieldNotes,
               alignLabelWithHint: true,
@@ -540,7 +679,7 @@ class _AddObservationPageState extends State<AddObservationPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (_position == null)
+            if (_latitude == null)
               OutlinedButton.icon(
                 onPressed: _gettingLocation ? null : _captureLocation,
                 style: OutlinedButton.styleFrom(
@@ -564,7 +703,7 @@ class _AddObservationPageState extends State<AddObservationPage> {
               _messageCard(
                 Icons.lock_outline,
                 AppLocalizations.of(context)
-                    .locationCaptured(_position!.accuracy.round()),
+                    .locationCaptured((_accuracyMeters ?? 0).round()),
                 const Color(0xFF9BE59F),
               ),
               const SizedBox(height: 12),
@@ -594,13 +733,44 @@ class _AddObservationPageState extends State<AddObservationPage> {
               ),
               const SizedBox(height: 8),
               TextButton.icon(
-                onPressed: () => setState(() => _position = null),
+                onPressed: () => setState(() {
+                  _latitude = null;
+                  _longitude = null;
+                  _accuracyMeters = null;
+                  _elevationMeters = null;
+                }),
                 icon: const Icon(Icons.location_off_outlined),
                 label: Text(AppLocalizations.of(context).removeLocation),
               ),
             ],
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _activeHikeCard(BuildContext context) {
+    final String name = widget.initialDraft?.hikeSessionName ??
+        widget.activeHike?.name ??
+        AppLocalizations.of(context).activeHike;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF213B32),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFF9BE59F)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.hiking_outlined, color: Color(0xFF9BE59F)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              AppLocalizations.of(context).addingToHike(name),
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ),
+        ],
       ),
     );
   }

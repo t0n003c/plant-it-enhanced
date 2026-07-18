@@ -11,7 +11,7 @@
 <p align="center"><i><b>Maintained self-hosted release line; database changes are applied through additive migrations.</b></i></p>
 <p align="center">Plant-it is a <b>self-hosted gardening companion app.</b><br>Useful for keeping track of plant care, receiving notifications about when to water plants, uploading plant images, and more.</p>
 
-<p align="center"><a href="https://docs.plant-it.org/latest/">Explore the documentation</a></p>
+<p align="center"><a href="online-resources/documentation/docs/index.md">Explore the maintained documentation</a></p>
 
 <p align="center"><a href="#why">Why?</a> • <a href="#features-highlight">Features highlights</a> • <a href="#quickstart">Quickstart</a> • <a href="BACKUP_AND_RESTORE.md">Backups</a> • <a href="ROADMAP.md">Roadmap</a> • <a href="#support-the-project">Support</a> • <a href="#contribute">Contribute</a></p>
 
@@ -35,6 +35,8 @@ Plant-it helps you remember the last time you did a treatment of your plants, wh
   prairie plants, ferns, shrubs, trees, and several contact hazards
 * Keep a private, chronological hiking journal with multi-photo observations, optional GPS, trail
   and habitat notes, and explicitly confirmed identifications
+* Save finds offline, group them into named hikes, and retry interrupted synchronization without
+  duplicating observations or photos
 * See why a search result matched and its match confidence
 * Take guided whole-plant, leaf, and flower photos, compare the top matches, and add the plant
 * Verify accepted scientific taxonomy through GBIF, with iNaturalist discovery and FloraCodex fallback
@@ -86,14 +88,18 @@ plants where they grow and observe local trail rules.
 
 Trail observations are separate from cultivated plants. Saving a wild find never creates a
 watering reminder or adds it to **My Green Friends**. Start from the Trail Journal card on the home
-screen or the central add button, take a whole-plant photo, optionally add leaf and flower views,
-and either confirm one of the identification candidates or save it as unidentified for later.
+screen or the central add button, start an optional named hike, take a whole-plant photo, optionally
+add leaf and flower views, and either confirm one of the identification candidates or save it as
+unidentified for later. Photo-first drafts are written to durable device storage before sync, and
+the journal shows pending or failed uploads with explicit edit, retry, and discard actions.
 
 Location is always opt-in. Exact coordinates and photo metadata remain in the authenticated,
 self-hosted account, and the initial sharing preference is **Private**. Obscured and open settings
 are recorded for future exports, but v0.15 does not publish observations. Browser location access
 requires an HTTPS deployment (or localhost); photos, notes, and identification continue to work
-when location is unavailable or denied.
+when location is unavailable or denied. Offline drafts are isolated by server and username. If a
+browser or device refuses durable storage, Plant-it says so and does not claim that an in-memory
+draft is safely stored.
 
 ## Photo identification and care guides
 
@@ -142,9 +148,12 @@ authorize the NAS's public outbound IP. Always treat automated identification an
 guidance as suggestions.
 
 ## Quickstart
+
 ### Server
+
 The maintained AMD64/ARM64 image is published from this repository to
-`ghcr.io/t0n003c/plant-it-enhanced` after the complete backend and frontend test suites pass.
+`ghcr.io/t0n003c/plant-it-enhanced:latest` after the complete backend and frontend test suites pass
+on `main`.
 
 ```bash
 git clone https://github.com/t0n003c/plant-it-enhanced.git
@@ -162,6 +171,33 @@ The web app is available at `http://localhost:3000`; the API is available at
 `http://localhost:8080/api`. MySQL and Redis share an internal-only network, while
 the server has a separate network for outbound plant-data requests.
 
+### Dockge on UGREEN or another NAS
+
+Keep `compose.yaml` and `.env` together in the Dockge stack directory. The NAS example joins only
+the application server to your existing reverse-proxy network; MySQL and Redis stay on an
+internal-only network and publish no host ports.
+
+```bash
+cp compose.nas.example.yaml compose.yaml
+cp .env.example .env
+```
+
+In `.env`, use absolute paths appropriate for the NAS, set the existing Docker network name, and
+choose the host ports you want Dockge to expose:
+
+```dotenv
+PLANTIT_UPLOAD_PATH=/volume1/docker/plantit/upload_dir
+PLANTIT_DB_PATH=/volume1/docker/plantit/db
+PLANTIT_PROXY_NETWORK=TinhnasNetwork
+PLANTIT_API_HOST_PORT=8346
+PLANTIT_WEB_HOST_PORT=3372
+```
+
+Do not add `container_name`; Compose-generated names avoid conflicts with abandoned containers from
+older stacks. The server has `pull_policy: always`, so a Dockge redeploy checks GHCR for a newer
+`latest` image. See the maintained [server installation guide](online-resources/documentation/docs/server-installation.md)
+for first deployment, reverse-proxy, and `.env` details.
+
 ### Safe upgrades
 
 Back up the application database before pulling a new image. `--no-tablespaces` allows
@@ -174,7 +210,8 @@ docker compose exec -T db sh -c \
   > "backups/plant-it-$(date +%Y%m%d-%H%M%S).sql"
 
 docker compose pull server
-docker compose up -d --no-deps server
+docker compose up -d --no-deps --force-recreate server
+docker compose ps
 docker compose logs --since=5m server
 ```
 
@@ -188,10 +225,12 @@ not change existing account or plant data. The authenticated **More → System d
 checks MySQL, Redis, provider configuration and recent provider responses. See
 [Backup and restore](BACKUP_AND_RESTORE.md) for the verified archive scripts and NAS schedule.
 
-The Field Journal migration adds owner-scoped observations and observation-image links. It does
-not convert or modify existing plants, care reminders, diaries, or photos.
+The Field Journal migrations add owner-scoped observations, named hike sessions, durable retry
+references, and observation-image links. They do not convert or modify existing plants, care
+reminders, diaries, or photos.
 
-<a href="https://docs.plant-it.org/latest/server-installation/#configuration">Take a look at the documentation</a> in order to understand the available configurations.
+See [Server installation](online-resources/documentation/docs/server-installation.md) for the full
+configuration reference.
 
 ## App
 You can access the Plant-it service using the web app at `http://<server_ip>:3000`.
@@ -204,13 +243,15 @@ For Android users, the app is also available as an APK, which can be downloaded 
     <a href="https://github.com/t0n003c/plant-it-enhanced/releases/latest"><img src="https://raw.githubusercontent.com/Kunzisoft/Github-badge/main/get-it-on-github.png" alt="Get it on GitHub" height="60" style="max-width: 200px"></a>
   </p>
 
-- **F-Droid**: Alternatively, you can get the app from [F-Droid](https://f-droid.org/packages/com.github.mdeluise.plantit/).
+- **F-Droid (upstream client)**: The [F-Droid package](https://f-droid.org/packages/com.github.mdeluise.plantit/)
+  follows upstream Plant-it and may not include enhanced search, care, or Trail Journal features.
   <p align="center">
     <a href="https://f-droid.org/packages/com.github.mdeluise.plantit" rel="nofollow"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Get_it_on_F-Droid_%28material_design%29.svg/2880px-Get_it_on_F-Droid_%28material_design%29.svg.png" alt="Get it on F-Droid" height=40 ></a>
   </p>
 
 ### Installation
-For detailed instructions on how to install and configure the app, please refer to the [installation documentation](https://docs.plant-it.org/latest/app-installation/).
+For detailed instructions, including HTTPS requirements for location capture and durable offline
+drafts, see [App installation](online-resources/documentation/docs/app-installation.md).
 
 
 ## Support the project
@@ -223,7 +264,9 @@ If you find this project helpful and would like to support it, consider [buying 
 Feel free to contribute and help improve the repo.
 
 ### Contributing Translations to the Project
-If you're interested in contributing transactions to enhance the app, you can get started by following the guide provided [here](https://github.com/MDeLuise/plant-it/discussions/148). Your support and contributions are greatly appreciated.
+If you're interested in contributing translations, start with the
+[upstream translation guide](https://github.com/MDeLuise/plant-it/discussions/148); this fork keeps
+the same localization structure.
 | Language | Filename | Translation |
 |----------|----------|-------------|
 | English | app_en.arb | 100% |
@@ -244,4 +287,5 @@ You can submit any of this in the [issues](https://github.com/t0n003c/plant-it-e
 Let's discuss possible solutions before starting development; open a [feature request issue](https://github.com/t0n003c/plant-it-enhanced/issues/new/choose).
 
 ### How to contribute
-If you want to make some changes and test them locally <a href="https://docs.plant-it.org/latest/support/#contributing">take a look at the documentation</a>.
+If you want to make changes and test them locally, see the
+[contribution guide](online-resources/documentation/docs/support.md#contribute).

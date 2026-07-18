@@ -3,6 +3,7 @@ package com.github.mdeluise.plantit.observation;
 import java.util.Comparator;
 
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfo;
+import com.github.mdeluise.plantit.hike.HikeSession;
 import com.github.mdeluise.plantit.image.EntityImage;
 import org.springframework.stereotype.Component;
 
@@ -12,6 +13,7 @@ public class ObservationDTOConverter {
         final Observation result = new Observation();
         result.setId(dto.getId());
         result.setObservedAt(dto.getObservedAt());
+        result.setClientReference(dto.getClientReference());
         result.setDisplayName(dto.getDisplayName());
         result.setTrailName(dto.getTrailName());
         result.setHabitat(dto.getHabitat());
@@ -26,6 +28,11 @@ public class ObservationDTOConverter {
             final BotanicalInfo botanicalInfo = new BotanicalInfo();
             botanicalInfo.setId(dto.getBotanicalInfoId());
             result.setBotanicalInfo(botanicalInfo);
+        }
+        if (dto.getHikeSessionId() != null) {
+            final HikeSession hikeSession = new HikeSession();
+            hikeSession.setId(dto.getHikeSessionId());
+            result.setHikeSession(hikeSession);
         }
         if (dto.getLocationPrivacy() != null) {
             result.setLocationPrivacy(ObservationLocationPrivacy.valueOf(dto.getLocationPrivacy()));
@@ -42,6 +49,7 @@ public class ObservationDTOConverter {
         result.setId(data.getId());
         result.setOwnerId(data.getOwner().getId());
         result.setObservedAt(data.getObservedAt());
+        result.setClientReference(data.getClientReference());
         result.setCreatedAt(data.getCreatedAt());
         result.setUpdatedAt(data.getUpdatedAt());
         result.setDisplayName(data.getDisplayName());
@@ -60,6 +68,10 @@ public class ObservationDTOConverter {
             result.setBotanicalInfoId(data.getBotanicalInfo().getId());
             result.setScientificName(data.getBotanicalInfo().getScientificName());
             result.setPreferredCommonName(data.getBotanicalInfo().getPreferredCommonName());
+        }
+        if (data.getHikeSession() != null) {
+            result.setHikeSessionId(data.getHikeSession().getId());
+            result.setHikeSessionName(data.getHikeSession().getName());
         }
         result.setImageIds(data.getImages().stream()
                                .sorted(Comparator.comparing(EntityImage::getCreateOn))

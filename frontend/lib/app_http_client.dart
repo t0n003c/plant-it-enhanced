@@ -159,12 +159,15 @@ class AppHttpClient {
     XFile image,
     int observationId, {
     String? description,
+    String? clientReference,
   }) async {
     final imageBytes = await image.readAsBytes();
     final uri = _prependBackendURL('observation/$observationId/image').replace(
       queryParameters: {
         if (description != null && description.isNotEmpty)
           'description': description,
+        if (clientReference != null && clientReference.isNotEmpty)
+          'clientReference': clientReference,
       },
     );
     final request = http.MultipartRequest('POST', uri);

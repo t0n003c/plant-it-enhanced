@@ -1,79 +1,58 @@
-# Kubernetes Deployment Instructions
-This guide will help you deploy your project using Kubernetes with Minikube. Follow the steps below to set up and access your application.
+# Kubernetes development deployment
+
+These manifests run Plant-it Enhanced on Minikube for development and evaluation. For a single
+UGREEN or other NAS, use the maintained Docker Compose examples at the repository root; they include
+health checks, private database/cache networking, persistent uploads, and verified backup scripts.
 
 ## Prerequisites
-- Ensure you have Minikube installed and running.
-- Ensure `kubectl` is installed and configured to communicate with your Minikube cluster.
-- (if using [Helm](https://helm.sh/)) Ensure Helm is installed.
 
-## Deployment Steps
+- Minikube
+- `kubectl`
+- Helm, only when using the chart in `deployment/helm`
 
-### Using kubectl
-From the `deployment/kubernetes` directory of the project:
+The server manifest uses `ghcr.io/t0n003c/plant-it-enhanced:latest`. Replace every placeholder in
+`secret.yml` before applying it. Kubernetes Secrets are encoded transport objects, not a substitute
+for an encrypted secret manager.
 
-1. **Run Minikube:**
-   ```sh
-   minikube start --driver=docker --mount --mount-string="/tmp/plant-it-data:/mnt/data"
-   ```
+## Apply with kubectl
 
-2. **Deploy the DB Secrets:**
-   ```sh
-   kubectl apply -f secret.yml
-   ```
+From `deployment/kubernetes`:
 
-3. **Deploy the DB ConfigMaps:**
-   ```sh
-   kubectl apply -f config.yml
-   ```
+```bash
+minikube start --driver=docker --mount --mount-string="/tmp/plant-it-data:/mnt/data"
+kubectl apply -f secret.yml
+kubectl apply -f config.yml
+kubectl apply -f db.yml
+kubectl apply -f cache.yml
+kubectl apply -f server.yml
+kubectl rollout status deployment/db-deployment
+kubectl rollout status deployment/server-deployment
+```
 
-4. **Deploy the Database:**
-   ```sh
-   kubectl apply -f db.yml
-   ```
+The NodePort service exposes the web app on `30100` and the API on `30101`:
 
-5. **Deploy the Cache:**
-   ```sh
-   kubectl apply -f cache.yml
-   ```
-
-6. **Deploy the Server:**
-   ```sh
-   kubectl apply -f server.yml
-   ```
-
-### Using Helm
-From the `deployment` directory of the project:
-
-1. **Run Minikube:**
-   ```sh
-   minikube start --driver=docker --mount --mount-string="/tmp/plant-it-data:/mnt/data"
-   ```
-
-2. **Modify `values.yml` File:**
-   Adjust the `values.yml` file to fit your configuration needs. This file contains the customizable settings for your Helm chart.
-
-3. **Install the Helm Chart:**
-   ```sh
-   helm install plantit helm
-   ```
-
-## Access the Application
-Once the deployment is complete, you can access the application and its Swagger UI at the following URLs:
-
-- **Application:** `http://<minikube_ip>:3000`
-- **Swagger UI:** `http://<minikube_ip>:8080/api/swagger-ui/index.html`
-
-Replace `<minikube_ip>` with the IP address returned by the following command:
-
-```sh
+```bash
 minikube ip
 ```
 
-### ⚠ Known Issue - Minikube IP not Accessible
-If you encounter issues accessing the NodePort service using `MinikubeIP:NodePort`, execute the following command to expose the service and obtain a direct URL:
+Open `http://<minikube-ip>:30100` and enter `http://<minikube-ip>:30101` as the server URL. If the
+Minikube driver does not expose NodePorts directly, run:
 
-```sh
+```bash
 minikube service server-service
 ```
 
-Then, open the printed links in your browser to access the application and Swagger UI.
+## Apply with Helm
+
+Create a private values file rather than editing the checked-in defaults:
+
+```bash
+cd deployment
+cp helm/values.yaml helm/my-values.yaml
+# Replace example secrets and adjust storage before continuing.
+helm upgrade --install plantit helm -f helm/my-values.yaml
+```
+
+The Kubernetes examples are not the release path used for the NAS deployment. Before production
+use, replace local `hostPath` storage, add persistent upload storage, configure ingress/TLS, define
+resource limits, and integrate your cluster's secret and backup systems.

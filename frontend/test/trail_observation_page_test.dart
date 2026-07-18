@@ -38,7 +38,8 @@ void main() {
 
     expect(find.text('Start with a plant photo'), findsNWidgets(2));
     expect(find.text('Leave what you find'), findsOneWidget);
-    expect(find.text('Save trail observation'), findsOneWidget);
+    expect(find.text('Save offline'), findsOneWidget);
+    expect(find.text('Save and sync'), findsOneWidget);
     expect(
       tester
           .getSize(find.byKey(
@@ -46,6 +47,14 @@ void main() {
           ))
           .height,
       greaterThanOrEqualTo(58),
+    );
+    expect(
+      tester
+          .getSize(find.byKey(
+            const ValueKey('save-offline-observation-button'),
+          ))
+          .height,
+      greaterThanOrEqualTo(54),
     );
     expect(
       tester.getSize(find.byKey(const ValueKey('trail-photo-button'))).height,

@@ -7,6 +7,7 @@ import java.util.Set;
 
 import com.github.mdeluise.plantit.authentication.User;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfo;
+import com.github.mdeluise.plantit.hike.HikeSession;
 import com.github.mdeluise.plantit.image.ImageTarget;
 import com.github.mdeluise.plantit.image.ObservationImage;
 import jakarta.persistence.CascadeType;
@@ -39,6 +40,9 @@ public class Observation implements Serializable, ImageTarget {
     @ManyToOne
     @JoinColumn(name = "botanical_info_id")
     private BotanicalInfo botanicalInfo;
+    @ManyToOne
+    @JoinColumn(name = "hike_session_id")
+    private HikeSession hikeSession;
     @NotNull
     private Instant observedAt;
     @NotNull
@@ -67,6 +71,8 @@ public class Observation implements Serializable, ImageTarget {
     private Double identificationConfidence;
     @Length(max = 40)
     private String identificationProvider;
+    @Length(max = 64)
+    private String clientReference;
     @NotNull
     @OneToMany(mappedBy = "target", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ObservationImage> images = new HashSet<>();
@@ -124,6 +130,16 @@ public class Observation implements Serializable, ImageTarget {
 
     public void setBotanicalInfo(BotanicalInfo botanicalInfo) {
         this.botanicalInfo = botanicalInfo;
+    }
+
+
+    public HikeSession getHikeSession() {
+        return hikeSession;
+    }
+
+
+    public void setHikeSession(HikeSession hikeSession) {
+        this.hikeSession = hikeSession;
     }
 
 
@@ -274,6 +290,16 @@ public class Observation implements Serializable, ImageTarget {
 
     public void setIdentificationProvider(String identificationProvider) {
         this.identificationProvider = identificationProvider;
+    }
+
+
+    public String getClientReference() {
+        return clientReference;
+    }
+
+
+    public void setClientReference(String clientReference) {
+        this.clientReference = clientReference;
     }
 
 

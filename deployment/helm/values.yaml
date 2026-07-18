@@ -8,23 +8,23 @@ dbMountCapacity: 512Mi
 secret:
   name: plantitsecret
   data:
-    MYSQL_PSW: cm9vdA==
-    MYSQL_ROOT_PASSWORD: cm9vdA==
-    JWT_SECRET: cHV0VGhlU2VjcmV0SGVyZQ==
-    FLORACODEX_KEY: 
+    MYSQL_PSW: replace-with-a-long-database-password
+    MYSQL_ROOT_PASSWORD: replace-with-a-different-root-password
+    JWT_SECRET: replace-with-a-long-random-jwt-secret
+    FLORACODEX_KEY: ""
 
 configmap:
   name: plantitconfigmap
   data:
     MYSQL_HOST: db-service
     MYSQL_PORT: 3306
-    MYSQL_USERNAME: root
+    MYSQL_USERNAME: plantit
     MYSQL_DATABASE: bootdb
     JWT_EXP: 1
     USERS_LIMIT: -1
     UPLOAD_DIR: /upload-dir
     API_PORT: 8080
-    LOG_LEVEL: DEBUG
+    LOG_LEVEL: INFO
     ALLOWED_ORIGINS: "*"
     CACHE_TTL: 86400
     CACHE_HOST: cache-service
@@ -32,11 +32,11 @@ configmap:
 
 image:
   server:
-    name: msdeluise/plant-it-server
+    name: ghcr.io/t0n003c/plant-it-enhanced
     tag: latest
   db:
     name: mysql
     tag: 8.0
   cache:
     name: redis
-    tag: 7.2.1
+    tag: 7.2-alpine

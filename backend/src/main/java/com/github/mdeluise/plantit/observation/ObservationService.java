@@ -1,6 +1,7 @@
 package com.github.mdeluise.plantit.observation;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import com.github.mdeluise.plantit.authentication.User;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfo;
@@ -9,6 +10,8 @@ import com.github.mdeluise.plantit.common.AuthenticatedUserService;
 import com.github.mdeluise.plantit.exception.ResourceNotFoundException;
 import com.github.mdeluise.plantit.exception.UnauthorizedException;
 import com.github.mdeluise.plantit.image.storage.ImageStorageService;
+import com.github.mdeluise.plantit.hike.HikeSession;
+import com.github.mdeluise.plantit.hike.HikeSessionService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -24,6 +27,7 @@ public class ObservationService {
     private final AuthenticatedUserService authenticatedUserService;
     private final ObservationRepository observationRepository;
     private final BotanicalInfoService botanicalInfoService;
+    private final HikeSessionService hikeSessionService;
     private final ImageStorageService imageStorageService;
 
 
@@ -31,10 +35,12 @@ public class ObservationService {
     public ObservationService(AuthenticatedUserService authenticatedUserService,
                               ObservationRepository observationRepository,
                               BotanicalInfoService botanicalInfoService,
+                              HikeSessionService hikeSessionService,
                               ImageStorageService imageStorageService) {
         this.authenticatedUserService = authenticatedUserService;
         this.observationRepository = observationRepository;
         this.botanicalInfoService = botanicalInfoService;
+        this.hikeSessionService = hikeSessionService;
         this.imageStorageService = imageStorageService;
     }
 
@@ -60,11 +66,21 @@ public class ObservationService {
     @Transactional
     public Observation save(Observation toSave) {
         final User authenticatedUser = authenticatedUserService.getAuthenticatedUser();
+        final String clientReference = normalize(toSave.getClientReference());
+        if (clientReference != null) {
+            final Optional<Observation> existing =
+                observationRepository.findByOwnerAndClientReference(authenticatedUser, clientReference);
+            if (existing.isPresent()) {
+                return existing.get();
+            }
+        }
         if (toSave.getOwner() != null && !sameUser(toSave.getOwner(), authenticatedUser)) {
             throw new UnauthorizedException();
         }
         toSave.setOwner(authenticatedUser);
+        toSave.setClientReference(clientReference);
         resolveBotanicalInfo(toSave);
+        resolveHikeSession(toSave);
         normalizeAndValidate(toSave);
         toSave.setCreationDefaults();
         return observationRepository.save(toSave);
@@ -88,7 +104,9 @@ public class ObservationService {
         toUpdate.setIdentificationConfidence(updated.getIdentificationConfidence());
         toUpdate.setIdentificationProvider(updated.getIdentificationProvider());
         toUpdate.setBotanicalInfo(updated.getBotanicalInfo());
+        toUpdate.setHikeSession(updated.getHikeSession());
         resolveBotanicalInfo(toUpdate);
+        resolveHikeSession(toUpdate);
         normalizeAndValidate(toUpdate);
         return observationRepository.save(toUpdate);
     }
@@ -107,6 +125,22 @@ public class ObservationService {
         if (botanicalInfo != null) {
             observation.setBotanicalInfo(botanicalInfoService.get(botanicalInfo.getId()));
         }
+    }
+
+
+    private void resolveHikeSession(Observation observation) {
+        final HikeSession hikeSession = observation.getHikeSession();
+        if (hikeSession != null) {
+            observation.setHikeSession(hikeSessionService.get(hikeSession.getId()));
+        }
+    }
+
+
+    private String normalize(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return null;
+        }
+        return value.trim();
     }
 
 

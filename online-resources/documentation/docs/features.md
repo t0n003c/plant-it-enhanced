@@ -1,110 +1,90 @@
 # Features
 
-## Homescreen
-![](assets/homescreen.png){ align=left; loading=lazy; style="height:600px;"}
+## Everyday-name plant search
 
-The app's home screen is designed to provide users with a comprehensive view of their stored plants and associated events. On this screen, users can easily view the latest chronological events related to their plants and access a list of the plants they own.
+Search uses familiar names first while preserving accepted scientific identity underneath. The
+bundled reviewed index handles aliases, reordered words, minor spelling mistakes, and an 80-species
+North American trail starter set. Results explain why they matched and show confidence instead of
+presenting a weak match as fact.
 
-## Plant
-### Add a new plant
-![](assets/search.png){ align=left; loading=lazy; style="height:600px;"}
-![](assets/species.png){ align=left; loading=lazy; style="height:600px;"}
-![](assets/add-plant.png){ align=left; loading=lazy; style="height:600px;"}
+When configured, iNaturalist expands common-name discovery, GBIF verifies accepted taxonomy, and
+FloraCodex provides a final fallback. Provider records that resolve to the same accepted taxon are
+merged instead of creating duplicate species.
 
-To add a new plant, simply tap the search icon in the bottom bar. From there, you can either add a custom species or, if you setup a FloraCodex key, explore and add existing species to your collection.
+## Photo identification
 
-Upon identifying the plant species, select it, click on "Add plant" at the bottom of the page, then input the necessary information, and proceed by clicking the "Add" button. For those without a FloraCodex key or wishing to add a new species, opt for the "Custom" species option, provide the required details, and then click on the "Save plant" button.
+The search camera guides you through a whole-plant view and optional leaf and flower close-ups.
+Plant-it sends up to five compressed photos to Pl@ntNet, displays several ranked candidates, and
+waits for your confirmation before adding anything. **Take a plant photo** and **Choose from
+gallery** use high-contrast mobile actions.
 
-### View details
-![](assets/plant-details-1.png){ align=left; loading=lazy; style="height:600px;"}
-![](assets/plant-details-2.png){ align=left; loading=lazy; style="height:600px;"}
-![](assets/plant-details-3.png){ align=left; loading=lazy; style="height:600px;"}
+Pl@ntNet is optional. A missing, exhausted, or rejected API key does not disable ordinary search.
+The authenticated **More → System diagnostics** page reports whether the integration is configured
+and records recent provider responses.
 
-To view detailed information about a plant, open it from the home screen. You’ll see a comprehensive overview, including details about the plant and its associated species.
+## Source-aware care guides
 
-* In the "Activity" section, you can find events and reminders specific to that plant.
-* The "Plant" section provides detailed information about the individual plant.
-* The "Species" section contains information about the plant’s species.
+Plant-it merges care fields rather than stopping at the first provider. The built-in catalog can
+fill common light, moisture, temperature, pH, and care values without an API key. Optional Trefle
+and Perenual records enrich missing fields. Each structured value retains its source, source link,
+confidence, and verification date, and users can still edit their own plant details.
 
-### Edit details or remove plant
-![](assets/edit-plant.png){ align=left; loading=lazy; style="height:600px;"}
+Generalized guidance is a starting point. Check the plant, soil, pot, season, and local conditions
+before watering or changing placement.
 
-To modify plant details, select the plant, then click on the edit icon in the bottom appbar of the view, proceed to update the information, and click the "Update" floating button. For plant deletion, click the trash icon in the bottom appbar of the view.
+## My Green Friends and Today
 
-## Events
-### Add a new event
-![](assets/add-event.png){ align=left; loading=lazy; style="height:600px;"}
+Owned plants remain separate from catalog species. Add placement, light, pot, drainage, soil,
+recent-care, and approximate-location context to create an initial schedule. The Today view groups
+due, overdue, snoozed, and upcoming work. Completing a task creates a care event so the plant's
+history remains visible.
 
-To create a new event, simply tap the plus button in the bottom bar. From there, you can link one or multiple plants, select one or multiple event types, choose the date, and insert a note. Complete the process by clicking the "Add" floating button.
+## Care history and reminders
 
-### View all events
-![](assets/events.png){ align=left; loading=lazy; style="height:600px;"}
+Log watering, fertilizing, biostimulating, pruning, repotting, and other events for one or more
+plants. Filter the chronological diary by plant or event type. Reminders can be enabled, disabled,
+edited, snoozed, skipped, or completed, with optional notification dispatchers configured by the
+self-hosting administrator.
 
-To access all saved events, select the "calendar" icon in the button bar, then click on the "Events" section. Here, you'll find a chronological list of all events, and you can further filter them by plants and/or type for convenient organization.
+## Trail Journal
 
-### Edit or remove existing event
-![](assets/edit-event.png){ align=left; loading=lazy; style="height:600px;"}
+Wild observations do not become owned plants and never receive watering reminders automatically.
+An observation can include:
 
-To modify or delete an event, choose it from either the home screen or the "diary" view within the app. Subsequently, click on the "Remove" button in order to remove it, or change the information and then click on the "Save" floating button.
+- one or more original photos;
+- observed date and time;
+- trail and habitat notes;
+- optional coordinates, accuracy, and elevation;
+- an unconfirmed or explicitly confirmed identification;
+- a private, obscured, or open sharing preference; and
+- an optional named hike session with start and end times.
 
-## Species
-### Create new species
-![](assets/add-custom-1.png){ align=left; loading=lazy; style="height:600px;"}
-![](assets/add-custom-2.png){ align=left; loading=lazy; style="height:600px;"}
+### Offline capture and synchronization
 
-To add a new species, tap the search icon in the bottom bar, enter the species name, and select the "Custom" species option. Enter the necessary details and then click "Save plant" to create the new species.
+Photo-first drafts are written to durable browser or device storage before synchronization. The
+journal shows pending, syncing, and failed states with edit, retry, and discard actions. Stable
+client references make repeated requests idempotent, so an interrupted retry does not create a
+second hike, taxon, observation, or image.
 
-### Edit existing species
-![](assets/species.png){ align=left; loading=lazy; style="height:600px;"}
-![](assets/edit-species.png){ align=left; loading=lazy; style="height:600px;"}
+Offline drafts are isolated by server and username. If durable storage is unavailable, the offline
+save action is disabled and Plant-it says why. Pending device drafts are not included in a server
+backup until synchronization succeeds.
 
-To modify an existing species, tap the search icon in the bottom bar, enter the species name, and select it. Next, click the edit icon in the bottom appbar of the window, make the necessary updates, and then click the floating "Save" button. The species will be updated. If it originated from the FloraCodex service, a new custom species will be generated, and all plants linked to the FloraCodex species will be associated with the new one. If it was already a custom species, it will be straightforwardly updated.
+### Location and safety
 
-### Remove existing species
-To delete a species, it must be a custom one. Tap the search icon in the bottom bar, enter the species name, and select it. Next, click the trash icon in the bottom appbar of the window,. Please be aware that this action will also delete all linked plants associated with the species.
+Location is always opt-in. Browser geolocation normally requires HTTPS or localhost; photos, notes,
+and identification still work when location is denied. Exact coordinates and original photos stay
+inside the authenticated self-hosted account. Sharing preferences are recorded for future export,
+but v0.15 does not publish observations.
 
-## Reminders
-The Reminder feature in the project allows users to set up reminders for specific actions related to their plants.
+Trail tags and contact-hazard warnings are informational. Region, season, elevation, habitat, and
+lookalikes still matter, and the application never infers edibility or medicinal safety.
 
-### View Upcoming Reminder Occurrences
-![](assets/reminder-1.png){ align=left; loading=lazy; style="height:600px;"}
-![](assets/reminder-2.png){ align=left; loading=lazy; style="height:600px;"}
-To see the upcoming reminder occurrences for your plants, follow these steps:
+## Backups and diagnostics
 
-* Open the Calendar: Click on the "Calendar" icon located in the bottom bar of the app.
-* Navigate to the Reminder Section: Once in the Calendar view, switch to the "Reminder" section. Here, you'll find a calendar displaying all scheduled reminder occurrences.
-* View Daily Details: Click on a specific day in the calendar to see a detailed list of reminder occurrences, along with the associated plants. This allows you to quickly check which tasks need attention on a particular day.
+The repository includes verified scripts for database and upload backups, checksum validation,
+retention, and restore checks. Diagnostics report the application version, MySQL and Redis status,
+provider configuration, and recent provider failures without exposing credentials.
 
-### Add a new reminder
-![](assets/plant-details-1.png){ align=left; loading=lazy; style="height:600px;"}
-![](assets/add-reminder.png){ align=left; loading=lazy; style="height:600px;"}
-
-Follow the steps below to create a new reminder:
-
-* Navigate to Plant Detail View: Open the detail view of the desired plant by selecting it from the plant list. Once in the detail view, locate and click on the "Activity" section.
-* Access Reminders Section: Within the "Activity" section, scroll down until you find the "Reminders" subsection. Here, you can manage existing reminders, including removing or disabling them, as well as creating new ones.
-* Create a New Reminder: To create a new reminder, click on the "add" icon provided in the reminders section.
-* Fill Required Information: You will be prompted to fill in the following required information for the new reminder:
-    * Type: Specify the type of action to be reminded of.
-    * Start Date: Set the date from which you want the reminders to start.
-    * Frequency: Choose how often you want to be reminded if the specified action is not completed for the plant.
-    * Repeat After: Optionally, set a time interval after which reminders should be sent again if the action remains incomplete.
-    * End Date: Optionally, provide an end date for the reminder.
-    * Enabled: Toggle the reminder on or off as needed.
-* Save Reminder: After filling in the required information, save the reminder to activate it for the selected plant.
-
-### Edit or delete a reminder
-![](assets/edit-reminder.png){ align=left; loading=lazy; style="height:600px;"}
-
-In order to edit or delete an existing reminder click on it.
-Edit the information as needed and then click on the floating "Save" button in order to update it, or click on the trash icon in the upper right in order to delete the reminder.
-
-### Reminder notification
-![](assets/settings.png){ align=left; loading=lazy; style="height:600px;"}
-
-The Reminder Dispatcher feature in the application allows users to customize how they receive notifications for expired reminders. Follow the steps below to change the reminder dispatcher:
-
-* Access App Settings: Navigate to the application's settings by locating and clicking on the settings icon in the bottom bar
-* Open Reminder Notification Settings: Within the settings menu, look for the "Notifications" section or option. Click on it to access the reminder notification settings.
-* Select Dispatcher: In the reminder notification settings, you will find options to configure the reminder dispatcher. Choose the desired dispatcher by checking the corresponding checkbox.
-* Save Changes: After selecting the desired reminder dispatcher, save the changes to apply the new notification settings.
+See [Server installation](server-installation.md) and the repository's
+[backup guide](https://github.com/t0n003c/plant-it-enhanced/blob/main/BACKUP_AND_RESTORE.md).

@@ -10,6 +10,7 @@ import com.github.mdeluise.plantit.common.AuthenticatedUserService;
 import com.github.mdeluise.plantit.exception.UnauthorizedException;
 import com.github.mdeluise.plantit.image.ObservationImage;
 import com.github.mdeluise.plantit.image.storage.ImageStorageService;
+import com.github.mdeluise.plantit.hike.HikeSessionService;
 import com.github.mdeluise.plantit.observation.Observation;
 import com.github.mdeluise.plantit.observation.ObservationLocationPrivacy;
 import com.github.mdeluise.plantit.observation.ObservationRepository;
@@ -33,6 +34,8 @@ class ObservationServiceUnitTests {
     private ObservationRepository observationRepository;
     @Mock
     private BotanicalInfoService botanicalInfoService;
+    @Mock
+    private HikeSessionService hikeSessionService;
     @Mock
     private ImageStorageService imageStorageService;
     @InjectMocks
@@ -112,6 +115,28 @@ class ObservationServiceUnitTests {
 
         Mockito.verify(imageStorageService).remove("field-photo");
         Mockito.verify(observationRepository).delete(observation);
+    }
+
+
+    @Test
+    @DisplayName("Should return an existing observation for a repeated offline client reference")
+    void shouldReturnExistingObservationForRepeatedClientReference() {
+        final User authenticated = user(1L);
+        final Observation existing = new Observation();
+        existing.setId(12L);
+        existing.setOwner(authenticated);
+        existing.setClientReference("offline-draft-1");
+        final Observation repeated = new Observation();
+        repeated.setClientReference(" offline-draft-1 ");
+        Mockito.when(authenticatedUserService.getAuthenticatedUser()).thenReturn(authenticated);
+        Mockito.when(observationRepository.findByOwnerAndClientReference(authenticated, "offline-draft-1"))
+               .thenReturn(Optional.of(existing));
+
+        final Observation result = observationService.save(repeated);
+
+        Assertions.assertThat(result).isSameAs(existing);
+        Mockito.verify(observationRepository, Mockito.never()).save(Mockito.any());
+        Mockito.verifyNoInteractions(botanicalInfoService, hikeSessionService);
     }
 
 

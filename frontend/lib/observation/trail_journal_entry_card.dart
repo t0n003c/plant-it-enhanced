@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:plant_it/environment.dart';
 import 'package:plant_it/observation/add_observation_page.dart';
+import 'package:plant_it/observation/offline_hike_session.dart';
 import 'package:plant_it/observation/observation_journal_page.dart';
 
 class TrailJournalEntryCard extends StatefulWidget {
@@ -18,8 +19,25 @@ class TrailJournalEntryCard extends StatefulWidget {
 
 class _TrailJournalEntryCardState extends State<TrailJournalEntryCard> {
   int? _observationCount;
+  int _offlineDraftCount = 0;
+  OfflineHikeSession? _activeHike;
 
   Future<void> _loadCount() async {
+    try {
+      final drafts = await widget.env.trailDraftRepository
+          .listObservationDrafts(widget.env.offlineAccountScope);
+      final activeHike = await widget.env.trailDraftRepository
+          .getActiveHikeSession(widget.env.offlineAccountScope);
+      if (mounted) {
+        setState(() {
+          _offlineDraftCount = drafts.length;
+          _activeHike = activeHike;
+        });
+      }
+    } catch (error, stackTrace) {
+      widget.env.logger.debug('Could not load offline trail finds: $error');
+      widget.env.logger.debug(stackTrace);
+    }
     try {
       final response = await widget.env.http.get('observation/_count');
       if (response.statusCode != 200 || !mounted) return;
@@ -42,7 +60,10 @@ class _TrailJournalEntryCardState extends State<TrailJournalEntryCard> {
   Future<void> _recordObservation() async {
     final bool? created = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
-        builder: (context) => AddObservationPage(env: widget.env),
+        builder: (context) => AddObservationPage(
+          env: widget.env,
+          activeHike: _activeHike,
+        ),
       ),
     );
     if (created == true) await _loadCount();
@@ -92,11 +113,22 @@ class _TrailJournalEntryCardState extends State<TrailJournalEntryCard> {
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                        if (_observationCount != null)
+                        if (_observationCount != null || _offlineDraftCount > 0)
+                          Text(
+                            AppLocalizations.of(context).trailObservationCount(
+                              (_observationCount ?? 0) + _offlineDraftCount,
+                            ),
+                            style: const TextStyle(color: Colors.white70),
+                          ),
+                        if (_activeHike != null)
                           Text(
                             AppLocalizations.of(context)
-                                .trailObservationCount(_observationCount!),
-                            style: const TextStyle(color: Colors.white70),
+                                .addingToHike(_activeHike!.name),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Color(0xFFC7F9CC),
+                            ),
                           ),
                       ],
                     ),

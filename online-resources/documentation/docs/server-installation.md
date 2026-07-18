@@ -1,549 +1,271 @@
-# Server Installation
+# Server installation
 
-## Prerequisite
-Before installing Plant-it, make sure you have the following prerequisites:
+Plant-it Enhanced publishes one container containing the Java API and Flutter web app. MySQL stores
+accounts, plants, care history, reminders, catalog data, hikes, and synchronized observations.
+Redis is a disposable cache. Uploaded plant and trail photos are stored in `/upload-dir`.
 
-* `docker` version 3 or above
-* `docker-compose`
+## Requirements
 
-## Quickstart
-Installing Plant-it is pretty straight forward, in order to do so follow these steps:
+- Docker Engine with the Compose v2 plugin (`docker compose`)
+- an AMD64 or ARM64 Linux host
+- persistent storage for MySQL and uploads
+- an existing external Docker network only when using a reverse proxy
 
-* Create a folder where you want to place all Plant-it related files.
-* Inside that folder, create a file named `docker-compose.yml` with this content:
-```yaml
-name: plant-it
-services:
-  server:
-    image: msdeluise/plant-it-server:latest
-    env_file: server.env
-    depends_on:
-      - db
-      - cache
-    restart: unless-stopped
-    volumes:
-      - "./upload-dir:/upload-dir"
-    ports:
-      - "8080:8080"
-      - "3000:3000"
+The maintained image is `ghcr.io/t0n003c/plant-it-enhanced:latest`. It is published from `main`
+only after backend tests, frontend analysis/tests, a production web build, and a multi-architecture
+container build succeed.
 
-  db:
-    image: mysql:8.0
-    restart: always
-    env_file: server.env
-    volumes:
-      - "./db:/var/lib/mysql"
+## Standard Docker Compose deployment
 
-  cache:
-    image: redis:7.2.1
-    restart: always
+Clone the repository and create a private environment file:
+
+```bash
+git clone https://github.com/t0n003c/plant-it-enhanced.git
+cd plant-it-enhanced
+cp .env.example .env
 ```
 
-* Inside that folder, create a file named `server.env` with this content:
-```properties
-#
-# DB
-#
-MYSQL_HOST=db
-MYSQL_PORT=3306
-MYSQL_USERNAME=root
-MYSQL_PSW=root
+Replace the three `replace-with-...` secrets in `.env`. Use different long random values for the
+application database password, MySQL root password, and JWT secret. Then validate and start:
+
+```bash
+docker compose -f compose.example.yaml config --quiet
+docker compose -f compose.example.yaml pull
+docker compose -f compose.example.yaml up -d
+docker compose -f compose.example.yaml ps
+```
+
+The defaults expose the web app at `http://<host>:3000` and the API at
+`http://<host>:8080/api`. MySQL and Redis publish no host ports.
+
+## Dockge on UGREEN or another NAS
+
+Dockge expects the active `compose.yaml` and `.env` in the stack directory. A clean layout is:
+
+```text
+/volume1/docker/Dockge/stacks/plantit/
+├── .env
+├── compose.yaml
+└── source/
+```
+
+Clone or update the source, then copy the maintained examples into the stack root:
+
+```bash
+cd /volume1/docker/Dockge/stacks/plantit
+git clone https://github.com/t0n003c/plant-it-enhanced.git source
+cp source/compose.nas.example.yaml compose.yaml
+cp source/.env.example .env
+```
+
+If `source` already exists, use `git -C source pull --ff-only` instead of cloning. Edit `.env` and
+set at least:
+
+```dotenv
+PLANTIT_IMAGE=ghcr.io/t0n003c/plant-it-enhanced:latest
+PLANTIT_API_HOST_PORT=8346
+PLANTIT_WEB_HOST_PORT=3372
+PLANTIT_UPLOAD_PATH=/volume1/docker/plantit/upload_dir
+PLANTIT_DB_PATH=/volume1/docker/plantit/db
+PLANTIT_PROXY_NETWORK=TinhnasNetwork
+
 MYSQL_DATABASE=bootdb
-MYSQL_ROOT_PASSWORD=root
-
-#
-# JWT
-#
-JWT_SECRET=putTheSecretHere
-JWT_EXP=1
-
-#
-# Server config
-#
-USERS_LIMIT=-1
-UPLOAD_DIR=/upload-dir
-API_PORT=8080
-FLORACODEX_KEY=
-LOG_LEVEL=DEBUG
-ALLOWED_ORIGINS=*
-
-#
-# Cache
-#
-CACHE_TTL=86400
-CACHE_HOST=cache
-CACHE_PORT=6379
+MYSQL_USER=plantit
+MYSQL_PASSWORD=replace-with-a-long-database-password
+MYSQL_ROOT_PASSWORD=replace-with-a-different-root-password
+JWT_SECRET=replace-with-a-long-random-jwt-secret
+TZ=America/Chicago
 ```
 
-* Run the docker compose file (`docker compose -f docker-compose.yml up -d`), then the service will be available at `localhost:3000`, while the REST API will be available at `localhost:8080/api` (`localhost:8080/api/swagger-ui/index.html` for the documentation of them).
+The proxy network must already exist:
 
-## Configuration
-The `server.env` file is used to pass configurations to the server. An example of properties and descriptions is the following:
-```properties
-#
-# DB
-#
-MYSQL_HOST=db
-MYSQL_PORT=3306
-MYSQL_USERNAME=root
-MYSQL_PSW=root
-MYSQL_DATABASE=bootdb
-MYSQL_ROOT_PASSWORD=root
-
-#
-# JWT
-#
-JWT_SECRET=putTheSecretHere
-JWT_EXP=1
-
-#
-# Server config
-#
-USERS_LIMIT=-1 # less then 0 means no limit
-UPLOAD_DIR=/upload-dir # path to the directory used to store uploaded images, if on docker deployment leave as it is and change the volume binding in the docker-compose file if needed
-API_PORT=8080
-FLORACODEX_URL=https://api.floracodex.com
-FLORACODEX_KEY=
-ALLOWED_ORIGINS=* # CORS allowed origins (comma separated list)
-LOG_LEVEL=DEBUG # could be: DEBUG, INFO, WARN, ERROR
-CONTACT_MAIL=foo@bar.com # address used as "contact" for template email
-REMINDER_NOTIFY_CHECK=0 30 7 * * * # 6-values crontab expression to set the check time for reminders
-MAX_REQUESTS_PER_MINUTE=100 # rate limiting of the upcoming requests
-
-#
-# Notification
-#
-NTFY_ENABLED=true # if "false" ntfy service won't be available as notification dispatcher
-GOTIFY_ENABLED=true # if "false" ntfy service won't be available as notification dispatcher
-
-#
-# Cache
-#
-CACHE_TYPE=redis # Cache type. By default, it's "redis" but can also be "none"
-CACHE_TTL=86400
-CACHE_HOST=cache
-CACHE_PORT=6379
-CACHE_PASSWORD=
-CACHE_USERNAME=
-
-#
-# SMTP
-#
-SMTP_HOST=
-SMTP_PORT=
-SMTP_EMAIL=
-SMTP_PASSWORD=
-SMTP_AUTH=
-SMTP_START_TTL=
+```bash
+docker network inspect TinhnasNetwork >/dev/null
 ```
 
-### Integration with FloraCodex
-To enhance your application with plant search capabilities, you can integrate with the FloraCodex service. FloraCodex provides a comprehensive API for searching and retrieving plant information. Follow the steps below to configure and use the FloraCodex service in your project:
+Validate and deploy from the stack directory or use the matching Dockge actions:
 
-1. **Create an Account on FloraCodex:**
-   
-    - Visit the [FloraCodex website](https://floracodex.com/) and sign up for an account.
-    - Follow the registration process to verify your account.
+```bash
+docker compose config --quiet
+docker compose pull
+docker compose up -d
+docker compose ps
+docker compose logs --since=10m server
+```
 
-2. **Retrieve the API Key:**
-   
-    - Once your account is set up, log in to your FloraCodex account.
-    - Navigate to the API section to generate or retrieve your API key. This key is necessary for authenticating your requests to the FloraCodex API.
+The NAS example intentionally does not set `container_name`. Compose-generated names prevent stale
+containers from a previous project from blocking deployment. It also uses `pull_policy: always`, so
+a redeploy checks GHCR for the current `latest` image.
 
-3. **Configure the API Key:**
-   
-    - Open the `server.env` file in your project.
-    - Add the following line to the file, replacing `YOUR_FLORACODEX_API_KEY` with the actual API key you obtained from FloraCodex: `FLORACODEX_KEY=YOUR_FLORACODEX_API_KEY`
+## Network design
 
-4. **Save and Restart Your Server:**
-   
-    - Save the changes made to the `server.env` file.
-    - Restart your server to apply the new configuration.
+The database and cache belong only on the Compose `backend` network, which is marked `internal`.
+They do not need internet access, an external reverse-proxy network, or published ports.
 
-By following these steps, you enable your application to use the FloraCodex service for searching and retrieving information about existing plants. Ensure that your API key is kept secure and not exposed publicly to avoid unauthorized access.
+The server joins both networks:
 
-### Deployment Without Cache
-If you need to deploy the application without using a cache, you can disable the cache by setting the `CACHE_TYPE` environment variable to `none`. This prevents the application from attempting to connect to a cache service.
+```text
+browser / reverse proxy
+          |
+       server  ---- outbound HTTPS to optional plant providers
+          |
+   internal backend
+      /        \
+   MySQL      Redis
+```
 
-Then, to remove the cache service from your deployment, update your docker-compose.yaml file as follows:
+For a local deployment, `compose.example.yaml` uses a normal bridge network named `app`. For a NAS
+behind a reverse proxy, `compose.nas.example.yaml` replaces that side with the existing external
+network named by `PLANTIT_PROXY_NETWORK`. Only the server is attached to it.
+
+## How `.env` is used
+
+Docker Compose automatically reads a file named `.env` beside the active Compose file for `${...}`
+interpolation. That alone does not pass every value into a container. These examples also declare:
+
 ```yaml
-name: plant-it
-services:
-  server:
-    image: msdeluise/plant-it-server:latest
-    env_file: server.env
-    depends_on:
-      - db
-    restart: unless-stopped
-    volumes:
-      - "./upload-dir:/upload-dir"
-    ports:
-      - "8080:8080"
-      - "3000:3000"
-
-  db:
-    image: mysql:8.0
-    restart: always
-    env_file: server.env
-    volumes:
-      - "./db:/var/lib/mysql"
+env_file:
+  - ./.env
 ```
 
-### Deployment Without Docker
-If you prefer to install and run the server without using Docker, ensure that you have Java Runtime Environment (JRE) 21 installed on your system. Follow these steps to set up the server:
+on the server service, so application settings enter the server container. A file named
+`server.env` is ignored unless the Compose file explicitly references it.
 
-1. **Download the Server JAR File**:
-   
-    - Obtain the `server.jar` file from the [latest release of the project on GitHub](https://github.com/MDeLuise/plant-it/releases/latest).
+The Compose `environment` block deliberately maps `MYSQL_USER` and `MYSQL_PASSWORD` to the
+application's `MYSQL_USERNAME` and `MYSQL_PSW` names. This keeps the application and MySQL service
+on the same non-root credential and prevents password drift.
 
-2. **Set Environment Variables**:
-   
-    - You can configure the necessary environment variables in two ways:
-     
-        - **Option 1**: Manually export them in your terminal based on your setup. For example:
-          ```bash
-          export MYSQL_HOST=localhost && \
-          export MYSQL_PORT=3306 && \
-          ...
-          ```
-        Adjust these variables according to your specific setup.
-     
-        - **Option 2**: Provide a `server.properties` file that contains all the required properties. You can download a template for this file from the [project's repository](https://github.com/MDeLuise/plant-it/blob/main/backend/src/main/resources/application.properties) and adjust it to suit your configuration.
-   
-3. **Run the Server**:
-   
-    - If you chose **Option 1** (manually setting environment variables), run the server using the following command:
-      ```bash
-      java -jar server.jar
-      ```
-    - If you chose **Option 2** (using the `server.properties` file), run the server with the following command, specifying the location of your configuration file:
-      ```bash
-      java -jar server.jar --spring.config.location=classpath:/<path-to-server.properties>
-      ```
+!!! warning "Existing MySQL data"
 
-#### **Frontend Setup Without Docker**
-For the frontend, if you're using Android, you can use the provided APK available on [GitHub releases](https://github.com/MDeLuise/plant-it/releases/latest) or [F-Droid](https://f-droid.org/packages/com.github.mdeluise.plantit/). However, for iOS, a standalone app is not available. If you choose not to use Docker for the frontend, follow these steps:
+    `MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD`, and `MYSQL_ROOT_PASSWORD` initialize a new,
+    empty MySQL directory only. Editing `.env` later does not change accounts already stored in an
+    existing database. Keep the working values, or deliberately change the MySQL account inside the
+    database before recreating the server container.
 
-1. **Download the Frontend Files**:
-   
-    - Download the `client.tar.gz` file from the [latest release of the project on GitHub](https://github.com/MDeLuise/plant-it/releases/latest).
+## Configuration reference
 
-2. **Uncompress the Files**:
-   
-    - Extract the contents of the `client.tar.gz` file:
-      ```bash
-      tar -xzf client.tar.gz
-      ```
+The checked-in `.env.example` is the canonical list for Docker Compose. Important groups are:
 
-3. **Serve the Files**:
-   
-    - You can serve the frontend files locally using a simple HTTP server. For example, using Python:
-      ```bash
-      python3 -m http.server 3000
-      ```
-   - Alternatively, you can serve the files using a web server like Nginx.
+### Required secrets
 
-By following these instructions, you can deploy both the server and frontend components without relying on Docker. This setup provides flexibility if Docker is not available or desirable in your environment.
+- `MYSQL_PASSWORD`: password used by the `plantit` application account
+- `MYSQL_ROOT_PASSWORD`: separate administrative password, not used by the app
+- `JWT_SECRET`: long random signing secret; changing it signs users out
 
+Do not commit `.env`, paste it into an issue, or expose it through a reverse proxy.
 
-## Change ports binding
-### Backend
-If you don't want to use the default port `8080`, you can do the following:
+### Plant search and care
 
-* change the port binding in the `docker-compose.yml` file, e.g. `9090:8080` to setup the port `9090` for the backend service,
+Common-name search and the bundled catalog work with every provider key blank.
 
-### Frontend
-If you don't want to use the default port `3000`, you can do the following:
+- `PLANTNET_API_KEY`: optional guided photo identification
+- `TREFLE_TOKEN`: optional structured plant data
+- `PERENUAL_API_KEY`: optional care fallback; free-plan coverage is limited
+- `FLORACODEX_KEY`: optional final plant-data fallback
+- `INATURALIST_ENABLED`: common-name discovery; defaults to `true`
+- `PLANT_SEARCH_LOCALE` and `PLANT_SEARCH_REGION`: fallback language and region for older clients
+- `GBIF_MIN_CONFIDENCE`: threshold for accepted-taxonomy verification
 
-* change the port binding in the `docker-compose.yml` file, e.g. `4040:3000` to setup the port `4040` for the frontend service
+Provider keys remain on the server and are never sent to the web app. After changing them, recreate
+only the server:
 
-### Complete example
-Let's say that you want to run Plant-it on a server with IP `http://192.168.1.103` and want to have:
-
-* the backend on port `8089`,
-* the frontend on port `3009`.
-
-Then this will be you configuration for the `docker-compose.yml` file:
-```yaml
-name: plant-it
-services:
-  server:
-    image: msdeluise/plant-it-server:latest
-    env_file: server.env
-    depends_on:
-      - db
-      - cache
-    restart: unless-stopped
-    volumes:
-      - "./upload-dir:/upload-dir"
-    ports:
-      - "8089:8080"
-      - "3009:3000"
-  db:
-    image: mysql:8.0
-    restart: always
-    env_file: server.env
-    volumes:
-      - "./db:/var/lib/mysql"
-  cache:
-    image: redis:7.2.1
-    restart: always
-```
-And this will be you configuration for the `server.env` file:
-```properties
-#
-# DB
-#
-MYSQL_HOST=db
-MYSQL_PORT=3306
-MYSQL_USERNAME=root
-MYSQL_PSW=root
-MYSQL_DATABASE=bootdb
-MYSQL_ROOT_PASSWORD=root
-
-#
-# JWT
-#
-JWT_SECRET=32characterscomplicatedsecret
-JWT_EXP=1
-
-#
-# Server config
-#
-USERS_LIMIT=2
-UPLOAD_DIR=/upload-dir
-API_PORT=8080
-FLORACODEX_KEY=
-ALLOWED_ORIGINS=*
-
-#
-# Cache
-#
-CACHE_TTL=86400
-CACHE_HOST=cache
-CACHE_PORT=6379
+```bash
+docker compose up -d --no-deps --force-recreate server
 ```
 
-## Example of traefik deployment
-This is an example of deployment using [traefik](https://traefik.io/traefik/):
-```
-version: '3'
-services:
-  reverse-proxy:
-    image: traefik:v3.0
-    command: --api.insecure=true --providers.docker
-    ports:
-      - "80:80"
-      - "8080:8080"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+Open **More → System diagnostics** after signing in to verify configuration and recent provider
+responses. For Pl@ntNet, keep **Expose my API key** disabled for normal server-side use. If its
+account uses IP restrictions, authorize the NAS's public outbound IP.
 
-  server:
-    image: msdeluise/plant-it-server:latest
-    env_file: server.env
-    depends_on:
-      - db
-      - cache
-    restart: unless-stopped
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.app.rule=Host(`plant-it.docker.localhost`)"
-      - "traefik.http.routers.app.service=server"
-      - "traefik.http.routers.app.entrypoints=http"
-      - "traefik.http.services.server.loadbalancer.server.port=3000"
-      
-      - "traefik.http.routers.api.rule=Host(`plant-it-api.docker.localhost`)"
-      - "traefik.http.routers.api.service=server-api"
-      - "traefik.http.routers.api.entrypoints=http"
-      - "traefik.http.services.server-api.loadbalancer.server.port=8080"
+### Upload and request limits
 
-  db:
-    image: mysql:8.0
-    restart: always
-    env_file: server.env
-    volumes:
-      - "./db:/var/lib/mysql"
-    labels:
-      - "traefik.enable=false"
+- `PLANTIT_UPLOAD_PATH`: host directory mounted at `/upload-dir`
+- `MAX_ORIGIN_IMG_SIZE`: maximum original image size in bytes
+- `MAX_UPLOAD_IMG_SIZE`: maximum individual multipart file size
+- `MAX_UPLOAD_REQUEST_SIZE`: combined size for a multi-photo request
 
-  cache:
-    image: redis:7.2.1
-    restart: always
-    labels:
-      - "traefik.enable=false"
-```
+### Accounts, logging, and email
 
-Visit `http://plant-it.docker.localhost` for accessing the app, and `http://plant-it-api.docker.localhost/api/swagger-ui/index.html` for accessing the Swagger UI.
-Use `http://plant-it-api.docker.localhost` as server URL when request in the app setup.
+- `USERS_LIMIT=-1`: no account limit
+- `LOG_LEVEL=INFO`: application logging
+- `CONTACT_MAIL`: administrator contact shown in email templates
+- `SMTP_*`: optional password-reset and notification email delivery
+- `NTFY_ENABLED` and `GOTIFY_ENABLED`: optional notification dispatchers
 
-## SMTP Configuration for Email Notifications
-An SMTP server can be used to send notifications to users, such as password reset emails. To configure the usage of an SMTP server, the following properties need to be set in the `server.env` file:
+## Reverse proxy
 
-- **SMTP_HOST**: The host of the SMTP server.
-- **SMTP_PORT**: The port of the SMTP server.
-- **SMTP_EMAIL**: The email address used to send notifications.
-- **SMTP_PASSWORD**: The password of the email account used for authentication.
-- **SMTP_AUTH**: This parameter enables or disables authentication for the SMTP server.
-- **SMTP_START_TLS**: This parameter enables or disables the use of STARTTLS for secure communication with the SMTP server.
-- **CONTACT_MAIL**: contact address to use in the email templates if a user want to contact the administrator
+Route the application hostname to server container port `3000` and the API hostname or path to
+server container port `8080`. The NAS Compose service is reachable as `server` on the external
+proxy network. Never route `db:3306` or `cache:6379`.
 
-!!! info "Email credentials"
+Use HTTPS for mobile geolocation. When the frontend and API use different origins, set
+`ALLOWED_ORIGINS` to the frontend origin or leave `*` while validating the deployment. Enter the API
+base URL without `/api` when the app asks for a server address.
 
-    Please note that some providers, such as Gmail, may require the use of an [application-specific password](https://support.google.com/mail/answer/185833?hl=en) for authentication.
+## Upgrade safely
 
-### Example Gmail Configuration
-```properties
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_EMAIL=your-email@gmail.com
-SMTP_PASSWORD=your-application-password
-SMTP_AUTH=true
-SMTP_START_TTL=true
-CONTACT_MAIL=your-email@gmail.com
+`latest` changes only after a successful build on the default branch. Before an upgrade, synchronize
+pending Trail Journal drafts and create a backup. Pending device drafts are not yet in MySQL or the
+server upload directory.
+
+```bash
+cd /volume1/docker/Dockge/stacks/plantit
+
+COMPOSE_FILE="$PWD/compose.yaml" \
+ENV_FILE="$PWD/.env" \
+DATA_DIRECTORY=/volume1/docker/plantit \
+BACKUP_DIRECTORY=/volume1/docker/plantit-backups \
+./source/scripts/backup.sh
+
+docker compose pull server
+docker compose up -d --no-deps --force-recreate server
+docker compose ps
+docker compose logs --since=10m server
 ```
 
-## Homepage dashboard integration
-![](assets/dashboard-homepage.png){ align=left; loading=lazy; style="max-width: 400px"}
+Database migrations are additive. The v0.14 and v0.15 migrations add catalog provenance, care
+context, field observations, named hikes, and idempotent synchronization references without
+deleting existing users, plants, care history, reminders, diaries, or photos.
 
-The project offers a widget for integrates the service with the popular dashboard called [homepage](https://github.com/gethomepage/homepage).
-In order to use it, simply place the widget as above in the configuration yml file of the dashboard:
-```
-- Plant-it:
-    href: <server-app-url>
-    description: 🪴 Self-hosted, open source gardening companion app
-    icon: plant-it
-    widget:
-      type: plantit
-      url: <server-backend-url>
-      key: <you-key>
-```
-You can get the API Key following the step in the relative section.
+See [Backup and restore](https://github.com/t0n003c/plant-it-enhanced/blob/main/BACKUP_AND_RESTORE.md)
+for retention and restore verification.
 
-## API Key Retrieval
-To retrieve an API Key using the REST API, follow these steps:
+## Troubleshooting
 
-1. **Authenticate and Retrieve JWT Token:**
-   
-    - Send a `POST` request to the authentication endpoint to log in.
-    - Replace `<server-url>` with the actual server URL.
-    - Example using `curl`:
+### Dockge says inactive but containers exist
 
-      ```bash
-      curl -X 'POST' \
-      'http://<server-url>/api/authentication/login' \
-      -H 'accept: */*' \
-      -H 'Content-Type: application/json' \
-      -d '{
-      "username": "user",
-      "password": "user"
-      }'
-      ```
+Run `docker compose ps` from the exact Dockge stack directory. If old manually created containers
+used fixed names, remove or rename only those confirmed stale containers, then redeploy. The
+maintained examples omit fixed names to prevent this problem.
 
-    - Upon successful authentication, the response will contain a JWT token. This token is required for the next step.
+### MySQL access denied
 
-2. **Generate API Key:**
-   
-    - With the JWT token, make an authenticated `POST` request to the API Key endpoint. You may optionally pass a name parameter for the API key.
-    - Example using `curl`:
+Confirm the running server sees the expected non-secret settings:
 
-    ```bash
-    curl -X 'POST' \
-    'http://<server-url>/api/api-key/' \
-    -H 'accept: */*' \
-    -H 'Authorization: Bearer <JWT-token>' \
-    -d ''
-    ```
-
-3. **Receive API Key:**
-   
-    - The response from the API Key request will contain your newly generated API Key.
-
-Make sure to store the API Key securely, as it will be used for authenticating your requests to the system.
-
-## Kubernetes Deployment
-This guide will help you deploy your project using Kubernetes with Minikube. Follow the steps below to set up and access your application.
-
-### Prerequisites
-- Ensure you have Minikube installed and running.
-- Ensure `kubectl` is installed and configured to communicate with your Minikube cluster.
-- (if using [Helm](https://helm.sh/)) Ensure Helm is installed.
-
-### Deployment Steps
-
-#### Using kubectl
-First, download the contents of the `deployment/kubernetes` [directory from the project repository](https://github.com/MDeLuise/plant-it/tree/main/deployment/kubernetes), then:
-
-1. **Run Minikube:**
-   ```sh
-   minikube start --driver=docker --mount --mount-string="/tmp/plant-it-data:/mnt/data"
-   ```
-
-2. **Deploy the DB Secrets:**
-   ```sh
-   kubectl apply -f secret.yml
-   ```
-
-3. **Deploy the DB ConfigMaps:**
-   ```sh
-   kubectl apply -f config.yml
-   ```
-
-4. **Deploy the Database:**
-   ```sh
-   kubectl apply -f db.yml
-   ```
-
-5. **Deploy the Cache:**
-   ```sh
-   kubectl apply -f cache.yml
-   ```
-
-6. **Deploy the Server:**
-   ```sh
-   kubectl apply -f server.yml
-   ```
-
-If you want to change the configuration values, edit the content of `config.yml` and `secret.yml` files.
-
-#### Using Helm
-First, download the contents of the `deployment/helm` [directory from the project repository](https://github.com/MDeLuise/plant-it/tree/main/deployment/helm), then:
-
-1. **Run Minikube:**
-   ```sh
-   minikube start --driver=docker --mount --mount-string="/tmp/plant-it-data:/mnt/data"
-   ```
-
-2. **Create and Modify `my-values.yml` File:**
-   Create a new file called `my-values.yml` to override the default settings provided in the `values.yml` file. You can copy the content from `values.yml` and modify it according to your configuration needs. This ensures your custom values are applied without altering the default configuration.
-
-3. **Install the Helm Chart:**
-   ```sh
-   helm install plantit helm --values helm/values.yml -f helm/my-values.yml
-   ```
-   This command confirms that the values in `helm/values.yml` will be used as the base configuration, and any values specified in `helm/my-values.yml` will override the defaults.
-
-#### Using TrueCharts
-The Plant-it service is also available on TrueCharts, which simplifies the deployment process. You can find the chart for Plant-it [here](https://truecharts.org/charts/incubator/plant-it/). 
-
-Please note that I am not the creator of these charts. For any issues or detailed instructions on how to deploy using TrueCharts, please refer to the official [TrueCharts documentation](https://truecharts.org/guides/).
-
-### Access the Application
-Once the deployment is complete, you can access the application and its Swagger UI at the following URLs:
-
-- **Application:** `http://<minikube_ip>:3000`
-- **Swagger UI:** `http://<minikube_ip>:8080/api/swagger-ui/index.html`
-
-Replace `<minikube_ip>` with the IP address returned by the following command:
-
-```sh
-minikube ip
+```bash
+docker compose exec -T server sh -c 'printf "%s\n" "$MYSQL_HOST" "$MYSQL_USERNAME"'
+docker compose exec -T db sh -c \
+  'MYSQL_PWD="$MYSQL_PASSWORD" mysql -h127.0.0.1 -u"$MYSQL_USER" "$MYSQL_DATABASE" -e "SELECT 1"'
 ```
 
-#### ⚠ Known Issue - Minikube IP not Accessible
-If you encounter issues accessing the NodePort service using `MinikubeIP:NodePort`, execute the following command to expose the service and obtain a direct URL:
+If the second command works but the server fails, recreate only `server`. If it fails, the existing
+MySQL data directory was initialized with different credentials. Do not delete it merely to change
+a password; either restore the known credential or update the MySQL account deliberately.
 
-```sh
-minikube service server-service
-```
+### Pl@ntNet returns HTTP 403
 
-Then, open the printed links in your browser to access the application and Swagger UI.
+Check that the key belongs to the current Pl@ntNet API product, is not exposed client-side, has
+remaining quota, and permits the NAS's public outbound IP. Diagnostics records the provider status.
+Ordinary name search remains available while photo identification is unavailable.
+
+### No structured care guide
+
+Confirm the result resolved to an accepted scientific taxon and review diagnostics for each care
+provider. The bundled catalog covers common plants but not every taxon; Trefle and Perenual may also
+have sparse records. Plant-it does not attach a care profile from a merely similar name.
+
+### Offline save is unavailable
+
+The browser or embedded client denied durable storage. Use a normal browser profile, allow site
+storage, leave private browsing, and reload. Plant-it disables offline save rather than pretending
+an in-memory draft is safe.

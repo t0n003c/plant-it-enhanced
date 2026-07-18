@@ -517,6 +517,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.3.4"
+  hive_ce:
+    dependency: transitive
+    description:
+      name: hive_ce
+      sha256: "8e9980e68643afb1e765d3af32b47996552a64e190d03faf622cea07c1294418"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.19.3"
+  hive_ce_flutter:
+    dependency: "direct main"
+    description:
+      name: hive_ce_flutter
+      sha256: e74e11d3ed622630ff1ee758037dab21a59d2182fa7b61378726c673742d2ab9
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
   http:
     dependency: "direct main"
     description:
@@ -645,6 +661,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.4"
+  isolate_channel:
+    dependency: transitive
+    description:
+      name: isolate_channel
+      sha256: a9d3d620695bc984244dafae00b95e4319d6974b2d77f4b9e1eb4f2efe099094
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.1"
   js:
     dependency: transitive
     description:
@@ -1331,7 +1355,7 @@ packages:
     source: hosted
     version: "3.1.2"
   uuid:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: uuid
       sha256: a5be9ef6618a7ac1e964353ef476418026db906c4facdedaa299b7a2e71690ff

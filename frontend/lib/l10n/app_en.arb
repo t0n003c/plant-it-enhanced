@@ -593,7 +593,12 @@
   "chooseIdentification": "Confirm an identification",
   "identificationOptional": "Choose a candidate only when it matches what you saw. You can save it as unidentified instead.",
   "saveTrailObservation": "Save trail observation",
+  "saveOfflineDraft": "Save offline",
+  "saveAndSync": "Save and sync",
   "observationSaved": "Trail observation saved",
+  "observationSavedOffline": "Trail find saved safely on this device",
+  "observationQueuedForSync": "Trail find saved offline and queued to sync",
+  "offlineStorageUnavailable": "Durable offline storage is unavailable on this device. Keep this screen open and try again when the server is reachable.",
   "observationSaveError": "Could not save this observation.",
   "observationPhotoUploadWarning": "The observation was saved, but one or more photos could not be uploaded.",
   "identificationFailedSaveAnyway": "Identification is unavailable right now. You can still save the photos as an unidentified observation.",
@@ -602,6 +607,73 @@
   "deleteObservationConfirm": "Delete this observation and all of its photos?",
   "changeObservationPhotos": "Retake or change photos",
   "viewTrailJournal": "View trail journal",
+  "activeHike": "Active hike",
+  "addingToHike": "Adding this find to {name}",
+  "@addingToHike": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "River Bluff Loop"
+      }
+    }
+  },
+  "hikeSessions": "Hike sessions",
+  "hikeSessionIntro": "Group nearby finds into one field outing, even when you lose signal.",
+  "startHike": "Start a hike",
+  "hikeName": "Hike name",
+  "hikeNameHint": "River Bluff Loop",
+  "hikeNotesOptional": "Notes (optional)",
+  "hikeStarted": "Started at {time}",
+  "@hikeStarted": {
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "8:42 AM"
+      }
+    }
+  },
+  "finishHike": "Finish hike",
+  "finishHikeConfirm": "Finish this hike now? All saved finds will stay in your journal.",
+  "recentHikeCount": "{count, plural, =1{1 synchronized hike} other{{count} synchronized hikes}}",
+  "@recentHikeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "hikeSyncPending": "{count, plural, =1{1 hike is waiting to sync} other{{count} hikes are waiting to sync}}",
+  "@hikeSyncPending": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "1"
+      }
+    }
+  },
+  "syncNow": "Sync now",
+  "retrySync": "Retry sync",
+  "waitingToSync": "Waiting to sync",
+  "syncing": "Syncing…",
+  "syncFailed": "Sync failed",
+  "synced": "Synced",
+  "trailJournalOffline": "You are offline. New finds remain safely on this device and will sync when the server is reachable.",
+  "offlineDraftCount": "{count, plural, =1{1 offline find} other{{count} offline finds}}",
+  "@offlineDraftCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "savedTrailFinds": "Saved trail finds",
+  "discardOfflineDraft": "Discard offline find?",
+  "discardOfflineDraftConfirm": "This removes the locally saved photos and notes. If part of the find already synchronized, the server copy will also be deleted.",
+  "discard": "Discard",
+  "discardNeedsConnection": "This find has partially synchronized. Connect to the server before discarding it.",
+  "edit": "Edit",
   "trailObservationCount": "{count, plural, =0{No observations} =1{1 observation} other{{count} observations}}",
   "@trailObservationCount": {
     "placeholders": {

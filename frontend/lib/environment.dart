@@ -1,6 +1,7 @@
 import 'package:plant_it/app_http_client.dart';
 import 'package:plant_it/dto/plant_dto.dart';
 import 'package:plant_it/logger/logger.dart';
+import 'package:plant_it/observation/trail_draft_repository.dart';
 import 'package:plant_it/toast/toast_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -9,6 +10,8 @@ class Environment {
   final AppHttpClient http;
   final Logger logger;
   final ToastManager toastManager;
+  final TrailDraftRepository trailDraftRepository;
+  final bool durableTrailStorage;
   List<String> eventTypes;
   List<PlantDTO> plants;
   String backendVersion;
@@ -25,8 +28,18 @@ class Environment {
     required this.plants,
     Logger? logger,
     ToastManager? toastManager,
+    TrailDraftRepository? trailDraftRepository,
+    this.durableTrailStorage = true,
   })  : logger = logger ?? TalkerLogger(),
-        toastManager = toastManager ?? ToastificationToastManager();
+        toastManager = toastManager ?? ToastificationToastManager(),
+        trailDraftRepository =
+            trailDraftRepository ?? MemoryTrailDraftRepository();
+
+  String get offlineAccountScope {
+    final String server = http.backendUrl?.trim() ?? '';
+    final String username = credentials.username.trim().toLowerCase();
+    return '$server|$username';
+  }
 }
 
 class Credentials {
