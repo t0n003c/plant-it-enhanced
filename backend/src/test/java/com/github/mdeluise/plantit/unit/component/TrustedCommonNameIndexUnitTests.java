@@ -88,6 +88,8 @@ class TrustedCommonNameIndexUnitTests {
 
         Assertions.assertEquals("Coriandrum sativum", index.resolveProviderSearchTerm("CILANTRO"));
         Assertions.assertEquals("Zingiber officinale", index.resolveProviderSearchTerm("ginger-root"));
+        Assertions.assertEquals("Brassica oleracea", index.resolveProviderSearchTerm("kale"));
+        Assertions.assertEquals("Capsicum annuum", index.resolveProviderSearchTerm("Thai pepper"));
         Assertions.assertEquals("ging", index.resolveProviderSearchTerm("ging"));
     }
 

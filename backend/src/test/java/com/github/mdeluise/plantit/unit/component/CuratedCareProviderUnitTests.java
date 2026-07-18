@@ -27,7 +27,7 @@ class CuratedCareProviderUnitTests {
     void shouldCoverReportedPlants() {
         final List<String> reportedPlants = List.of(
             "Monstera deliciosa", "Zea mays", "Helianthus annuus", "Lavandula angustifolia", "Rosa",
-            "Fragaria ananassa");
+            "Fragaria ananassa", "Brassica oleracea");
 
         for (String scientificName : reportedPlants) {
             Assertions.assertTrue(provider.fetch(scientificName).isPresent(), scientificName);

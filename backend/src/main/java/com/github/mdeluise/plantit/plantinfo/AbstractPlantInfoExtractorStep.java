@@ -1,12 +1,15 @@
 package com.github.mdeluise.plantit.plantinfo;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfo;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoCatalogMerger;
+import com.github.mdeluise.plantit.plantinfo.search.PlantSearchMatchReason;
+import com.github.mdeluise.plantit.plantinfo.search.PlantSearchScorer;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -29,11 +32,20 @@ public abstract class AbstractPlantInfoExtractorStep implements PlantInfoExtract
         final Set<BotanicalInfo> result = new LinkedHashSet<>();
         extractPlantsInternal(partialPlantScientificName, size, locale, region)
             .forEach(candidate -> addOrMerge(result, candidate));
-        if (shouldQueryNext(result, size)) {
+        if (shouldQueryNext(result, size, partialPlantScientificName)) {
             next.extractPlants(partialPlantScientificName, size, locale, region)
                 .forEach(candidate -> addOrMerge(result, candidate));
         }
-        return new ArrayList<>(new ArrayList<>(result).subList(0, Math.min(size, result.size())));
+        final boolean hasStrongMatch = result.stream().anyMatch(candidate ->
+            PlantSearchScorer.isStrongMatch(partialPlantScientificName, candidate));
+        return result.stream()
+                     .filter(candidate -> !hasStrongMatch || PlantSearchScorer.evaluate(
+                         partialPlantScientificName, candidate).reason() != PlantSearchMatchReason.COMMON_NAME_TYPO)
+                     .sorted(searchResultComparator(partialPlantScientificName))
+                     .limit(size)
+                     .peek(candidate -> PlantSearchScorer.applyMatchMetadata(
+                         partialPlantScientificName, candidate))
+                     .toList();
     }
 
 
@@ -67,8 +79,17 @@ public abstract class AbstractPlantInfoExtractorStep implements PlantInfoExtract
     }
 
 
-    private boolean shouldQueryNext(Set<BotanicalInfo> result, int size) {
+    private boolean shouldQueryNext(Set<BotanicalInfo> result, int size, String searchTerm) {
         return next != null && (result.size() < size || result.stream().anyMatch(
-            botanicalInfo -> !BotanicalInfoCatalogMerger.hasUsableImage(botanicalInfo)));
+            botanicalInfo -> !BotanicalInfoCatalogMerger.hasUsableImage(botanicalInfo)) ||
+                   result.stream().noneMatch(botanicalInfo -> PlantSearchScorer.isStrongMatch(
+                       searchTerm, botanicalInfo)));
+    }
+
+
+    private Comparator<BotanicalInfo> searchResultComparator(String searchTerm) {
+        return PlantSearchScorer.relevanceComparator(searchTerm).thenComparing(
+            Comparator.comparing(BotanicalInfoCatalogMerger::hasUsableImage).reversed()
+        );
     }
 }

@@ -248,6 +248,19 @@ Nginx Proxy Manager and the Plant-it server must both join `TinhnasNetwork` (or 
 `PLANTIT_PROXY_NETWORK`). The same-origin layout means the server address entered in Plant-it is
 simply `https://plants.example.com`, without `/api`.
 
+After saving the Proxy Host and its custom location, verify the API route itself rather than relying
+on an HTTP 200 status alone:
+
+```bash
+curl -fsS https://plants.example.com/api/info/ping
+```
+
+The complete response must be `pong`. If it is Flutter HTML (usually beginning with
+`<!DOCTYPE html>`), `/api/` is still reaching port `3000`; recreate the Nginx Proxy Manager custom
+location with `/api/`, `http`, `plantit-server`, and port `8080`. A misrouted API path also prevents
+catalog images from loading because authenticated `/api/proxy` requests receive HTML instead of an
+image. Run `./scripts/verify-deployment.sh https://plants.example.com` after correcting the route.
+
 Set an exact CORS origin even though same-origin requests do not require CORS:
 
 ```dotenv
