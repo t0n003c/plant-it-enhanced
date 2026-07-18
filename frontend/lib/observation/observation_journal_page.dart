@@ -9,8 +9,10 @@ import 'package:plant_it/dto/hike_session_dto.dart';
 import 'package:plant_it/dto/observation_dto.dart';
 import 'package:plant_it/environment.dart';
 import 'package:plant_it/observation/add_observation_page.dart';
+import 'package:plant_it/observation/observation_review_service.dart';
 import 'package:plant_it/observation/offline_hike_session.dart';
 import 'package:plant_it/observation/offline_observation_draft.dart';
+import 'package:plant_it/observation/trail_journal_filter.dart';
 import 'package:plant_it/observation/trail_sync_service.dart';
 import 'package:uuid/uuid.dart';
 
@@ -27,6 +29,7 @@ class ObservationJournalPage extends StatefulWidget {
 }
 
 class _ObservationJournalPageState extends State<ObservationJournalPage> {
+  final TextEditingController _filterController = TextEditingController();
   List<ObservationDTO> _observations = [];
   List<OfflineObservationDraft> _drafts = [];
   List<OfflineHikeSession> _localHikes = [];
@@ -34,7 +37,11 @@ class _ObservationJournalPageState extends State<ObservationJournalPage> {
   OfflineHikeSession? _activeHike;
   bool _loading = true;
   bool _syncing = false;
+  bool _preparingReview = false;
   String? _remoteError;
+  TrailJournalStatusFilter _statusFilter = TrailJournalStatusFilter.all;
+  String? _hikeFilter;
+  DateTimeRange? _dateRange;
 
   TrailSyncService get _syncService => TrailSyncService(
         http: widget.env.http,
@@ -189,6 +196,57 @@ class _ObservationJournalPageState extends State<ObservationJournalPage> {
       ),
     );
     if (changed == true) await _refresh();
+  }
+
+  Future<void> _reviewObservation(ObservationDTO observation) async {
+    setState(() => _preparingReview = true);
+    try {
+      final OfflineObservationDraft draft =
+          await ObservationReviewService(widget.env).createDraft(observation);
+      if (!mounted) return;
+      final bool? changed = await Navigator.of(context).push<bool>(
+        MaterialPageRoute(
+          builder: (context) => AddObservationPage(
+            env: widget.env,
+            initialDraft: draft,
+          ),
+        ),
+      );
+      if (changed == true) await _refresh();
+    } catch (error, stackTrace) {
+      widget.env.logger.warning('Could not prepare observation review: $error');
+      widget.env.logger.debug(stackTrace);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context).reviewObservationError),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _preparingReview = false);
+    }
+  }
+
+  Future<void> _selectDateRange() async {
+    final DateTime now = DateTime.now();
+    final DateTimeRange? selected = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(now.year + 1),
+      initialDateRange: _dateRange,
+    );
+    if (selected != null && mounted) {
+      setState(() => _dateRange = selected);
+    }
+  }
+
+  void _clearFilters() {
+    _filterController.clear();
+    setState(() {
+      _statusFilter = TrailJournalStatusFilter.all;
+      _hikeFilter = null;
+      _dateRange = null;
+    });
   }
 
   Future<void> _retryDraft(OfflineObservationDraft draft) async {
@@ -400,12 +458,18 @@ class _ObservationJournalPageState extends State<ObservationJournalPage> {
   }
 
   @override
+  void dispose() {
+    _filterController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context).trailJournal),
         actions: [
-          if (_syncing)
+          if (_syncing || _preparingReview)
             const Padding(
               padding: EdgeInsets.only(right: 16),
               child: Center(
@@ -439,9 +503,61 @@ class _ObservationJournalPageState extends State<ObservationJournalPage> {
     if (_loading && _drafts.isEmpty && _observations.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
+    final TrailJournalFilter filter = TrailJournalFilter(
+      query: _filterController.text,
+      status: _statusFilter,
+      hikeKey: _hikeFilter,
+      from: _dateRange?.start,
+      through: _dateRange?.end,
+    );
+    final List<OfflineObservationDraft> visibleDrafts =
+        _drafts.where(filter.matchesDraft).toList(growable: false);
+    final List<ObservationDTO> distinctObservations =
+        TrailJournalFilter.deduplicateRemoteObservations(
+      _observations,
+      _drafts,
+    );
+    final List<ObservationDTO> visibleObservations =
+        distinctObservations.where(filter.matchesObservation).toList(
+              growable: false,
+            );
+    final int needsIdentification =
+        _drafts.where((draft) => draft.status != 'CONFIRMED').length +
+            distinctObservations
+                .where((observation) => observation.status != 'CONFIRMED')
+                .length;
+    final int activeHikeObservationCount = _activeHike == null
+        ? 0
+        : _drafts
+                .where(
+                  (draft) => draft.hikeSessionLocalId == _activeHike!.localId,
+                )
+                .length +
+            distinctObservations
+                .where(
+                  (observation) =>
+                      _activeHike!.serverId != null &&
+                      observation.hikeSessionId == _activeHike!.serverId,
+                )
+                .length;
     final List<Widget> children = [
+      _TrailDashboardCard(
+        totalCount: _drafts.length + distinctObservations.length,
+        needsIdentificationCount: needsIdentification,
+        pendingSyncCount: _drafts.length,
+        onShowAll: () => setState(() {
+          _statusFilter = TrailJournalStatusFilter.all;
+        }),
+        onShowNeedsIdentification: () => setState(() {
+          _statusFilter = TrailJournalStatusFilter.needsIdentification;
+        }),
+        onShowPending: () => setState(() {
+          _statusFilter = TrailJournalStatusFilter.pendingSync;
+        }),
+      ),
       _HikeSessionCard(
         activeHike: _activeHike,
+        activeObservationCount: activeHikeObservationCount,
         recentHikes: _serverHikes,
         pendingSessionCount: _localHikes
             .where(
@@ -461,20 +577,21 @@ class _ObservationJournalPageState extends State<ObservationJournalPage> {
                 if (mounted) setState(() => _syncing = false);
               },
       ),
+      _buildFilters(context),
     ];
     if (_remoteError != null) {
       children.add(_offlineBanner(context));
     }
-    if (_drafts.isNotEmpty) {
+    if (visibleDrafts.isNotEmpty) {
       children.add(
         _sectionTitle(
           context,
-          AppLocalizations.of(context).offlineDraftCount(_drafts.length),
+          AppLocalizations.of(context).offlineDraftCount(visibleDrafts.length),
           Icons.cloud_upload_outlined,
         ),
       );
       children.addAll(
-        _drafts.map(
+        visibleDrafts.map(
           (draft) => _OfflineDraftCard(
             draft: draft,
             onRetry: () => _retryDraft(draft),
@@ -484,19 +601,24 @@ class _ObservationJournalPageState extends State<ObservationJournalPage> {
         ),
       );
     }
-    if (_observations.isNotEmpty) {
+    if (visibleObservations.isNotEmpty) {
       children.add(
         _sectionTitle(
           context,
-          AppLocalizations.of(context).savedTrailFinds,
+          _statusFilter == TrailJournalStatusFilter.needsIdentification
+              ? AppLocalizations.of(context).identificationInbox
+              : AppLocalizations.of(context).savedTrailFinds,
           Icons.auto_stories_outlined,
         ),
       );
       children.addAll(
-        _observations.map(
+        visibleObservations.map(
           (observation) => _ObservationCard(
             observation: observation,
             env: widget.env,
+            onReview: observation.status == 'CONFIRMED'
+                ? null
+                : () => _reviewObservation(observation),
             onDelete: () => _deleteObservation(observation),
           ),
         ),
@@ -529,6 +651,31 @@ class _ObservationJournalPageState extends State<ObservationJournalPage> {
           ),
         ),
       );
+    } else if (visibleDrafts.isEmpty && visibleObservations.isEmpty) {
+      children.add(
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 32, 24, 80),
+          child: Column(
+            children: [
+              const Icon(
+                Icons.filter_alt_off_outlined,
+                size: 52,
+                color: Colors.white70,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                AppLocalizations.of(context).noJournalMatches,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton(
+                onPressed: _clearFilters,
+                child: Text(AppLocalizations.of(context).clearFilters),
+              ),
+            ],
+          ),
+        ),
+      );
     }
     return ListView(
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 120),
@@ -536,6 +683,152 @@ class _ObservationJournalPageState extends State<ObservationJournalPage> {
           .expand((child) => [child, const SizedBox(height: 10)])
           .toList(),
     );
+  }
+
+  Widget _buildFilters(BuildContext context) {
+    final List<_HikeFilterOption> hikeOptions = _hikeOptions();
+    final String dateLabel = _dateRange == null
+        ? AppLocalizations.of(context).allDates
+        : '${DateFormat.yMMMd().format(_dateRange!.start)} – '
+            '${DateFormat.yMMMd().format(_dateRange!.end)}';
+    return Card(
+      color: const Color(0xFF182C25),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextField(
+              key: const ValueKey('trail-journal-search'),
+              controller: _filterController,
+              onChanged: (_) => setState(() {}),
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context).searchTrailJournal,
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _filterController.text.isEmpty
+                    ? null
+                    : IconButton(
+                        tooltip: AppLocalizations.of(context).clear,
+                        onPressed: () {
+                          _filterController.clear();
+                          setState(() {});
+                        },
+                        icon: const Icon(Icons.clear),
+                      ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _statusChip(
+                    context,
+                    TrailJournalStatusFilter.all,
+                    AppLocalizations.of(context).all,
+                  ),
+                  _statusChip(
+                    context,
+                    TrailJournalStatusFilter.needsIdentification,
+                    AppLocalizations.of(context).needsIdentification,
+                  ),
+                  _statusChip(
+                    context,
+                    TrailJournalStatusFilter.confirmed,
+                    AppLocalizations.of(context).confirmed,
+                  ),
+                  _statusChip(
+                    context,
+                    TrailJournalStatusFilter.pendingSync,
+                    AppLocalizations.of(context).waitingToSync,
+                  ),
+                ].expand((chip) => [chip, const SizedBox(width: 8)]).toList()
+                  ..removeLast(),
+              ),
+            ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<String>(
+              value: _hikeFilter ?? 'all',
+              isExpanded: true,
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context).filterByHike,
+                prefixIcon: const Icon(Icons.hiking_outlined),
+              ),
+              items: [
+                DropdownMenuItem(
+                  value: 'all',
+                  child: Text(AppLocalizations.of(context).allHikes),
+                ),
+                ...hikeOptions.map(
+                  (option) => DropdownMenuItem(
+                    value: option.key,
+                    child: Text(
+                      option.name,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+              ],
+              onChanged: (value) {
+                setState(() => _hikeFilter = value == 'all' ? null : value);
+              },
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _selectDateRange,
+                    icon: const Icon(Icons.date_range_outlined),
+                    label: Text(dateLabel, overflow: TextOverflow.ellipsis),
+                  ),
+                ),
+                if (_dateRange != null) ...[
+                  const SizedBox(width: 6),
+                  IconButton(
+                    tooltip: AppLocalizations.of(context).allDates,
+                    onPressed: () => setState(() => _dateRange = null),
+                    icon: const Icon(Icons.clear),
+                  ),
+                ],
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _statusChip(
+    BuildContext context,
+    TrailJournalStatusFilter value,
+    String label,
+  ) {
+    return ChoiceChip(
+      label: Text(label),
+      selected: _statusFilter == value,
+      onSelected: (_) => setState(() => _statusFilter = value),
+      selectedColor: const Color(0xFF315D4E),
+      labelStyle: const TextStyle(color: Colors.white),
+    );
+  }
+
+  List<_HikeFilterOption> _hikeOptions() {
+    final Map<String, _HikeFilterOption> options = {};
+    for (final HikeSessionDTO hike in _serverHikes) {
+      final int? id = hike.id;
+      if (id == null) continue;
+      final String key = 'remote:$id';
+      options[key] = _HikeFilterOption(key, hike.name);
+    }
+    for (final OfflineHikeSession hike in _localHikes) {
+      final String key = hike.serverId == null
+          ? 'local:${hike.localId}'
+          : 'remote:${hike.serverId}';
+      options[key] = _HikeFilterOption(key, hike.name);
+    }
+    return options.values.toList(growable: false)
+      ..sort((left, right) => left.name.compareTo(right.name));
   }
 
   Widget _offlineBanner(BuildContext context) {
@@ -584,8 +877,142 @@ class _ObservationJournalPageState extends State<ObservationJournalPage> {
   }
 }
 
+class _TrailDashboardCard extends StatelessWidget {
+  final int totalCount;
+  final int needsIdentificationCount;
+  final int pendingSyncCount;
+  final VoidCallback onShowAll;
+  final VoidCallback onShowNeedsIdentification;
+  final VoidCallback onShowPending;
+
+  const _TrailDashboardCard({
+    required this.totalCount,
+    required this.needsIdentificationCount,
+    required this.pendingSyncCount,
+    required this.onShowAll,
+    required this.onShowNeedsIdentification,
+    required this.onShowPending,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: const Color(0xFF182C25),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              AppLocalizations.of(context).trailDashboard,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _DashboardMetric(
+                    key: const ValueKey('trail-dashboard-all'),
+                    icon: Icons.auto_stories_outlined,
+                    value: totalCount,
+                    label: AppLocalizations.of(context).allFinds,
+                    onTap: onShowAll,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _DashboardMetric(
+                    key: const ValueKey('trail-dashboard-needs-id'),
+                    icon: Icons.help_outline,
+                    value: needsIdentificationCount,
+                    label: AppLocalizations.of(context).needsIdShort,
+                    onTap: onShowNeedsIdentification,
+                    accent: const Color(0xFFFFD166),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _DashboardMetric(
+                    key: const ValueKey('trail-dashboard-pending'),
+                    icon: Icons.cloud_upload_outlined,
+                    value: pendingSyncCount,
+                    label: AppLocalizations.of(context).pendingSyncShort,
+                    onTap: onShowPending,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DashboardMetric extends StatelessWidget {
+  final IconData icon;
+  final int value;
+  final String label;
+  final VoidCallback onTap;
+  final Color accent;
+
+  const _DashboardMetric({
+    super.key,
+    required this.icon,
+    required this.value,
+    required this.label,
+    required this.onTap,
+    this.accent = const Color(0xFF9BE59F),
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: const Color(0xFF213B32),
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 94),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, color: accent, size: 22),
+                const SizedBox(height: 3),
+                Text(
+                  '$value',
+                  style: TextStyle(
+                    color: accent,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                Text(
+                  label,
+                  maxLines: 2,
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(color: Colors.white, fontSize: 11),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _HikeSessionCard extends StatelessWidget {
   final OfflineHikeSession? activeHike;
+  final int activeObservationCount;
   final List<HikeSessionDTO> recentHikes;
   final int pendingSessionCount;
   final VoidCallback onStart;
@@ -594,6 +1021,7 @@ class _HikeSessionCard extends StatelessWidget {
 
   const _HikeSessionCard({
     required this.activeHike,
+    required this.activeObservationCount,
     required this.recentHikes,
     required this.pendingSessionCount,
     required this.onStart,
@@ -637,6 +1065,16 @@ class _HikeSessionCard extends StatelessWidget {
                     ),
               style: const TextStyle(color: Colors.white70),
             ),
+            if (active != null) ...[
+              const SizedBox(height: 6),
+              Text(
+                AppLocalizations.of(context).activeHikeSummary(
+                  _elapsed(active.startedAt),
+                  activeObservationCount,
+                ),
+                style: const TextStyle(color: Color(0xFF9BE59F)),
+              ),
+            ],
             if (active?.lastError != null) ...[
               const SizedBox(height: 6),
               Text(
@@ -725,6 +1163,14 @@ class _HikeSessionCard extends StatelessWidget {
       case TrailSyncState.pending:
         return const Icon(Icons.cloud_upload_outlined, color: Colors.white70);
     }
+  }
+
+  String _elapsed(DateTime startedAt) {
+    final Duration measured = DateTime.now().difference(startedAt);
+    final Duration elapsed = measured.isNegative ? Duration.zero : measured;
+    final int hours = elapsed.inHours;
+    final int minutes = elapsed.inMinutes.remainder(60);
+    return hours > 0 ? '${hours}h ${minutes}m' : '${minutes}m';
   }
 }
 
@@ -875,11 +1321,13 @@ class _OfflineDraftCard extends StatelessWidget {
 class _ObservationCard extends StatelessWidget {
   final ObservationDTO observation;
   final Environment env;
+  final VoidCallback? onReview;
   final VoidCallback onDelete;
 
   const _ObservationCard({
     required this.observation,
     required this.env,
+    required this.onReview,
     required this.onDelete,
   });
 
@@ -970,6 +1418,22 @@ class _ObservationCard extends StatelessWidget {
               Icons.lock_outline,
               AppLocalizations.of(context).exactLocationPrivate,
             ),
+          if (!confirmed && onReview != null) ...[
+            const SizedBox(height: 14),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                key: ValueKey<String>(
+                  'review-observation-${observation.id}',
+                ),
+                onPressed: onReview,
+                icon: const Icon(Icons.fact_check_outlined),
+                label: Text(
+                  AppLocalizations.of(context).reviewIdentification,
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -1023,4 +1487,11 @@ class _ObservationCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _HikeFilterOption {
+  final String key;
+  final String name;
+
+  const _HikeFilterOption(this.key, this.name);
 }

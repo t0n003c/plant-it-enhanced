@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -11,6 +12,7 @@ import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfo;
 import com.github.mdeluise.plantit.plantinfo.config.PlantNetProperties;
 import com.github.mdeluise.plantit.plantinfo.config.PlantSearchProperties;
 import com.github.mdeluise.plantit.plantinfo.identification.PlantIdentificationCandidate;
+import com.github.mdeluise.plantit.plantinfo.identification.PlantIdentificationContext;
 import com.github.mdeluise.plantit.plantinfo.identification.PlantIdentificationPhoto;
 import com.github.mdeluise.plantit.plantinfo.identification.PlantIdentificationService;
 import com.sun.net.httpserver.HttpExchange;
@@ -117,7 +119,44 @@ class PlantIdentificationServiceUnitTests {
     }
 
 
+    @Test
+    @DisplayName("Should choose a regional flora from a coarsened opt-in field location")
+    void shouldChooseRegionalFlora() {
+        final AtomicReference<String> projectsQuery = new AtomicReference<>();
+        server.createContext("/v2/projects", exchange -> {
+            projectsQuery.set(exchange.getRequestURI().getRawQuery());
+            respond(exchange, """
+                [
+                  {"id":"useful","title":"Useful plants"},
+                  {"id":"k-northern-america","title":"Northern America"}
+                ]
+                """);
+        });
+        server.createContext("/v2/identify/k-northern-america", exchange -> respond(
+            exchange, IDENTIFICATION_RESPONSE));
+        server.start();
+        final MockMultipartFile image = new MockMultipartFile(
+            "image", "trail-plant.jpg", "image/jpeg", "fake-jpeg".getBytes(StandardCharsets.UTF_8));
+        final PlantIdentificationContext context = new PlantIdentificationContext(
+            41.8781, -87.6298, 181.0, "woodland edge", Instant.parse("2026-07-18T12:00:00Z"), "US");
+
+        final List<PlantIdentificationCandidate> result = createService(true).identify(
+            List.of(new PlantIdentificationPhoto(image, "leaf")), "en", context);
+
+        Assertions.assertEquals("k-northern-america", result.get(0).project().id());
+        Assertions.assertEquals("Northern America", result.get(0).project().title());
+        Assertions.assertTrue(result.get(0).project().contextual());
+        Assertions.assertTrue(projectsQuery.get().contains("lat=42.0"));
+        Assertions.assertTrue(projectsQuery.get().contains("lon=-87.5"));
+    }
+
+
     private PlantIdentificationService createService() {
+        return createService(false);
+    }
+
+
+    private PlantIdentificationService createService(boolean locationProjectEnabled) {
         final PlantNetProperties plantNetProperties = Mockito.mock(PlantNetProperties.class);
         final PlantSearchProperties searchProperties = Mockito.mock(PlantSearchProperties.class);
         Mockito.when(plantNetProperties.isConfigured()).thenReturn(true);
@@ -125,6 +164,8 @@ class PlantIdentificationServiceUnitTests {
         Mockito.when(plantNetProperties.getApiKey()).thenReturn("secret");
         Mockito.when(plantNetProperties.getMaximumResults()).thenReturn(5);
         Mockito.when(plantNetProperties.getMinimumConfidence()).thenReturn(0.05);
+        Mockito.when(plantNetProperties.isLocationProjectEnabled()).thenReturn(locationProjectEnabled);
+        Mockito.when(plantNetProperties.getLocationPrecisionDegrees()).thenReturn(0.5);
         Mockito.when(searchProperties.getLocale()).thenReturn("en");
         Mockito.when(searchProperties.getUserAgent()).thenReturn("Plant-it unit test");
         return new PlantIdentificationService(

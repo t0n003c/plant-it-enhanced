@@ -13,3 +13,4 @@ frontend/build
 docs
 screenshots
 *.md
+**/.smbdelete*

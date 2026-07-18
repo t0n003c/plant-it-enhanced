@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
+@SuppressWarnings("ClassDataAbstractionCoupling")
 public class PlantIdentificationService {
     private static final int HTTP_SUCCESS_MIN = 200;
     private static final int HTTP_SUCCESS_MAX = 300;
@@ -45,22 +46,31 @@ public class PlantIdentificationService {
     private final PlantNetProperties properties;
     private final PlantSearchProperties searchProperties;
     private final ProviderStatusRegistry providerStatusRegistry;
+    private final PlantNetProjectResolver projectResolver;
+    private final PlantIdentificationContextScorer contextScorer;
 
 
     public PlantIdentificationService(HttpClient httpClient, PlantNetProperties properties,
                                       PlantSearchProperties searchProperties) {
-        this(httpClient, properties, searchProperties, new ProviderStatusRegistry());
+        this(httpClient, properties, searchProperties, new ProviderStatusRegistry(),
+            new PlantNetProjectResolver(httpClient, properties, searchProperties),
+            PlantIdentificationContextScorer.noOp());
     }
 
 
     @Autowired
+    @SuppressWarnings("ParameterNumber")
     public PlantIdentificationService(HttpClient httpClient, PlantNetProperties properties,
                                       PlantSearchProperties searchProperties,
-                                      ProviderStatusRegistry providerStatusRegistry) {
+                                      ProviderStatusRegistry providerStatusRegistry,
+                                      PlantNetProjectResolver projectResolver,
+                                      PlantIdentificationContextScorer contextScorer) {
         this.httpClient = httpClient;
         this.properties = properties;
         this.searchProperties = searchProperties;
         this.providerStatusRegistry = providerStatusRegistry;
+        this.projectResolver = projectResolver;
+        this.contextScorer = contextScorer;
     }
 
 
@@ -70,12 +80,19 @@ public class PlantIdentificationService {
 
 
     public List<PlantIdentificationCandidate> identify(List<PlantIdentificationPhoto> photos, String language) {
+        return identify(photos, language, PlantIdentificationContext.empty());
+    }
+
+
+    public List<PlantIdentificationCandidate> identify(List<PlantIdentificationPhoto> photos, String language,
+                                                       PlantIdentificationContext context) {
         validate(photos);
+        final PlantNetProject project = projectResolver.resolve(context, language);
         final String boundary = "PlantIt-" + UUID.randomUUID();
         final HttpRequest request;
         try {
             request = HttpRequest.newBuilder()
-                                 .uri(buildUri(language))
+                                 .uri(buildUri(language, project))
                                  .header("Accept", "application/json")
                                  .header("Content-Type", "multipart/form-data; boundary=" + boundary)
                                  .header("User-Agent", searchProperties.getUserAgent())
@@ -96,7 +113,9 @@ public class PlantIdentificationService {
                     "Pl@ntNet identification returned HTTP " + response.statusCode());
             }
             providerStatusRegistry.recordSuccess("PLANTNET", response.statusCode(), quotaRemaining(response));
-            return parse(response.body(), normalizeLanguage(language));
+            final List<PlantIdentificationCandidate> candidates = parse(
+                response.body(), normalizeLanguage(language), project);
+            return contextScorer.rerank(candidates, context, language);
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
             throw new InfoExtractionException(exception);
@@ -131,7 +150,7 @@ public class PlantIdentificationService {
     }
 
 
-    private URI buildUri(String language) {
+    private URI buildUri(String language, PlantNetProject project) {
         final String baseUrl = properties.getUrl().endsWith("/")
                                    ? properties.getUrl().substring(0, properties.getUrl().length() - 1)
                                    : properties.getUrl();
@@ -140,7 +159,8 @@ public class PlantIdentificationService {
                                  "&nb-results=" + Math.min(
                                      MAXIMUM_RESULTS, Math.max(1, properties.getMaximumResults())) +
                                  "&include-related-images=false";
-        return URI.create(baseUrl + "/v2/identify/all?" + query);
+        final String projectId = project.id().matches("[A-Za-z0-9_-]+") ? project.id() : "all";
+        return URI.create(baseUrl + "/v2/identify/" + projectId + "?" + query);
     }
 
 
@@ -178,7 +198,7 @@ public class PlantIdentificationService {
     }
 
 
-    private List<PlantIdentificationCandidate> parse(String responseBody, String language) {
+    private List<PlantIdentificationCandidate> parse(String responseBody, String language, PlantNetProject project) {
         final JsonObject root = JsonParser.parseString(responseBody).getAsJsonObject();
         final String modelVersion = readString(root, "version");
         final Iterable<JsonElement> results = root.has("results") && root.get("results").isJsonArray()
@@ -193,7 +213,7 @@ public class PlantIdentificationService {
             }
             final BotanicalInfo botanicalInfo = toBotanicalInfo(result, language);
             if (botanicalInfo != null) {
-                candidates.add(new PlantIdentificationCandidate(botanicalInfo, confidence, modelVersion));
+                candidates.add(new PlantIdentificationCandidate(botanicalInfo, confidence, modelVersion, project));
             }
         }
         return candidates;

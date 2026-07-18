@@ -11,10 +11,13 @@ private hiking journal in one AMD64/ARM64 container image.
 - Search common names, aliases, scientific names, and minor misspellings.
 - Use a bundled plant and care catalog without any cloud API key.
 - Optionally identify a plant from guided whole-plant, leaf, and flower photos.
+- Optionally select a closer regional flora from a coarsened, opt-in field location.
 - Review where each care value came from and how confident the source is.
 - Track owned plants, care events, reminders, snoozes, and upcoming work.
 - Save private trail observations offline, group them into hikes, and retry interrupted sync safely.
 - Keep MySQL, Redis, uploads, provider keys, exact coordinates, and original photos on your server.
+- Deploy cleanly behind Cloudflare Tunnel and Nginx Proxy Manager without publishing app, database,
+  or cache ports on the NAS.
 
 Start with [Server installation](server-installation.md), then connect a browser or mobile device
 using [App installation](app-installation.md). See [Features](features.md) for the complete workflow.

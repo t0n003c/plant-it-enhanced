@@ -23,6 +23,11 @@ not use the default `*` value.
 A reverse proxy must route the frontend to container port `3000` and the API hostname or path to
 container port `8080`. Do not proxy MySQL or Redis.
 
+For the recommended Cloudflare Tunnel → Nginx Proxy Manager deployment, use one public hostname:
+route `/` to `plantit-server:3000` and `/api/` to `plantit-server:8080`. Open that HTTPS hostname
+and enter the same origin, such as `https://plants.example.com`, as the server URL—do not append
+`/api`. Configure the tunnel to target Nginx Proxy Manager, not the Plant-it container directly.
+
 ## Android
 
 The enhanced web app works in Chrome and can be added to the home screen. A native enhanced APK can

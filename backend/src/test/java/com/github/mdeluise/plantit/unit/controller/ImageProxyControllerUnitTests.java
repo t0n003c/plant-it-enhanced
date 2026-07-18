@@ -5,6 +5,8 @@ import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 
 import com.github.mdeluise.plantit.proxy.ImageProxyController;
+import com.github.mdeluise.plantit.proxy.RemoteImageFetcher;
+import com.github.mdeluise.plantit.proxy.RemoteImagePolicy;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import org.junit.jupiter.api.AfterEach;
@@ -29,6 +31,14 @@ class ImageProxyControllerUnitTests {
         server.createContext("/text", exchange -> respond(
             exchange, 200, "text/plain", "not-an-image".getBytes(StandardCharsets.UTF_8)));
         server.createContext("/image", exchange -> respond(exchange, 200, "image/jpeg", IMAGE_CONTENT));
+        server.createContext("/redirect", exchange -> {
+            exchange.getResponseHeaders().set("Location", "/image");
+            respond(exchange, 302, "text/plain", new byte[0]);
+        });
+        server.createContext("/private-redirect", exchange -> {
+            exchange.getResponseHeaders().set("Location", "http://169.254.169.254/latest/meta-data");
+            respond(exchange, 302, "text/plain", new byte[0]);
+        });
         server.start();
     }
 
@@ -44,7 +54,7 @@ class ImageProxyControllerUnitTests {
     void shouldUseFallbackImage() throws IOException {
         final MockHttpServletResponse response = new MockHttpServletResponse();
 
-        new ImageProxyController().proxyImage(serverUrl + "/missing", serverUrl + "/image", response);
+        controller().proxyImage(serverUrl + "/missing", serverUrl + "/image", response);
 
         Assertions.assertEquals(200, response.getStatus());
         Assertions.assertEquals("image/jpeg", response.getContentType());
@@ -57,9 +67,38 @@ class ImageProxyControllerUnitTests {
     void shouldRejectNonImageContent() throws IOException {
         final MockHttpServletResponse response = new MockHttpServletResponse();
 
-        new ImageProxyController().proxyImage(serverUrl + "/text", null, response);
+        controller().proxyImage(serverUrl + "/text", null, response);
 
         Assertions.assertEquals(502, response.getStatus());
+    }
+
+
+    @Test
+    @DisplayName("Should validate and follow a relative redirect")
+    void shouldFollowValidatedRedirect() throws IOException {
+        final MockHttpServletResponse response = new MockHttpServletResponse();
+
+        controller().proxyImage(serverUrl + "/redirect", null, response);
+
+        Assertions.assertEquals(200, response.getStatus());
+        Assertions.assertArrayEquals(IMAGE_CONTENT, response.getContentAsByteArray());
+    }
+
+
+    @Test
+    @DisplayName("Should reject a redirect to a host outside the allowlist")
+    void shouldRejectRedirectToDisallowedHost() throws IOException {
+        final MockHttpServletResponse response = new MockHttpServletResponse();
+
+        controller().proxyImage(serverUrl + "/private-redirect", null, response);
+
+        Assertions.assertEquals(502, response.getStatus());
+    }
+
+
+    private ImageProxyController controller() {
+        final String port = Integer.toString(server.getAddress().getPort());
+        return new ImageProxyController(new RemoteImageFetcher(new RemoteImagePolicy("127.0.0.1", port, true)));
     }
 
 

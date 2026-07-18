@@ -455,11 +455,12 @@ public class EntitiesSteps {
         if (parameters.get("image_url") != null) {
             Assertions.assertThat(toCheck.getUrl()).isEqualTo(parameters.get("image_url"));
         }
-        final ImageContentResponse expected = imageStorageService.getImageContentInternal(toCheck.getId());
         if (parameters.get("image_content") != null) {
+            final ImageContentResponse expected = imageStorageService.getImageContentInternal(toCheck.getId());
             Assertions.assertThat(expected.getContent())
                       .isEqualTo(Base64.getDecoder().decode(parameters.get("image_content")));
-        } else {
+        } else if (parameters.get("image_content_type") != null) {
+            final ImageContentResponse expected = imageStorageService.getImageContentInternal(toCheck.getId());
             Assertions.assertThat(expected.getType()).isNotNull();
         }
     }

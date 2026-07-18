@@ -18,6 +18,19 @@ Plant-it sends up to five compressed photos to Pl@ntNet, displays several ranked
 waits for your confirmation before adding anything. **Take a plant photo** and **Choose from
 gallery** use high-contrast mobile actions.
 
+In the Trail Journal, capturing location is optional. When it is enabled, the server rounds the
+coordinates to a configurable grid and asks Pl@ntNet for a nearby regional flora before identifying
+the photos. Candidate cards name that flora. The same coarsened point can be used to find public,
+research-grade iNaturalist observations from the observation month and adjacent months. Regional
+flora and nearby seasonal occurrences can make only a small, bounded ranking adjustment; the photo
+confidence remains visible as a separate score. Exact observation coordinates remain in the
+self-hosted account and are not sent to either provider for contextual ranking.
+
+Candidate cards show the evidence behind an adjustment and link to the occurrence query when one
+was used. Habitat and elevation are visible comparison notes but are not scored until an
+attributable ecological range is available. Native, introduced, or endemic status is shown only
+when iNaturalist supplies it for the configured place.
+
 Pl@ntNet is optional. A missing, exhausted, or rejected API key does not disable ordinary search.
 The authenticated **More → System diagnostics** page reports whether the integration is configured
 and records recent provider responses.
@@ -49,6 +62,10 @@ self-hosting administrator.
 ## Trail Journal
 
 Wild observations do not become owned plants and never receive watering reminders automatically.
+Open **Trail** in the five-item bottom navigation to view the journal or record a find. The journal
+is no longer duplicated on Home, and its photo action stays inside the Trail tab so it remains easy
+to reach without obscuring the primary navigation.
+
 An observation can include:
 
 - one or more original photos;
@@ -58,6 +75,12 @@ An observation can include:
 - an unconfirmed or explicitly confirmed identification;
 - a private, obscured, or open sharing preference; and
 - an optional named hike session with start and end times.
+
+The Trail dashboard counts all finds, pending synchronization, and finds needing identification.
+Its identification inbox can reopen a saved observation, reuse its authenticated self-hosted
+photos, and run identification again. Text, status, hike, and inclusive date filters make longer
+journals manageable. If observation creation succeeded but an image upload needs retrying, the
+server record and retry draft are presented as one find rather than double-counted.
 
 ### Offline capture and synchronization
 
@@ -77,8 +100,21 @@ and identification still work when location is denied. Exact coordinates and ori
 inside the authenticated self-hosted account. Sharing preferences are recorded for future export,
 but v0.15 does not publish observations.
 
-Trail tags and contact-hazard warnings are informational. Region, season, elevation, habitat, and
-lookalikes still matter, and the application never infers edibility or medicinal safety.
+Trail tags, contextual ranking, and contact-hazard warnings are informational. Visual and
+contextual scores are shown separately; no candidate is presented as certain. Region, season,
+elevation, habitat, and lookalikes still matter, and the application never infers edibility,
+medicinal safety, or whether a wild plant is safe to touch.
+
+## Self-hosting and reverse proxies
+
+The hardened NAS layout supports Cloudflare Tunnel in front of Nginx Proxy Manager. Only the
+application server joins the proxy network; MySQL and Redis stay on an internal Docker network and
+publish no host ports. Plant-it accepts `CF-Connecting-IP` or `X-Forwarded-For` only from explicitly
+trusted proxy CIDRs, so a direct caller cannot select a different rate-limit identity.
+
+Catalog images are downloaded through a provider-host allowlist. Redirect destinations are checked
+again, private and link-local addresses are blocked, and response type and size are bounded for both
+previews and saved species images.
 
 ## Backups and diagnostics
 
