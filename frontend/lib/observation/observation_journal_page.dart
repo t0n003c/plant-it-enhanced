@@ -5,6 +5,7 @@ import 'package:cached_network_image_platform_interface/cached_network_image_pla
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
+import 'package:plant_it/app_extended_floating_action_button.dart';
 import 'package:plant_it/dto/hike_session_dto.dart';
 import 'package:plant_it/dto/observation_dto.dart';
 import 'package:plant_it/environment.dart';
@@ -487,10 +488,13 @@ class _ObservationJournalPageState extends State<ObservationJournalPage> {
             ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: AppExtendedFloatingActionButton(
+        key: const ValueKey<String>('trail-record-find'),
+        heroTag: 'trail-record-find',
         onPressed: _addObservation,
-        icon: const Icon(Icons.camera_alt_outlined),
-        label: Text(AppLocalizations.of(context).recordTrailFind),
+        icon: Icons.camera_alt_outlined,
+        label: AppLocalizations.of(context).recordTrailFind,
+        tooltip: AppLocalizations.of(context).recordTrailFind,
       ),
       body: RefreshIndicator(
         onRefresh: _refresh,
