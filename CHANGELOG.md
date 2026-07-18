@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.15.4 - 2026-07-18 - Exact photo-match ranking
+
+- Preserve iNaturalist's exact provider match through the bounded GBIF verification stage, so a
+  requested plant is not crowded out by related names that merely begin with the same word.
+- Add a regression with nine higher-scoring `strawberry ...` results around cultivated strawberry,
+  proving its licensed photo still reaches the final result.
+- Invalidate image-less search results cached before the exact-match ranking correction.
+
 ## 0.15.3 - 2026-07-18 - Cultivated strawberry enrichment
 
 - Include iNaturalist's species-level hybrid rank when enriching common-name search results, so
