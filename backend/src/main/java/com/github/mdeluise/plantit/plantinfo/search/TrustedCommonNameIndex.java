@@ -46,6 +46,24 @@ public class TrustedCommonNameIndex {
     }
 
 
+    /**
+     * Resolves an exact reviewed everyday name or scientific synonym to the accepted scientific name used by
+     * taxonomy and media providers. Partial and fuzzy queries intentionally remain unchanged so discovery searches
+     * can still return several relevant taxa.
+     */
+    public String resolveProviderSearchTerm(String query) {
+        final String normalizedQuery = PlantNameNormalizer.normalize(query);
+        if (normalizedQuery.isBlank()) {
+            return query;
+        }
+        return entries.stream()
+                      .filter(entry -> matchesExactName(normalizedQuery, entry))
+                      .map(entry -> entry.scientificName)
+                      .findFirst()
+                      .orElse(query);
+    }
+
+
     public List<TrustedNameExample> qualityExamples() {
         final List<TrustedNameExample> result = new ArrayList<>();
         entries.forEach(entry -> {
@@ -81,6 +99,19 @@ public class TrustedCommonNameIndex {
         return entry.scientificSynonyms.stream()
                                        .map(PlantNameNormalizer::normalize)
                                        .anyMatch(normalizedScientificName::equals);
+    }
+
+
+    private boolean matchesExactName(String normalizedQuery, TrustedNameEntry entry) {
+        if (PlantNameNormalizer.normalize(entry.scientificName).equals(normalizedQuery)) {
+            return true;
+        }
+        return entry.scientificSynonyms.stream()
+                                       .map(PlantNameNormalizer::normalize)
+                                       .anyMatch(normalizedQuery::equals) ||
+                   entry.commonNames.stream()
+                                    .map(PlantNameNormalizer::normalize)
+                                    .anyMatch(normalizedQuery::equals);
     }
 
 

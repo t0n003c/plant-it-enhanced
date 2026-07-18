@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.15.5 - 2026-07-18 - Trusted alias photo enrichment
+
+- Resolve exact reviewed everyday names to their accepted scientific identity before taxonomy and
+  photo-provider lookup, while preserving ranking and match explanations for the user's wording.
+- Add culinary ginger with `ginger root` aliases and enrich both ginger and cilantro through
+  `Zingiber officinale` and `Coriandrum sativum`, respectively.
+- Invalidate cached herb searches that were created before canonical alias enrichment.
+
 ## 0.15.4 - 2026-07-18 - Exact photo-match ranking
 
 - Preserve iNaturalist's exact provider match through the bounded GBIF verification stage, so a
