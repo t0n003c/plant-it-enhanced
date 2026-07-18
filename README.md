@@ -256,6 +256,11 @@ docker compose ps
 docker compose logs --since=5m server
 ```
 
+The image sends no-store/revalidation headers for Flutter's mutable web bundle so Cloudflare does
+not keep an older interface after a deployment. Installations upgraded from an earlier image may
+need one final custom purge of `main.dart.js`, `flutter.js`, and `flutter_service_worker.js`, followed
+by closing and reopening the app.
+
 The Catalog v1 and Care Intelligence v1 migrations add catalog identity, care provenance,
 soil-moisture, snooze, and skip-state columns. They do not delete plants, diaries, reminders,
 images, users, or custom species.

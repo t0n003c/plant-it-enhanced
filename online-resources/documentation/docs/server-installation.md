@@ -265,8 +265,11 @@ consistent address. Do not enable Cloudflare's **Remove visitor IP headers** tra
 hostname. If the NPM host is also reachable from an untrusted non-Cloudflare ingress, restrict that
 ingress before trusting the Cloudflare header.
 
-In Cloudflare, bypass caching for `/api/*`. Use HTTPS at the public hostname because browser
-geolocation and camera behavior require a secure context. Cloudflare Tunnel uses
+In Cloudflare, bypass caching for `/api/*`. Do not create a **Cache Everything** rule for the app
+hostname. The maintained image marks Flutter's mutable entry files as `no-store` and requires the
+remaining web assets to revalidate, preventing an old `main.dart.js` from being combined with a new
+release. Use HTTPS at the public hostname because browser geolocation and camera behavior require a
+secure context. Cloudflare Tunnel uses
 [outbound-only connections](https://developers.cloudflare.com/tunnel/), so no inbound router port
 is required.
 
@@ -306,6 +309,19 @@ docker compose up -d --no-deps --force-recreate server
 docker compose ps
 docker compose logs --since=10m server
 ```
+
+If Cloudflare cached JavaScript before the cache-policy fix was deployed, purge these exact URLs
+once in **Cloudflare → Caching → Configuration → Custom Purge**:
+
+```text
+https://plants.example.com/main.dart.js
+https://plants.example.com/flutter.js
+https://plants.example.com/flutter_service_worker.js
+```
+
+Replace `plants.example.com` with the real hostname, close every open app tab or installed PWA
+window, and reopen it. A private window is a useful non-destructive check. Purging CDN/browser
+caches does not delete MySQL accounts, plants, photos, or reminders.
 
 Database migrations are additive. The v0.14 and v0.15 migrations add catalog provenance, care
 context, field observations, named hikes, and idempotent synchronization references without

@@ -44,7 +44,7 @@ COPY --from=frontend-build /work/frontend/build/web /opt/app/frontend/build/web
 COPY deployment/start.sh /opt/app/start.sh
 COPY deployment/nginx.conf /etc/nginx/nginx.conf
 
-RUN chmod 0755 /opt/app/start.sh
+RUN chmod 0755 /opt/app/start.sh && nginx -t
 
 WORKDIR /opt/app/frontend
 
