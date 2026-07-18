@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+
+    <changeSet id="createHikeSessionTable" author="t0n003c">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="hike_sessions"/>
+            </not>
+        </preConditions>
+        <createTable tableName="hike_sessions">
+            <column name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="owner_id" type="bigint">
+                <constraints nullable="false"
+                             foreignKeyName="fk_hike_session_user"
+                             references="application_users(id)"
+                             deleteCascade="true"/>
+            </column>
+            <column name="name" type="varchar(120)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="started_at" type="datetime(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ended_at" type="datetime(6)"/>
+            <column name="notes" type="varchar(1000)"/>
+            <column name="client_reference" type="varchar(64)"/>
+            <column name="created_at" type="datetime(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="datetime(6)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="hike_sessions" indexName="idx_hike_session_owner_started_at">
+            <column name="owner_id"/>
+            <column name="started_at"/>
+        </createIndex>
+        <addUniqueConstraint tableName="hike_sessions"
+                             columnNames="owner_id, client_reference"
+                             constraintName="uq_hike_session_owner_client_reference"/>
+    </changeSet>
+
+
+    <changeSet id="linkObservationsToHikeSessions" author="t0n003c">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="observations"/>
+            <tableExists tableName="hike_sessions"/>
+            <not>
+                <columnExists tableName="observations" columnName="hike_session_id"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="observations">
+            <column name="hike_session_id" type="bigint"/>
+            <column name="client_reference" type="varchar(64)"/>
+        </addColumn>
+        <addForeignKeyConstraint baseTableName="observations"
+                                 baseColumnNames="hike_session_id"
+                                 constraintName="fk_observation_hike_session"
+                                 referencedTableName="hike_sessions"
+                                 referencedColumnNames="id"
+                                 onDelete="SET NULL"/>
+        <createIndex tableName="observations" indexName="idx_observation_hike_session">
+            <column name="hike_session_id"/>
+        </createIndex>
+        <addUniqueConstraint tableName="observations"
+                             columnNames="owner_id, client_reference"
+                             constraintName="uq_observation_owner_client_reference"/>
+    </changeSet>
+
+
+    <changeSet id="addObservationPhotoClientReferences" author="t0n003c">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="entity_images"/>
+            <not>
+                <columnExists tableName="entity_images" columnName="client_reference"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="entity_images">
+            <column name="client_reference" type="varchar(64)"/>
+        </addColumn>
+        <addUniqueConstraint tableName="entity_images"
+                             columnNames="observation_entity_id, client_reference"
+                             constraintName="uq_observation_image_client_reference"/>
+    </changeSet>
+
+</databaseChangeLog>

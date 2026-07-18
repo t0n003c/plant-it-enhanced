@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.15.1 - 2026-07-18 - Offline trail capture
+
+- Store photo-first trail drafts, notes, optional GPS accuracy/elevation, and hike sessions in
+  durable on-device storage before attempting any network request.
+- Add visible pending, syncing, failed, and retry states; interrupted uploads resume without
+  discarding original photos or creating duplicate hike, observation, taxon, or image records.
+- Group field finds into named hikes with start/end times and keep active-hike context across the
+  journal, home card, and central quick-add action.
+- Add owner-scoped hike APIs, observation/hike client references, photo retry references, and an
+  additive Liquibase migration.
+- Keep the offline action unavailable when the device cannot provide durable storage rather than
+  implying that an in-memory draft is safe.
+- Add a Dockge/UGREEN NAS Compose example using the maintained `latest` image, automatic pulls,
+  health-gated startup, internal-only MySQL/Redis, and an external network only for the server.
+- Refresh the environment reference, self-hosting documentation, and backup guidance; pending
+  device drafts are explicitly excluded from server archives until they synchronize.
+- Validate both Compose examples and build the maintained documentation on every pull request,
+  including stacked feature pull requests.
+- Add storage round-trip, interrupted-sync, partial-upload recovery, idempotency, ownership, and
+  mobile action coverage.
+
 ## 0.15.0 - 2026-07-18 - Field journal foundation
 
 - Separate wild observations from owned plants so trail finds never receive care reminders.

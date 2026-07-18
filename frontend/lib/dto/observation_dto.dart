@@ -2,6 +2,8 @@ class ObservationDTO {
   final int? id;
   final int? ownerId;
   final int? botanicalInfoId;
+  final int? hikeSessionId;
+  final String? hikeSessionName;
   final String? scientificName;
   final String? preferredCommonName;
   final DateTime observedAt;
@@ -19,12 +21,15 @@ class ObservationDTO {
   final String status;
   final double? identificationConfidence;
   final String? identificationProvider;
+  final String? clientReference;
   final List<String> imageIds;
 
   const ObservationDTO({
     this.id,
     this.ownerId,
     this.botanicalInfoId,
+    this.hikeSessionId,
+    this.hikeSessionName,
     this.scientificName,
     this.preferredCommonName,
     required this.observedAt,
@@ -42,6 +47,7 @@ class ObservationDTO {
     this.status = 'UNIDENTIFIED',
     this.identificationConfidence,
     this.identificationProvider,
+    this.clientReference,
     this.imageIds = const [],
   });
 
@@ -50,6 +56,8 @@ class ObservationDTO {
       id: json['id'] as int?,
       ownerId: json['ownerId'] as int?,
       botanicalInfoId: json['botanicalInfoId'] as int?,
+      hikeSessionId: json['hikeSessionId'] as int?,
+      hikeSessionName: json['hikeSessionName'] as String?,
       scientificName: json['scientificName'] as String?,
       preferredCommonName: json['preferredCommonName'] as String?,
       observedAt: DateTime.parse(json['observedAt'] as String),
@@ -72,6 +80,7 @@ class ObservationDTO {
       identificationConfidence:
           (json['identificationConfidence'] as num?)?.toDouble(),
       identificationProvider: json['identificationProvider'] as String?,
+      clientReference: json['clientReference'] as String?,
       imageIds: (json['imageIds'] as List<dynamic>? ?? [])
           .map((value) => value.toString())
           .toList(),
@@ -81,6 +90,8 @@ class ObservationDTO {
   Map<String, dynamic> toMap() {
     return {
       if (botanicalInfoId != null) 'botanicalInfoId': botanicalInfoId,
+      if (hikeSessionId != null) 'hikeSessionId': hikeSessionId,
+      if (clientReference != null) 'clientReference': clientReference,
       'observedAt': observedAt.toUtc().toIso8601String(),
       if (displayName?.trim().isNotEmpty == true)
         'displayName': displayName!.trim(),

@@ -116,13 +116,7 @@ class _TemplatePageState extends State<TemplatePage> {
                 context: sheetContext,
                 icon: Icons.camera_alt_outlined,
                 label: AppLocalizations.of(context).recordTrailFind,
-                onTap: () {
-                  Navigator.of(sheetContext).pop();
-                  goToPageSlidingUp(
-                    context,
-                    AddObservationPage(env: _env),
-                  );
-                },
+                onTap: () => _openQuickObservation(sheetContext),
               ),
               const SizedBox(height: 12),
               _quickAddAction(
@@ -138,6 +132,17 @@ class _TemplatePageState extends State<TemplatePage> {
           ),
         ),
       ),
+    );
+  }
+
+  Future<void> _openQuickObservation(BuildContext sheetContext) async {
+    Navigator.of(sheetContext).pop();
+    final activeHike = await _env.trailDraftRepository
+        .getActiveHikeSession(_env.offlineAccountScope);
+    if (!mounted) return;
+    await goToPageSlidingUp(
+      context,
+      AddObservationPage(env: _env, activeHike: activeHike),
     );
   }
 

@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: server
-        image: msdeluise/plant-it-server:latest
+        image: ghcr.io/t0n003c/plant-it-enhanced:latest
         ports:
         - containerPort: 8080
         - containerPort: 3000

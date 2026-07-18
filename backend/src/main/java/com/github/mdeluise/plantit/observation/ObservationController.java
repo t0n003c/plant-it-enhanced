@@ -2,6 +2,8 @@ package com.github.mdeluise.plantit.observation;
 
 import com.github.mdeluise.plantit.common.MessageResponse;
 import com.github.mdeluise.plantit.image.EntityImage;
+import com.github.mdeluise.plantit.image.ObservationImage;
+import com.github.mdeluise.plantit.image.ObservationImageRepository;
 import com.github.mdeluise.plantit.image.storage.ImageStorageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,15 +31,18 @@ public class ObservationController {
     private final ObservationService observationService;
     private final ObservationDTOConverter observationDTOConverter;
     private final ImageStorageService imageStorageService;
+    private final ObservationImageRepository observationImageRepository;
 
 
     @Autowired
     public ObservationController(ObservationService observationService,
                                  ObservationDTOConverter observationDTOConverter,
-                                 ImageStorageService imageStorageService) {
+                                 ImageStorageService imageStorageService,
+                                 ObservationImageRepository observationImageRepository) {
         this.observationService = observationService;
         this.observationDTOConverter = observationDTOConverter;
         this.imageStorageService = imageStorageService;
+        this.observationImageRepository = observationImageRepository;
     }
 
 
@@ -95,9 +100,22 @@ public class ObservationController {
     @Operation(summary = "Attach a field photo to an observation.")
     public ResponseEntity<String> saveImage(@PathVariable Long id,
                                             @RequestParam("image") MultipartFile file,
-                                            @RequestParam(required = false) String description) {
+                                            @RequestParam(required = false) String description,
+                                            @RequestParam(required = false) String clientReference) {
         final Observation observation = observationService.get(id);
+        if (clientReference != null && !clientReference.isBlank()) {
+            final var existing =
+                observationImageRepository.findByTargetAndClientReference(observation, clientReference.trim());
+            if (existing.isPresent()) {
+                return ResponseEntity.ok(existing.get().getId());
+            }
+        }
         final EntityImage saved = imageStorageService.save(file, observation, null, description);
+        if (saved instanceof ObservationImage observationImage &&
+                clientReference != null && !clientReference.isBlank()) {
+            observationImage.setClientReference(clientReference.trim());
+            observationImageRepository.save(observationImage);
+        }
         return ResponseEntity.ok(saved.getId());
     }
 }

@@ -4,10 +4,10 @@ This roadmap records the product direction for the maintained fork. Each milesto
 self-hosting friendly: optional cloud providers may enrich the experience, but core search, care,
 and backup workflows must continue to work without API keys.
 
-The v0.14 milestone is implemented on the `feature/trustworthy-onboarding` release branch. Trail
-Mode is the next product milestone. It deliberately separates a wild observation from an owned
-plant so a trail find never receives care reminders unless the user explicitly adds a cultivated
-plant to their collection.
+The v0.14 onboarding milestone and the first two v0.15 Trail Mode phases are implemented. The next
+phase adds contextual identification and field-safety signals. Trail Mode deliberately separates a
+wild observation from an owned plant so a trail find never receives care reminders unless the user
+explicitly adds a cultivated plant to their collection.
 
 ## v0.14 — Trustworthy plant onboarding
 
@@ -35,11 +35,11 @@ plant to their collection.
 
 ### Phase 2 — Offline field capture
 
-- [ ] Save photo-first drafts without connectivity and synchronize them with visible retry state.
-- [ ] Preserve optional GPS, accuracy, and elevation in offline drafts and synchronize them only
+- [x] Save photo-first drafts without connectivity and synchronize them with visible retry state.
+- [x] Preserve optional GPS, accuracy, and elevation in offline drafts and synchronize them only
       after the user chooses to save the observation.
-- [ ] Group observations into named hike sessions with start and end times.
-- [ ] Keep original photos and exact coordinates on the self-hosted server unless the user exports
+- [x] Group observations into named hike sessions with start and end times.
+- [x] Keep original photos and exact coordinates on the self-hosted server unless the user exports
       or publishes them.
 
 ### Phase 3 — Contextual identification and field safety

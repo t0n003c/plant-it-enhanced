@@ -1,5 +1,8 @@
 name: plant-it-enhanced
 
+# Dockge/UGREEN NAS example. Keep this file and .env together in the stack
+# directory. Only the server joins the external proxy network; MySQL and Redis
+# remain reachable exclusively through the private internal network.
 services:
   server:
     image: "${PLANTIT_IMAGE:-ghcr.io/t0n003c/plant-it-enhanced:latest}"
@@ -21,13 +24,13 @@ services:
       cache:
         condition: service_healthy
     volumes:
-      - "${PLANTIT_UPLOAD_PATH:-./data/upload}:/upload-dir"
+      - "${PLANTIT_UPLOAD_PATH:?Set PLANTIT_UPLOAD_PATH in .env}:/upload-dir"
     ports:
-      - "${PLANTIT_API_HOST_PORT:-8080}:8080"
-      - "${PLANTIT_WEB_HOST_PORT:-3000}:3000"
+      - "${PLANTIT_API_HOST_PORT:-8346}:8080"
+      - "${PLANTIT_WEB_HOST_PORT:-3372}:3000"
     networks:
       - backend
-      - app
+      - proxy
     healthcheck:
       test:
         - CMD-SHELL
@@ -48,7 +51,7 @@ services:
       MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD is required}"
       MYSQL_ROOT_HOST: localhost
     volumes:
-      - "${PLANTIT_DB_PATH:-./data/mysql}:/var/lib/mysql"
+      - "${PLANTIT_DB_PATH:?Set PLANTIT_DB_PATH in .env}:/var/lib/mysql"
     networks:
       - backend
     healthcheck:
@@ -81,5 +84,6 @@ services:
 networks:
   backend:
     internal: true
-  app:
-    driver: bridge
+  proxy:
+    external: true
+    name: "${PLANTIT_PROXY_NETWORK:-TinhnasNetwork}"

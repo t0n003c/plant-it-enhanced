@@ -1,6 +1,7 @@
 package com.github.mdeluise.plantit.image;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.github.mdeluise.plantit.authentication.User;
 import com.github.mdeluise.plantit.observation.Observation;
@@ -12,4 +13,6 @@ public interface ObservationImageRepository extends JpaRepository<ObservationIma
     List<String> findAllIdsByObservationOrderBySavedAtDesc(Observation target);
 
     Integer countByTargetOwner(User user);
+
+    Optional<ObservationImage> findByTargetAndClientReference(Observation target, String clientReference);
 }

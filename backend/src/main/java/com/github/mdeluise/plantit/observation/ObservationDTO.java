@@ -13,6 +13,9 @@ public class ObservationDTO {
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     private Long ownerId;
     private Long botanicalInfoId;
+    private Long hikeSessionId;
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+    private String hikeSessionName;
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     private String scientificName;
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
@@ -34,6 +37,7 @@ public class ObservationDTO {
     private String status;
     private Double identificationConfidence;
     private String identificationProvider;
+    private String clientReference;
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     private List<String> imageIds = new ArrayList<>();
 
@@ -65,6 +69,26 @@ public class ObservationDTO {
 
     public void setBotanicalInfoId(Long botanicalInfoId) {
         this.botanicalInfoId = botanicalInfoId;
+    }
+
+
+    public Long getHikeSessionId() {
+        return hikeSessionId;
+    }
+
+
+    public void setHikeSessionId(Long hikeSessionId) {
+        this.hikeSessionId = hikeSessionId;
+    }
+
+
+    public String getHikeSessionName() {
+        return hikeSessionName;
+    }
+
+
+    public void setHikeSessionName(String hikeSessionName) {
+        this.hikeSessionName = hikeSessionName;
     }
 
 
@@ -235,6 +259,16 @@ public class ObservationDTO {
 
     public void setIdentificationProvider(String identificationProvider) {
         this.identificationProvider = identificationProvider;
+    }
+
+
+    public String getClientReference() {
+        return clientReference;
+    }
+
+
+    public void setClientReference(String clientReference) {
+        this.clientReference = clientReference;
     }
 
 
