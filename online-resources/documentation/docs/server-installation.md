@@ -91,6 +91,20 @@ docker compose ps
 docker compose logs --since=10m server
 ```
 
+Then verify the same hostname users open in their browser. If this repository is kept in the
+stack's `source` directory, the expected revision can be checked at the same time:
+
+```bash
+EXPECTED_REVISION=$(git -C source rev-parse HEAD)
+./source/scripts/verify-deployment.sh \
+  https://plants.example.com "$EXPECTED_REVISION"
+```
+
+The verifier checks that `/` is Plant-it rather than the Nginx Proxy Manager default site, `/api/`
+reaches Spring Boot, the expected image revision is running, Flutter's mutable JavaScript is not
+cached stale, and `/update.html` is available. Omit the second argument when the stack contains only
+the published image and no source checkout.
+
 The NAS example intentionally does not set `container_name`. Compose-generated names prevent stale
 containers from a previous project from blocking deployment. It also uses `pull_policy: always`, so
 a redeploy checks GHCR for the current `latest` image. Ports `3000` and `8080` are exposed only on
@@ -186,7 +200,11 @@ docker compose up -d --no-deps --force-recreate server
 ```
 
 Open **More → System diagnostics** after signing in to verify configuration and recent provider
-responses. For Pl@ntNet, keep **Expose my API key** disabled for normal server-side use. If its
+responses. **Settings → Interface build** identifies the Flutter bundle loaded by this browser,
+while **System diagnostics → Server build** identifies the backend container. They should match.
+The public, read-only `/api/info/build` endpoint exposes only the application version and source
+revision, never credentials. `APP_BUILD_REVISION` is supplied by the published image and should not
+be overridden in `.env`. For Pl@ntNet, keep **Expose my API key** disabled for normal server-side use. If its
 account uses IP restrictions, authorize the NAS's public outbound IP.
 
 ### Upload and request limits
@@ -309,6 +327,17 @@ docker compose up -d --no-deps --force-recreate server
 docker compose ps
 docker compose logs --since=10m server
 ```
+
+Confirm the public route and running image before testing features:
+
+```bash
+EXPECTED_REVISION=$(git -C source rev-parse HEAD)
+./source/scripts/verify-deployment.sh \
+  https://plants.example.com "$EXPECTED_REVISION"
+```
+
+If the interface and server revisions differ, Plant-it shows a high-contrast update notice. Its
+**Refresh app safely** action opens `/update.html`, which clears only the old Flutter app shell.
 
 If Cloudflare cached JavaScript before the cache-policy fix was deployed, purge these exact URLs
 once in **Cloudflare → Caching → Configuration → Custom Purge**:

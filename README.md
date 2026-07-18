@@ -256,6 +256,26 @@ docker compose ps
 docker compose logs --since=5m server
 ```
 
+Verify the public hostname after the server is healthy:
+
+```bash
+./scripts/verify-deployment.sh https://plants.example.com
+```
+
+Pass a full or abbreviated Git commit as the second argument to prove that the expected image is
+serving both the interface and API. The check fails if the hostname reaches the Nginx Proxy Manager
+default site, `/api/` is routed incorrectly, the running revision is different, or Cloudflare/Nginx
+allows the mutable Flutter bundle to become stale:
+
+```bash
+./scripts/verify-deployment.sh https://plants.example.com "$(git rev-parse HEAD)"
+```
+
+Every published image bakes the same source revision into the Flutter interface and Spring backend.
+**Settings → Interface build** shows the browser bundle revision, **System diagnostics → Server
+build** shows the backend revision, and `/api/info/build` provides the same server identity without
+requiring an account. Do not set `APP_BUILD_REVISION` in `.env`; the release image supplies it.
+
 The image sends no-store/revalidation headers for Flutter's mutable web bundle so Cloudflare does
 not keep an older interface after a deployment. Installations upgraded from an earlier image may
 need one final custom purge of `main.dart.js`, `flutter.js`, and `flutter_service_worker.js`, followed

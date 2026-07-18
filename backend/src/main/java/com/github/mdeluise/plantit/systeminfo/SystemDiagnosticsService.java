@@ -20,15 +20,17 @@ public class SystemDiagnosticsService {
     private final StringRedisTemplate redisTemplate;
     private final ProviderStatusRegistry providerStatusRegistry;
     private final Environment environment;
+    private final BuildInfoService buildInfoService;
 
 
     public SystemDiagnosticsService(JdbcTemplate jdbcTemplate, StringRedisTemplate redisTemplate,
                                     ProviderStatusRegistry providerStatusRegistry,
-                                    Environment environment) {
+                                    Environment environment, BuildInfoService buildInfoService) {
         this.jdbcTemplate = jdbcTemplate;
         this.redisTemplate = redisTemplate;
         this.providerStatusRegistry = providerStatusRegistry;
         this.environment = environment;
+        this.buildInfoService = buildInfoService;
     }
 
 
@@ -40,8 +42,9 @@ public class SystemDiagnosticsService {
         providers.put("INATURALIST", provider("INATURALIST", isEnabled("inaturalist.enabled")));
         providers.put("GBIF", provider("GBIF", true));
         final String publicOutboundIp = environment.getProperty("diagnostics.public-outbound-ip");
+        final BuildInfo buildInfo = buildInfoService.get();
         return new SystemDiagnostics(
-            environment.getProperty("app.version", "unknown"), Instant.now(),
+            buildInfo.version(), buildInfo.revision(), Instant.now(),
             databaseStatus(), cacheStatus(), providers,
             publicOutboundIp == null || publicOutboundIp.isBlank() ? null : publicOutboundIp.trim()
         );

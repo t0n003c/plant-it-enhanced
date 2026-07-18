@@ -2,6 +2,14 @@
 
 ## Unreleased - Context-aware identification and hardened self-hosting
 
+- Bake one Git revision into the frontend, backend, OCI image metadata, Settings, and authenticated
+  diagnostics so a self-hoster can identify the code actually running.
+- Add a public no-store `/api/info/build` identity endpoint and an in-app stale-interface detector
+  with a high-contrast, mobile-safe refresh action.
+- Filter the packaged Spring properties so the application version is reported as its real release
+  number rather than the unresolved Maven placeholder.
+- Add `scripts/verify-deployment.sh` to validate the public Flutter root, `/api/` proxy route,
+  expected revision, mutable-asset cache headers, and safe-refresh page after a NAS upgrade.
 - Prevent Cloudflare and browser caches from combining a newly deployed Flutter shell with an
   older `main.dart.js`; mutable web assets now revalidate and critical entry files use `no-store`.
 - Serve Flutter JavaScript and JSON with their correct MIME types and validate the bundled Nginx

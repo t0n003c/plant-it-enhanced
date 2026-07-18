@@ -79,6 +79,8 @@ plant to their collection.
 
 - [x] Add an authenticated diagnostics screen for database, cache, provider configuration,
       provider status, version, and recent upstream failures.
+- [x] Identify the exact frontend and backend revisions, warn when a browser has a stale interface,
+      and verify the public proxy/cache path with one deployment command.
 - [ ] Add portable user-data and image export/import.
 - [x] Add scheduled backup retention with an explicit destination and restore verification.
 - [ ] Complete keyboard, screen-reader, contrast, large-text, and intermittent-network testing.

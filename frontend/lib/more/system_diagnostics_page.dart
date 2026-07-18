@@ -163,6 +163,10 @@ class _SystemDiagnosticsPageState extends State<SystemDiagnosticsPage> {
         value: data['version']?.toString(),
       ),
       _DiagnosticValue(
+        label: AppLocalizations.of(context).serverBuild,
+        value: data['revision']?.toString(),
+      ),
+      _DiagnosticValue(
         label: AppLocalizations.of(context).publicOutboundIp,
         value: data['publicOutboundIp']?.toString() ??
             AppLocalizations.of(context).notConfigured,

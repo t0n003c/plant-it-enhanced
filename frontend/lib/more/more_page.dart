@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:plant_it/app_exception.dart';
+import 'package:plant_it/deployment_build_info.dart';
 import 'package:plant_it/environment.dart';
 import 'package:plant_it/logger/logger.dart' as my_logger;
 import 'package:plant_it/more/change_language_page.dart';
@@ -275,17 +276,25 @@ class _MorePageState extends State<MorePage> {
                 title: AppLocalizations.of(context).serverVersion,
                 value: widget.env.backendVersion,
               ),
+              SettingsInfo(
+                title: AppLocalizations.of(context).interfaceBuild,
+                value: DeploymentBuildInfo.displayRevision(
+                  frontendBuildRevision,
+                ),
+              ),
               SettingsExternalLink(
                 title: AppLocalizations.of(context).documentation,
-                url: "https://docs.plant-it.org/latest",
+                url:
+                    "https://github.com/t0n003c/plant-it-enhanced/tree/main/online-resources/documentation/docs",
               ),
               SettingsExternalLink(
                 title: AppLocalizations.of(context).openSource,
-                url: "https://github.com/MDeLuise/plant-it",
+                url: "https://github.com/t0n003c/plant-it-enhanced",
               ),
               SettingsExternalLink(
                 title: AppLocalizations.of(context).reportIssue,
-                url: "https://github.com/MDeLuise/plant-it/issues/new/choose",
+                url:
+                    "https://github.com/t0n003c/plant-it-enhanced/issues/new/choose",
               ),
               SettingsInternalLink(
                 title: AppLocalizations.of(context).appLog,
