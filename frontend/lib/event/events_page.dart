@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:plant_it/app_extended_floating_action_button.dart';
 import 'package:plant_it/environment.dart';
 import 'package:plant_it/event/add_new_event.dart';
 import 'package:plant_it/event/events_done_section.dart';
@@ -38,14 +39,17 @@ class _EventsPageState extends State<EventsPage> {
     }
 
     return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: AppExtendedFloatingActionButton(
+        key: const ValueKey<String>('calendar-add-event'),
+        heroTag: 'calendar-add-event',
         onPressed: () => Navigator.of(context).push<bool>(
           MaterialPageRoute(
             builder: (context) => AddNewEventPage(env: widget.env),
           ),
         ),
-        icon: const Icon(Icons.event_available_outlined),
-        label: Text(AppLocalizations.of(context).addNewEvent),
+        icon: Icons.event_available_outlined,
+        label: AppLocalizations.of(context).addNewEvent,
+        tooltip: AppLocalizations.of(context).addNewEvent,
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(
