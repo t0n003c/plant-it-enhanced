@@ -17,12 +17,12 @@ import org.springframework.core.io.ClassPathResource;
 class TrustedCommonNameIndexUnitTests {
 
     @Test
-    @DisplayName("Should keep at least 550 trusted name queries mapped to the expected taxon")
+    @DisplayName("Should keep at least 625 trusted name queries mapped to the expected taxon")
     void shouldPassLargeTrustedNameCorpus() {
         final TrustedCommonNameIndex index = createIndex();
         final List<TrustedCommonNameIndex.TrustedNameExample> examples = index.qualityExamples();
 
-        Assertions.assertTrue(examples.size() >= 550, "The trusted-name corpus must not shrink below 550");
+        Assertions.assertTrue(examples.size() >= 625, "The trusted-name corpus must not shrink below 625");
         for (TrustedCommonNameIndex.TrustedNameExample example : examples) {
             final List<BotanicalInfo> result = index.search(example.query(), 1);
             Assertions.assertFalse(result.isEmpty(), "No trusted result for " + example.query());
@@ -45,6 +45,10 @@ class TrustedCommonNameIndexUnitTests {
             Map.entry("ostrich fern", "Matteuccia struthiopteris"),
             Map.entry("mountain laurel", "Kalmia latifolia"),
             Map.entry("poison ivy", "Toxicodendron radicans"),
+            Map.entry("poison hemlock", "Conium maculatum"),
+            Map.entry("giant hogweed", "Heracleum mantegazzianum"),
+            Map.entry("cow parsnip", "Heracleum maximum"),
+            Map.entry("poodle dog bush", "Eriodictyon parryi"),
             Map.entry("sugar maple", "Acer saccharum"),
             Map.entry("Douglas fir", "Pseudotsuga menziesii"),
             Map.entry("coast redwood", "Sequoia sempervirens"),

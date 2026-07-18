@@ -12,6 +12,7 @@ import java.util.Set;
 
 import com.github.mdeluise.plantit.botanicalinfo.care.PlantCareInfoDTO;
 import com.github.mdeluise.plantit.plantinfo.identification.PlantIdentificationEvidence;
+import com.github.mdeluise.plantit.plantinfo.identification.PlantLookalike;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(name = "Botanical info", description = "Represents a plant's botanical info.")
@@ -84,6 +85,9 @@ public class BotanicalInfoDTO {
     @Schema(description = "Signals considered when contextually ranking an identification.",
             accessMode = Schema.AccessMode.READ_ONLY)
     private List<PlantIdentificationEvidence> identificationEvidence = new ArrayList<>();
+    @Schema(description = "Reviewed, attributable taxa commonly confused with this identification.",
+            accessMode = Schema.AccessMode.READ_ONLY)
+    private List<PlantLookalike> reviewedLookalikes = new ArrayList<>();
     @Schema(description = "Attributable regional establishment status, when available.",
             accessMode = Schema.AccessMode.READ_ONLY)
     private String establishmentMeans;
@@ -396,6 +400,16 @@ public class BotanicalInfoDTO {
 
     public void setIdentificationEvidence(List<PlantIdentificationEvidence> identificationEvidence) {
         this.identificationEvidence = identificationEvidence == null ? new ArrayList<>() : identificationEvidence;
+    }
+
+
+    public List<PlantLookalike> getReviewedLookalikes() {
+        return reviewedLookalikes;
+    }
+
+
+    public void setReviewedLookalikes(List<PlantLookalike> reviewedLookalikes) {
+        this.reviewedLookalikes = reviewedLookalikes == null ? new ArrayList<>() : reviewedLookalikes;
     }
 
 

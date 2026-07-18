@@ -665,6 +665,66 @@
       "catalogTags": ["NORTH_AMERICAN_TRAIL", "CONTACT_HAZARD"]
     },
     {
+      "scientificName": "Parthenocissus quinquefolia",
+      "scientificSynonyms": [],
+      "commonNames": ["Virginia creeper", "five-leaved ivy", "woodbine"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Acer negundo",
+      "scientificSynonyms": [],
+      "commonNames": ["Boxelder", "box elder", "ash-leaved maple"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Conium maculatum",
+      "scientificSynonyms": [],
+      "commonNames": ["Poison hemlock", "poison parsley", "deadly hemlock"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL", "CONTACT_HAZARD"]
+    },
+    {
+      "scientificName": "Heracleum maximum",
+      "scientificSynonyms": ["Heracleum lanatum"],
+      "commonNames": ["Cow parsnip", "American cow parsnip", "masterwort"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL", "CONTACT_HAZARD"]
+    },
+    {
+      "scientificName": "Heracleum mantegazzianum",
+      "scientificSynonyms": [],
+      "commonNames": ["Giant hogweed", "giant cow parsley", "cartwheel flower"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL", "CONTACT_HAZARD"]
+    },
+    {
+      "scientificName": "Daucus carota",
+      "scientificSynonyms": [],
+      "commonNames": ["Queen Anne's lace", "wild carrot", "bird's nest"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL"]
+    },
+    {
+      "scientificName": "Cicuta maculata",
+      "scientificSynonyms": [],
+      "commonNames": ["Spotted water hemlock", "water hemlock", "spotted cowbane"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL", "CONTACT_HAZARD"]
+    },
+    {
+      "scientificName": "Angelica atropurpurea",
+      "scientificSynonyms": [],
+      "commonNames": ["Purple-stemmed angelica", "great angelica", "masterwort angelica"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL", "CONTACT_HAZARD"]
+    },
+    {
+      "scientificName": "Pastinaca sativa",
+      "scientificSynonyms": [],
+      "commonNames": ["Wild parsnip", "common parsnip", "poison parsnip"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL", "CONTACT_HAZARD"]
+    },
+    {
+      "scientificName": "Eriodictyon parryi",
+      "scientificSynonyms": ["Turricula parryi", "Nama parryi"],
+      "commonNames": ["Poodle-dog bush", "poodle dog bush", "common turricula"],
+      "catalogTags": ["NORTH_AMERICAN_TRAIL", "CONTACT_HAZARD"]
+    },
+    {
       "scientificName": "Toxicodendron vernix",
       "scientificSynonyms": ["Rhus vernix"],
       "commonNames": ["Poison sumac", "swamp sumac", "thunderwood"],

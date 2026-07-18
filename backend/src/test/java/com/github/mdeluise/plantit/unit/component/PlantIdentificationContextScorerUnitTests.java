@@ -11,9 +11,11 @@ import com.github.mdeluise.plantit.plantinfo.identification.PlantIdentificationC
 import com.github.mdeluise.plantit.plantinfo.identification.PlantNetProject;
 import com.github.mdeluise.plantit.plantinfo.identification.PlantOccurrenceEvidence;
 import com.github.mdeluise.plantit.plantinfo.identification.PlantOccurrenceSnapshot;
+import com.github.mdeluise.plantit.plantinfo.identification.TrailFieldGuideIndex;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.io.ClassPathResource;
 
 @DisplayName("Unit tests for contextual identification scoring")
 class PlantIdentificationContextScorerUnitTests {
@@ -50,6 +52,47 @@ class PlantIdentificationContextScorerUnitTests {
         Assertions.assertTrue(result.get(0).evidence().stream()
                                     .anyMatch(evidence -> "ELEVATION_RECORDED".equals(evidence.code())
                                         && evidence.adjustment() == 0));
+    }
+
+
+    @Test
+    @DisplayName("Should add only positive source-backed habitat and elevation evidence")
+    void shouldUseReviewedEcologyWithoutNegativeScoring() {
+        final TrailFieldGuideIndex fieldGuide = new TrailFieldGuideIndex(
+            new ClassPathResource("trail-field-guide.json"));
+        final PlantIdentificationContextScorer scorer = new PlantIdentificationContextScorer(
+            (context, language) -> PlantOccurrenceSnapshot.empty(), fieldGuide);
+        final PlantIdentificationContext matchingContext = new PlantIdentificationContext(
+            36.6, -118.7, 1_500.0, "shaded stream bank", Instant.parse("2026-07-18T12:00:00Z"), "US");
+        final PlantNetProject project = new PlantNetProject("all", "World flora", false);
+
+        final PlantIdentificationCandidate matching = scorer.rerank(
+            List.of(candidate("Urtica dioica", 0.80, project)), matchingContext, "en").get(0);
+
+        Assertions.assertEquals(0.85, matching.contextualScore(), 0.0001);
+        Assertions.assertTrue(matching.evidence().stream().anyMatch(
+            evidence -> "HABITAT_MATCH".equals(evidence.code()) && evidence.adjustment() == 0.03));
+        Assertions.assertTrue(matching.evidence().stream().anyMatch(
+            evidence -> "ELEVATION_MATCH".equals(evidence.code()) && evidence.adjustment() == 0.02));
+        Assertions.assertTrue(matching.evidence().stream()
+                                      .filter(evidence -> evidence.adjustment() > 0)
+                                      .allMatch(evidence -> evidence.sourceReference() != null));
+
+        final PlantIdentificationContext unmatchedContext = new PlantIdentificationContext(
+            null, null, 3_500.0, "desert dune", null, null);
+        final PlantIdentificationCandidate unmatched = scorer.rerank(
+            List.of(candidate("Urtica dioica", 0.80, project)), unmatchedContext, "en").get(0);
+
+        Assertions.assertEquals(0.80, unmatched.contextualScore(), 0.0001);
+        Assertions.assertTrue(unmatched.evidence().stream()
+                                       .anyMatch(evidence -> "HABITAT_RECORDED".equals(evidence.code())));
+        Assertions.assertTrue(unmatched.evidence().stream()
+                                       .anyMatch(evidence -> "ELEVATION_RECORDED".equals(evidence.code())));
+
+        final PlantIdentificationCandidate poisonIvy = scorer.rerank(
+            List.of(candidate("Rhus radicans", 0.80, project)), PlantIdentificationContext.empty(), "en").get(0);
+        Assertions.assertEquals(3, poisonIvy.reviewedLookalikes().size());
+        Assertions.assertEquals("Virginia creeper", poisonIvy.reviewedLookalikes().get(0).commonName());
     }
 
 

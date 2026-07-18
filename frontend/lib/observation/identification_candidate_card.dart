@@ -173,6 +173,10 @@ class IdentificationCandidateCard extends StatelessWidget {
                     ),
                   ),
                 ],
+                if (candidate.reviewedLookalikes.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  _lookalikePanel(context),
+                ],
               ],
             ),
           ),
@@ -244,6 +248,10 @@ class IdentificationCandidateCard extends StatelessWidget {
           .regionalFloraEvidence(evidence.detail ?? evidence.source),
       'NEARBY_SEASONAL_OCCURRENCES' => AppLocalizations.of(context)
           .nearbySeasonalEvidence(evidence.observationCount ?? 0),
+      'HABITAT_MATCH' => AppLocalizations.of(context)
+          .habitatMatchEvidence(evidence.detail ?? ''),
+      'ELEVATION_MATCH' => AppLocalizations.of(context)
+          .elevationMatchEvidence(evidence.detail ?? ''),
       'HABITAT_RECORDED' => AppLocalizations.of(context)
           .habitatRecordedEvidence(evidence.detail ?? ''),
       'ELEVATION_RECORDED' => AppLocalizations.of(context)
@@ -282,6 +290,144 @@ class IdentificationCandidateCard extends StatelessWidget {
               ),
               icon: const Icon(Icons.open_in_new, size: 18),
             ),
+        ],
+      ),
+    );
+  }
+
+  Widget _lookalikePanel(BuildContext context) {
+    return Container(
+      key: const ValueKey<String>('reviewed-lookalikes'),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF15343A),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFF8EDFD3), width: 1.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.compare_arrows_rounded,
+                color: Color(0xFFB8F2E6),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  AppLocalizations.of(context).reviewedLookalikesTitle(
+                    candidate.reviewedLookalikes.length,
+                  ),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            AppLocalizations.of(context).lookalikeComparisonHint,
+            style: const TextStyle(color: Colors.white70, height: 1.35),
+          ),
+          const SizedBox(height: 10),
+          ...candidate.reviewedLookalikes.map(
+            (lookalike) => _lookalikeRow(context, lookalike),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _lookalikeRow(
+    BuildContext context,
+    PlantLookalikeDTO lookalike,
+  ) {
+    final Uri? sourceUri = Uri.tryParse(lookalike.sourceReference);
+    final bool canOpenSource = sourceUri != null && sourceUri.scheme == 'https';
+    return Container(
+      margin: const EdgeInsets.only(bottom: 9),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: const Color(0xFF23474E),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Text(
+                lookalike.commonName,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              if (lookalike.contactHazard)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFD166),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    AppLocalizations.of(context).alsoContactHazard,
+                    style: const TextStyle(
+                      color: Color(0xFF1A211F),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          Text(
+            lookalike.scientificName,
+            style: const TextStyle(
+              color: Color(0xFFD5EAE5),
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            lookalike.comparison,
+            style: const TextStyle(color: Colors.white, height: 1.35),
+          ),
+          if (canOpenSource) ...[
+            const SizedBox(height: 5),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: const Color(0xFF315F67),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 8,
+                  ),
+                ),
+                onPressed: () => launchUrl(
+                  sourceUri,
+                  mode: LaunchMode.externalApplication,
+                ),
+                icon: const Icon(Icons.open_in_new, size: 17),
+                label: Text(
+                  AppLocalizations.of(context)
+                      .viewLookalikeSource(lookalike.source),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

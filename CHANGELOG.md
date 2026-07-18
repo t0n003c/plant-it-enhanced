@@ -1,7 +1,16 @@
 # Changelog
 
-## Unreleased - Context-aware identification and hardened self-hosting
+## 0.15.2 - 2026-07-18 - Context-aware identification and hardened self-hosting
 
+- Add a separately reviewed trail field guide with six ecological profiles and 12 attributable
+  lookalike comparisons from NPS, USDA Forest Service, University Extension, and state
+  conservation guidance.
+- Show common and scientific lookalike names, comparison clues, source links, and additional
+  contact warnings in a high-contrast mobile candidate panel.
+- Add only small positive habitat and elevation adjustments for exact scientific identities or
+  reviewed synonyms; never penalize a mismatch or infer a range for an unreviewed taxon.
+- Expand the offline North American trail set from 80 to 90 plants, including poison hemlock,
+  giant hogweed, cow parsnip, water hemlock, wild parsnip, and poodle-dog bush.
 - Bake one Git revision into the frontend, backend, OCI image metadata, Settings, and authenticated
   diagnostics so a self-hoster can identify the code actually running.
 - Add a public no-store `/api/info/build` identity endpoint and an in-app stale-interface detector

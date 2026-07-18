@@ -3,7 +3,7 @@
 ## Everyday-name plant search
 
 Search uses familiar names first while preserving accepted scientific identity underneath. The
-bundled reviewed index handles aliases, reordered words, minor spelling mistakes, and an 80-species
+bundled reviewed index handles aliases, reordered words, minor spelling mistakes, and a 90-species
 North American trail starter set. Results explain why they matched and show confidence instead of
 presenting a weak match as fact.
 
@@ -27,9 +27,12 @@ confidence remains visible as a separate score. Exact observation coordinates re
 self-hosted account and are not sent to either provider for contextual ranking.
 
 Candidate cards show the evidence behind an adjustment and link to the occurrence query when one
-was used. Habitat and elevation are visible comparison notes but are not scored until an
-attributable ecological range is available. Native, introduced, or endemic status is shown only
-when iNaturalist supplies it for the configured place.
+was used. Habitat and elevation remain visible comparison notes. An exact scientific identity or
+reviewed synonym can add only a small positive adjustment when that context matches one of the
+source-backed field-guide profiles; a mismatch is never penalized. Reviewed lookalikes show common
+and scientific names, concise comparison clues, additional contact warnings, and the original
+public-agency or Extension source. Native, introduced, or endemic status is shown only when
+iNaturalist supplies it for the configured place. See [Trail field guide](trail-field-guide.md).
 
 Pl@ntNet is optional. A missing, exhausted, or rejected API key does not disable ordinary search.
 The authenticated **More → System diagnostics** page reports whether the integration is configured

@@ -82,6 +82,7 @@ public class PlantIdentificationController {
         result.setIdentificationConfidence(candidate.confidence());
         result.setContextualIdentificationScore(candidate.contextualScore());
         result.setIdentificationEvidence(candidate.evidence());
+        result.setReviewedLookalikes(candidate.reviewedLookalikes());
         result.setEstablishmentMeans(candidate.establishmentMeans());
         result.setEstablishmentPlace(candidate.establishmentPlace());
         result.setIdentificationProvider("Pl@ntNet");

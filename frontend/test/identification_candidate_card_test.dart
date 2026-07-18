@@ -52,6 +52,25 @@ void main() {
           detail: '6,7,8',
         ),
       ],
+      reviewedLookalikes: const [
+        PlantLookalikeDTO(
+          scientificName: 'Parthenocissus quinquefolia',
+          commonName: 'Virginia creeper',
+          comparison:
+              'Virginia creeper usually has five leaflets; poison ivy has three.',
+          source: 'U.S. National Park Service',
+          sourceReference: 'https://www.nps.gov/example',
+          contactHazard: false,
+        ),
+        PlantLookalikeDTO(
+          scientificName: 'Heracleum maximum',
+          commonName: 'Cow parsnip',
+          comparison: 'Cow parsnip lacks purple stem blotches.',
+          source: 'New York State DEC',
+          sourceReference: 'https://dec.ny.gov/example',
+          contactHazard: true,
+        ),
+      ],
     );
     SpeciesDTO? selected;
 
@@ -85,6 +104,13 @@ void main() {
       findsOneWidget,
     );
     expect(find.textContaining('Do not touch it'), findsOneWidget);
+    expect(find.text('Reviewed lookalikes (2)'), findsOneWidget);
+    expect(find.text('Virginia creeper'), findsOneWidget);
+    expect(find.text('Also avoid contact'), findsOneWidget);
+    expect(
+      find.text('View U.S. National Park Service source'),
+      findsOneWidget,
+    );
 
     await tester.tap(
       find.byKey(

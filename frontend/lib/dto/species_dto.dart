@@ -31,6 +31,7 @@ class SpeciesDTO {
   String? identificationProjectTitle;
   double? contextualIdentificationScore;
   List<IdentificationEvidenceDTO> identificationEvidence;
+  List<PlantLookalikeDTO> reviewedLookalikes;
   String? establishmentMeans;
   String? establishmentPlace;
   String? searchMatchReason;
@@ -68,6 +69,7 @@ class SpeciesDTO {
     this.identificationProjectTitle,
     this.contextualIdentificationScore,
     this.identificationEvidence = const [],
+    this.reviewedLookalikes = const [],
     this.establishmentMeans,
     this.establishmentPlace,
     this.searchMatchReason,
@@ -125,6 +127,13 @@ class SpeciesDTO {
                 ),
               )
               .toList(),
+      reviewedLookalikes: (json['reviewedLookalikes'] as List<dynamic>? ?? [])
+          .map(
+            (value) => PlantLookalikeDTO.fromJson(
+              value as Map<String, dynamic>,
+            ),
+          )
+          .toList(),
       establishmentMeans: json['establishmentMeans'],
       establishmentPlace: json['establishmentPlace'],
       searchMatchReason: json['searchMatchReason'],
@@ -178,6 +187,9 @@ class SpeciesDTO {
       if (identificationEvidence.isNotEmpty)
         'identificationEvidence':
             identificationEvidence.map((evidence) => evidence.toMap()).toList(),
+      if (reviewedLookalikes.isNotEmpty)
+        'reviewedLookalikes':
+            reviewedLookalikes.map((lookalike) => lookalike.toMap()).toList(),
       if (establishmentMeans != null) 'establishmentMeans': establishmentMeans,
       if (establishmentPlace != null) 'establishmentPlace': establishmentPlace,
       'catalogTags': catalogTags,
@@ -223,6 +235,46 @@ class SpeciesDTO {
     }
     return findName((name) => name.preferred)?.name.trim() ??
         findName((name) => true)?.name.trim();
+  }
+}
+
+class PlantLookalikeDTO {
+  final String scientificName;
+  final String commonName;
+  final String comparison;
+  final String source;
+  final String sourceReference;
+  final bool contactHazard;
+
+  const PlantLookalikeDTO({
+    required this.scientificName,
+    required this.commonName,
+    required this.comparison,
+    required this.source,
+    required this.sourceReference,
+    required this.contactHazard,
+  });
+
+  factory PlantLookalikeDTO.fromJson(Map<String, dynamic> json) {
+    return PlantLookalikeDTO(
+      scientificName: json['scientificName'] as String? ?? '',
+      commonName: json['commonName'] as String? ?? '',
+      comparison: json['comparison'] as String? ?? '',
+      source: json['source'] as String? ?? '',
+      sourceReference: json['sourceReference'] as String? ?? '',
+      contactHazard: json['contactHazard'] as bool? ?? false,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'scientificName': scientificName,
+      'commonName': commonName,
+      'comparison': comparison,
+      'source': source,
+      'sourceReference': sourceReference,
+      'contactHazard': contactHazard,
+    };
   }
 }
 

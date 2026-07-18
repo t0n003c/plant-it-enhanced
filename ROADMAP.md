@@ -4,9 +4,9 @@ This roadmap records the product direction for the maintained fork. Each milesto
 self-hosting friendly: optional cloud providers may enrich the experience, but core search, care,
 and backup workflows must continue to work without API keys.
 
-The v0.14 onboarding milestone and the contextual-identification foundation of v0.15 Trail Mode are
-implemented. The next work completes source-backed lookalike and range data before moving into maps
-and portable observations. Trail Mode deliberately separates a wild observation from an owned
+The v0.14 onboarding milestone and the contextual-identification and field-safety work of v0.15
+Trail Mode are implemented. The next work adds scalable journal queries, maps, a life list, and
+portable observations. Trail Mode deliberately separates a wild observation from an owned
 plant so a trail find never receives care reminders unless the user explicitly adds a cultivated
 plant to their collection.
 
@@ -15,7 +15,7 @@ plant to their collection.
 - [x] Rank everyday common names ahead of misleading partial matches.
 - [x] Explain why each search result matched and show a confidence level.
 - [x] Maintain an offline trusted-name index and a 200+ query regression corpus.
-- [x] Add a tagged 80-species North American hiking starter set with contact-hazard warnings.
+- [x] Add a tagged 90-species North American hiking starter set with contact-hazard warnings.
 - [x] Merge care data field by field instead of stopping at the first provider.
 - [x] Retain source, source reference, confidence, and verification date for every care field.
 - [x] Guide users through whole-plant, leaf, and flower photos and send up to five images to
@@ -49,10 +49,10 @@ plant to their collection.
       flora was used, and keep exact observation coordinates on the self-hosted server.
 - [x] Rerank candidates with bounded regional-flora and nearby seasonal-occurrence evidence while
       retaining the provider's visual confidence as a separate value.
-- [x] Show captured habitat and elevation for comparison without scoring either field until a
-      source-backed ecological range is available for that taxon.
+- [x] Show captured habitat and elevation for comparison, and add only small positive adjustments
+      when an exact taxon has a source-backed ecological profile.
 - [x] Show comparable candidates, contact hazards, evidence, and confidence before confirmation.
-- [ ] Label common lookalikes only where a reviewed, attributable source supports the relationship.
+- [x] Label common lookalikes only where a reviewed, attributable source supports the relationship.
 - [x] Show native, introduced, or endemic status only when iNaturalist returns it for the configured
       place; add invasive status only after an attributable regional source is selected.
 - [x] Keep wild-plant safety language prominent and never infer edibility or medicinal safety.
