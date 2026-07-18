@@ -2,6 +2,10 @@
 
 ## Unreleased - Context-aware identification and hardened self-hosting
 
+- Prevent Cloudflare and browser caches from combining a newly deployed Flutter shell with an
+  older `main.dart.js`; mutable web assets now revalidate and critical entry files use `no-store`.
+- Serve Flutter JavaScript and JSON with their correct MIME types and validate the bundled Nginx
+  configuration while building the release image.
 - Enrich image-less trusted and saved search results with iNaturalist's default species photos
   without replacing an existing local or user-selected image.
 - Preserve provider, source page, license, attribution, and a square-image fallback when a species
