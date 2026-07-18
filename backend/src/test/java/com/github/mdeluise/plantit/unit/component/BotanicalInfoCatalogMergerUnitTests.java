@@ -6,6 +6,7 @@ import com.github.mdeluise.plantit.botanicalinfo.BotanicalCommonName;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfo;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoCatalogMerger;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoCreator;
+import com.github.mdeluise.plantit.image.BotanicalInfoImage;
 import com.github.mdeluise.plantit.plantinfo.search.TrustedCommonNameIndex;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -83,11 +84,49 @@ class BotanicalInfoCatalogMergerUnitTests {
     }
 
 
+    @Test
+    @DisplayName("Should fill a missing catalog image from a provider")
+    void shouldFillMissingCatalogImage() {
+        final BotanicalInfo target = createTaxon("1", "Monstera deliciosa");
+        final BotanicalInfo source = createTaxon("1", "Monstera deliciosa");
+        source.setImage(createImage("https://example.org/monstera-medium.jpg", "INATURALIST"));
+
+        final BotanicalInfo merged = BotanicalInfoCatalogMerger.mergeInto(target, source);
+
+        Assertions.assertSame(source.getImage(), merged.getImage());
+        Assertions.assertEquals("INATURALIST", merged.getImage().getSource());
+    }
+
+
+    @Test
+    @DisplayName("Should preserve an existing image instead of replacing it with a provider image")
+    void shouldPreserveExistingCatalogImage() {
+        final BotanicalInfo target = createTaxon("1", "Monstera deliciosa");
+        target.setImage(createImage("https://example.org/user-photo.jpg", null));
+        final BotanicalInfo source = createTaxon("1", "Monstera deliciosa");
+        source.setImage(createImage("https://example.org/provider-photo.jpg", "INATURALIST"));
+
+        final BotanicalInfo merged = BotanicalInfoCatalogMerger.mergeInto(target, source);
+
+        Assertions.assertEquals("https://example.org/user-photo.jpg", merged.getImage().getUrl());
+        Assertions.assertNull(merged.getImage().getSource());
+    }
+
+
     private BotanicalInfo createTaxon(String canonicalKey, String species) {
         final BotanicalInfo result = new BotanicalInfo();
         result.setCanonicalTaxonKey(canonicalKey);
         result.setSpecies(species);
         result.getExternalReferences().put("GBIF", canonicalKey);
         return result;
+    }
+
+
+    private BotanicalInfoImage createImage(String url, String source) {
+        final BotanicalInfoImage image = new BotanicalInfoImage();
+        image.setId(null);
+        image.setUrl(url);
+        image.setSource(source);
+        return image;
     }
 }

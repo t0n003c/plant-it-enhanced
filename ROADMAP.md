@@ -83,5 +83,6 @@ explicitly adds a cultivated plant to their collection.
 - A lower-priority provider fills missing care fields; it never silently overwrites a stronger
   field.
 - Every displayed care value must say where it came from and when it was checked.
+- Provider photos fill only missing images and retain their source, license, and attribution.
 - Provider credentials stay on the server. Photos are uploaded only after an explicit user action.
 - Releases require backend tests, frontend analysis/tests, and a production web build.

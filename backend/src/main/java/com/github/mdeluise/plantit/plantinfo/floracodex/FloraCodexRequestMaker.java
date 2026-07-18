@@ -187,6 +187,7 @@ public class FloraCodexRequestMaker {
         final BotanicalInfoImage abstractEntityImage = new BotanicalInfoImage();
         abstractEntityImage.setUrl(imageUrl);
         abstractEntityImage.setId(null);
+        abstractEntityImage.setSource(BotanicalInfoCreator.FLORA_CODEX.name());
         botanicalInfo.setImage(abstractEntityImage);
     }
 

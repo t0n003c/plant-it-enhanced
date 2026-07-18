@@ -2,6 +2,8 @@ package com.github.mdeluise.plantit.unit.service;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -22,6 +24,8 @@ import com.github.mdeluise.plantit.image.PlantImageRepository;
 import com.github.mdeluise.plantit.image.storage.FileSystemImageStorageService;
 import com.github.mdeluise.plantit.plant.Plant;
 import com.github.mdeluise.plantit.plant.PlantRepository;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpServer;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -187,6 +191,31 @@ class FileSystemImageStorageServiceUnitTests {
                   .isEqualTo(content);
         Assertions.assertThat(result.getType().toString()).as("content is correct")
                   .isEqualTo("image/" + type);
+    }
+
+
+    @Test
+    @DisplayName("Should use a botanical image fallback when the preferred URL is unavailable")
+    void shouldGetRemoteFallbackContent() throws IOException {
+        final byte[] content = "fallback-image".getBytes(StandardCharsets.UTF_8);
+        final HttpServer server = HttpServer.create(new InetSocketAddress(0), 0);
+        server.createContext("/missing", exchange -> respond(exchange, 404, "text/plain", new byte[0]));
+        server.createContext("/fallback", exchange -> respond(exchange, 200, "image/jpeg", content));
+        server.start();
+        try {
+            final String baseUrl = "http://127.0.0.1:" + server.getAddress().getPort();
+            final BotanicalInfoImage toGet = new BotanicalInfoImage();
+            toGet.setUrl(baseUrl + "/missing");
+            toGet.setFallbackUrl(baseUrl + "/fallback");
+            Mockito.when(imageRepository.findById(toGet.getId())).thenReturn(Optional.of(toGet));
+
+            final ImageContentResponse result = fileSystemImageStorageService.getImageContentInternal(toGet.getId());
+
+            Assertions.assertThat(result.getContent()).isEqualTo(content);
+            Assertions.assertThat(result.getType()).isEqualTo(MediaType.IMAGE_JPEG);
+        } finally {
+            server.stop(0);
+        }
     }
 
 
@@ -414,5 +443,13 @@ class FileSystemImageStorageServiceUnitTests {
         Mockito.when(plantImageRepository.countByTargetOwner(authenticatedUser)).thenReturn(countWanted);
 
         Assertions.assertThat(fileSystemImageStorageService.count()).as("count is correct").isEqualTo(countWanted);
+    }
+
+
+    private void respond(HttpExchange exchange, int status, String contentType, byte[] content) throws IOException {
+        exchange.getResponseHeaders().set("Content-Type", contentType);
+        exchange.sendResponseHeaders(status, content.length);
+        exchange.getResponseBody().write(content);
+        exchange.close();
     }
 }

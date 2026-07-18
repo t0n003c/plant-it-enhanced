@@ -1,0 +1,57 @@
+package com.github.mdeluise.plantit.unit.component;
+
+import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfo;
+import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoCreator;
+import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoDTO;
+import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoDTOConverter;
+import com.github.mdeluise.plantit.botanicalinfo.care.PlantCareInfoDTOConverter;
+import com.github.mdeluise.plantit.image.BotanicalInfoImage;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.modelmapper.ModelMapper;
+
+@DisplayName("Unit tests for botanical image DTO metadata")
+class BotanicalInfoDTOConverterUnitTests {
+
+    @Test
+    @DisplayName("Should preserve provider image metadata in both conversion directions")
+    void shouldPreserveImageMetadata() {
+        final BotanicalInfo botanicalInfo = new BotanicalInfo();
+        botanicalInfo.setSpecies("Monstera deliciosa");
+        botanicalInfo.setCreator(BotanicalInfoCreator.INATURALIST);
+        botanicalInfo.setImage(createImage());
+        final BotanicalInfoDTOConverter converter = createConverter();
+
+        final BotanicalInfoDTO dto = converter.convertToDTO(botanicalInfo);
+        final BotanicalInfo restored = converter.convertFromDTO(dto);
+
+        Assertions.assertEquals("https://example.org/medium.jpg", dto.getImageUrl());
+        Assertions.assertEquals("https://example.org/square.jpg", dto.getImageFallbackUrl());
+        Assertions.assertEquals("INATURALIST", dto.getImageSource());
+        Assertions.assertEquals("cc-by", dto.getImageLicenseCode());
+        Assertions.assertEquals("Example credit", dto.getImageAttribution());
+        Assertions.assertNotNull(restored.getImage());
+        Assertions.assertEquals(dto.getImageUrl(), restored.getImage().getUrl());
+        Assertions.assertEquals(dto.getImageSourceUrl(), restored.getImage().getSourceUrl());
+    }
+
+
+    private BotanicalInfoDTOConverter createConverter() {
+        final ModelMapper modelMapper = new ModelMapper();
+        return new BotanicalInfoDTOConverter(modelMapper, new PlantCareInfoDTOConverter(modelMapper));
+    }
+
+
+    private BotanicalInfoImage createImage() {
+        final BotanicalInfoImage image = new BotanicalInfoImage();
+        image.setId(null);
+        image.setUrl("https://example.org/medium.jpg");
+        image.setFallbackUrl("https://example.org/square.jpg");
+        image.setSource("INATURALIST");
+        image.setSourceUrl("https://www.inaturalist.org/photos/12345");
+        image.setLicenseCode("cc-by");
+        image.setAttribution("Example credit");
+        return image;
+    }
+}

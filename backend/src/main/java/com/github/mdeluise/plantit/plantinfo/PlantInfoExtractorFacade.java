@@ -37,7 +37,7 @@ public class PlantInfoExtractorFacade {
 
     @Cacheable(
         value = "botanical-info",
-        key = "{'botanical-schema-v3', #size, @authenticatedUserService.getAuthenticatedUser().id}"
+        key = "{'botanical-schema-v4', #size, @authenticatedUserService.getAuthenticatedUser().id}"
     )
     public List<BotanicalInfo> getAll(int size) {
         logger.debug("Search all botanical info");
@@ -47,7 +47,7 @@ public class PlantInfoExtractorFacade {
 
     @Cacheable(
         value = "botanical-info",
-        key = "{'common-name-v3', #searchTerm, #size, @authenticatedUserService.getAuthenticatedUser().id}"
+        key = "{'common-name-v4', #searchTerm, #size, @authenticatedUserService.getAuthenticatedUser().id}"
     )
     public List<BotanicalInfo> extractPlants(String searchTerm, int size) {
         final String normalizedSearchTerm = searchTerm.isBlank() ? "*" : searchTerm.trim();
@@ -58,7 +58,7 @@ public class PlantInfoExtractorFacade {
 
     @Cacheable(
         value = "botanical-info",
-        key = "{'localized-common-name-v1', #searchTerm, #size, #locale, #region, " +
+        key = "{'localized-common-name-v2', #searchTerm, #size, #locale, #region, " +
                   "@authenticatedUserService.getAuthenticatedUser().id}"
     )
     public List<BotanicalInfo> extractPlants(String searchTerm, int size, String locale, String region) {

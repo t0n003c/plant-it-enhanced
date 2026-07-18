@@ -207,10 +207,12 @@ public class BotanicalInfoService {
             logger.debug("Species {} have a linked image's content, updating...", toUpdate.getSpecies());
             final BotanicalInfoImage saved =
                 (BotanicalInfoImage) imageStorageService.saveBotanicalInfoThumbnailImage(toSave.getContent(), toSave.getContentType(), toUpdate);
+            saved.copyMetadataFrom(toSave);
             toUpdate.setImage(saved);
         } else if (toSave.getUrl() != null && !toSave.getUrl().isBlank()) {
             logger.debug("Species {} have a linked image's url, updating...", toUpdate.getSpecies());
             final BotanicalInfoImage saved = (BotanicalInfoImage) imageStorageService.save(toSave.getUrl(), toUpdate);
+            saved.copyMetadataFrom(toSave);
             toUpdate.setImage(saved);
         } else if (toSave.getId() != null && !toSave.getId().isBlank()) {
             logger.debug("Species {} have a linked image's id, updating...", toUpdate.getSpecies());

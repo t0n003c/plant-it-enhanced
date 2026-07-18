@@ -9,6 +9,7 @@ import 'package:plant_it/plant_details/species_tab.dart';
 import 'package:plant_it/search/header.dart';
 import 'package:plant_it/search/species_details_bottom_bar.dart';
 import 'package:plant_it/toast/toast_manager.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'dart:convert';
 
 class SpeciesDetailsPage extends StatefulWidget {
@@ -139,6 +140,38 @@ class _SpeciesDetailsPageState extends State<SpeciesDetailsPage> {
     );
   }
 
+  Widget _buildImageCredit(BuildContext context) {
+    final String attribution = _species.imageAttribution?.trim() ?? '';
+    final String source = switch (_species.imageSource) {
+      'INATURALIST' => 'iNaturalist',
+      'FLORA_CODEX' => 'FloraCodex',
+      final String value when value.isNotEmpty => value,
+      _ => '',
+    };
+    final String license = _species.imageLicenseCode?.trim() ?? '';
+    final String details =
+        [source, license].where((value) => value.isNotEmpty).join(' · ');
+    final String sourceUrl = _species.imageSourceUrl?.trim() ?? '';
+    final Uri? sourceUri = sourceUrl.isEmpty ? null : Uri.tryParse(sourceUrl);
+    return Material(
+      color: Theme.of(context).colorScheme.surfaceContainerLow,
+      child: ListTile(
+        dense: true,
+        leading: const Icon(Icons.photo_camera_outlined),
+        title: Text(attribution.isNotEmpty ? attribution : source),
+        subtitle:
+            attribution.isNotEmpty && details.isNotEmpty ? Text(details) : null,
+        trailing:
+            sourceUri == null ? null : const Icon(Icons.open_in_new, size: 18),
+        onTap: sourceUri == null ? null : () => launchUrl(sourceUri),
+      ),
+    );
+  }
+
+  bool get _hasImageCredit =>
+      (_species.imageAttribution?.trim().isNotEmpty ?? false) ||
+      (_species.imageSource?.trim().isNotEmpty ?? false);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -167,6 +200,7 @@ class _SpeciesDetailsPageState extends State<SpeciesDetailsPage> {
                     localImage: widget.identificationImage,
                   ),
                 ),
+                if (_hasImageCredit) _buildImageCredit(context),
                 SpeciesDetailsTab(
                   species: _species,
                   isLoading: false,

@@ -34,6 +34,12 @@ void main() {
       'genus': 'Dracaena',
       'species': 'Dracaena trifasciata',
       'plantCareInfo': <String, dynamic>{},
+      'imageUrl': 'https://example.org/medium.jpg',
+      'imageFallbackUrl': 'https://example.org/square.jpg',
+      'imageSource': 'INATURALIST',
+      'imageSourceUrl': 'https://www.inaturalist.org/photos/12345',
+      'imageLicenseCode': 'cc-by',
+      'imageAttribution': '(c) Example Photographer, CC BY',
       'creator': 'INATURALIST',
       'externalId': '67710',
       'catalogTags': ['NORTH_AMERICAN_TRAIL'],
@@ -45,11 +51,17 @@ void main() {
     expect(species.externalReferences['GBIF'], '11041822');
     expect(species.canonicalTaxonKey, '11041822');
     expect(species.catalogTags, ['NORTH_AMERICAN_TRAIL']);
+    expect(species.imageFallbackUrl, 'https://example.org/square.jpg');
+    expect(species.imageSource, 'INATURALIST');
+    expect(species.imageLicenseCode, 'cc-by');
+    expect(species.imageAttribution, '(c) Example Photographer, CC BY');
     expect(
         species.preferredCommonNameFor('es', region: 'MX'), 'Lengua de suegra');
     expect(species.preferredCommonNameFor('en', region: 'US'), 'Snake Plant');
     expect(species.toMap()['synonyms'],
         ['Sansevieria trifasciata', 'snake plant']);
     expect(species.toMap()['catalogTags'], ['NORTH_AMERICAN_TRAIL']);
+    expect(species.toMap()['imageSourceUrl'],
+        'https://www.inaturalist.org/photos/12345');
   });
 }

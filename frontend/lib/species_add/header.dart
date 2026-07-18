@@ -6,6 +6,7 @@ import 'package:plant_it/app_exception.dart';
 import 'package:plant_it/dto/species_dto.dart';
 import 'package:plant_it/environment.dart';
 import 'package:plant_it/image_provider_helper.dart';
+import 'package:plant_it/species_image_url.dart';
 import 'package:plant_it/theme.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -37,9 +38,11 @@ class _AddSpeciesImageHeaderState extends State<AddSpeciesImageHeader> {
   }
 
   void _setInitialImage() {
-    if (widget.species.imageUrl != null) {
+    final String? imageUrl =
+        resolveSpeciesImageUrl(widget.species, widget.env.http.backendUrl);
+    if (imageUrl != null) {
       _imageToDisplay = CachedNetworkImageProvider(
-        "${widget.env.http.backendUrl}proxy?url=${widget.species.imageUrl}",
+        imageUrl,
         headers: {
           "Key": widget.env.http.key!,
         },
@@ -51,6 +54,7 @@ class _AddSpeciesImageHeaderState extends State<AddSpeciesImageHeader> {
     }
     setState(() {
       _loading = false;
+      _imageUploaded = imageUrl != null;
     });
   }
 
@@ -99,6 +103,7 @@ class _AddSpeciesImageHeaderState extends State<AddSpeciesImageHeader> {
     widget.species.imageContent = await pickedImage.readAsBytes();
     widget.species.imageId = null;
     widget.species.imageUrl = null;
+    widget.species.clearImageMetadata();
     final ImageProvider<Object> uploaded =
         await ImageProviderHelper.getImageProvider(
             pickedImage, widget.env.logger);
@@ -136,12 +141,17 @@ class _AddSpeciesImageHeaderState extends State<AddSpeciesImageHeader> {
                   _loading = true;
                 });
                 try {
-                  final response = await widget.env.http.get("proxy?url=$url");
+                  final String proxyPath = Uri(
+                    path: 'proxy',
+                    queryParameters: {'url': url},
+                  ).toString();
+                  final response = await widget.env.http.get(proxyPath);
                   if (response.statusCode == 200) {
                     final imageBytes = response.bodyBytes;
                     widget.species.imageContent = null;
                     widget.species.imageId = null;
                     widget.species.imageUrl = url;
+                    widget.species.clearImageMetadata();
                     setState(() {
                       _imageToDisplay = MemoryImage(imageBytes);
                       _loading = false;

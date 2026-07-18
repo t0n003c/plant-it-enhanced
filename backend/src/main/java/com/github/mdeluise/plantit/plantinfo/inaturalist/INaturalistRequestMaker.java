@@ -16,8 +16,10 @@ import java.util.Map;
 
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalCommonName;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfo;
+import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoCatalogMerger;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoCreator;
 import com.github.mdeluise.plantit.exception.InfoExtractionException;
+import com.github.mdeluise.plantit.image.BotanicalInfoImage;
 import com.github.mdeluise.plantit.plantinfo.config.INaturalistProperties;
 import com.github.mdeluise.plantit.plantinfo.config.PlantSearchProperties;
 import com.github.mdeluise.plantit.plantinfo.gbif.GbifTaxonomyVerifier;
@@ -40,6 +42,7 @@ public class INaturalistRequestMaker {
     private static final int MAXIMUM_GBIF_VERIFICATIONS = 7;
     private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(8);
     private static final String PLANTAE_TAXON_ID = "47126";
+    private static final String PHOTO_PAGE = "https://www.inaturalist.org/photos/";
     private final HttpClient client;
     private final GbifTaxonomyVerifier gbifTaxonomyVerifier;
     private final INaturalistRequestThrottle requestThrottle;
@@ -174,6 +177,7 @@ public class INaturalistRequestMaker {
         if (matchedTerm != null && !matchedTerm.equalsIgnoreCase(scientificName)) {
             botanicalInfo.getSynonyms().add(matchedTerm);
         }
+        applyDefaultPhoto(result, botanicalInfo);
         if (PlantSearchScorer.evaluate(searchTerm, botanicalInfo).isRelevant()) {
             candidates.add(new RankedCandidate(
                 botanicalInfo,
@@ -191,9 +195,33 @@ public class INaturalistRequestMaker {
             results.put(normalizedSpecies, candidate);
             return;
         }
-        existing.getSynonyms().addAll(candidate.getSynonyms());
-        existing.getCommonNames().addAll(candidate.getCommonNames());
-        candidate.getExternalReferences().forEach(existing.getExternalReferences()::putIfAbsent);
+        BotanicalInfoCatalogMerger.mergeInto(existing, candidate);
+    }
+
+
+    private void applyDefaultPhoto(JsonObject result, BotanicalInfo botanicalInfo) {
+        final JsonObject photo = readObject(result, "default_photo");
+        if (photo == null) {
+            return;
+        }
+        final String mediumUrl = firstPresent(readString(photo, "medium_url"), readString(photo, "url"),
+                                              readString(photo, "square_url"));
+        if (mediumUrl == null) {
+            return;
+        }
+        final BotanicalInfoImage image = new BotanicalInfoImage();
+        image.setId(null);
+        image.setUrl(mediumUrl);
+        image.setFallbackUrl(firstDifferent(mediumUrl, readString(photo, "square_url"),
+                                            readString(photo, "url")));
+        image.setSource(BotanicalInfoCreator.INATURALIST.name());
+        image.setLicenseCode(readString(photo, "license_code"));
+        image.setAttribution(readString(photo, "attribution"));
+        final String photoId = readString(photo, "id");
+        if (photoId != null) {
+            image.setSourceUrl(PHOTO_PAGE + photoId);
+        }
+        botanicalInfo.setImage(image);
     }
 
 
@@ -221,8 +249,33 @@ public class INaturalistRequestMaker {
     }
 
 
+    private JsonObject readObject(JsonObject object, String key) {
+        return object.has(key) && object.get(key).isJsonObject() ? object.getAsJsonObject(key) : null;
+    }
+
+
     private long readLong(JsonObject object, String key) {
         return object.has(key) && !object.get(key).isJsonNull() ? object.get(key).getAsLong() : 0;
+    }
+
+
+    private String firstPresent(String... values) {
+        for (String value : values) {
+            if (value != null && !value.isBlank()) {
+                return value;
+            }
+        }
+        return null;
+    }
+
+
+    private String firstDifferent(String primary, String... alternatives) {
+        for (String alternative : alternatives) {
+            if (alternative != null && !alternative.isBlank() && !alternative.equals(primary)) {
+                return alternative;
+            }
+        }
+        return null;
     }
 
 

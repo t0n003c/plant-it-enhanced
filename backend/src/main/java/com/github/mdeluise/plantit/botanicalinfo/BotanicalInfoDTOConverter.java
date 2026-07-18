@@ -9,6 +9,7 @@ import com.github.mdeluise.plantit.botanicalinfo.care.PlantCareInfo;
 import com.github.mdeluise.plantit.botanicalinfo.care.PlantCareInfoDTO;
 import com.github.mdeluise.plantit.botanicalinfo.care.PlantCareInfoDTOConverter;
 import com.github.mdeluise.plantit.common.AbstractDTOConverter;
+import com.github.mdeluise.plantit.image.BotanicalInfoImage;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -35,9 +36,7 @@ public class BotanicalInfoDTOConverter extends AbstractDTOConverter<BotanicalInf
         result.setLastVerifiedAt(dto.getLastVerifiedAt());
         final PlantCareInfo plantCareInfo = plantCareInfoDtoConverter.convertFromDTO(dto.getPlantCareInfo());
         result.setPlantCareInfo(plantCareInfo);
-        if (dto.getImageContentType() != null) {
-            result.getImage().setContentType(dto.getImageContentType());
-        }
+        result.setImage(convertImage(dto));
         return result;
     }
 
@@ -55,9 +54,59 @@ public class BotanicalInfoDTOConverter extends AbstractDTOConverter<BotanicalInf
         result.setSearchMatchConfidence(data.getSearchMatchConfidence());
         result.setCatalogTags(data.getCatalogTags() == null
                                   ? new LinkedHashSet<>() : new LinkedHashSet<>(data.getCatalogTags()));
+        applyImage(data.getImage(), result);
         final PlantCareInfoDTO plantCareInfoDTO = plantCareInfoDtoConverter.convertToDTO(data.getPlantCareInfo());
         result.setPlantCareInfo(plantCareInfoDTO);
         return result;
+    }
+
+
+    private BotanicalInfoImage convertImage(BotanicalInfoDTO dto) {
+        if (!hasImage(dto)) {
+            return null;
+        }
+        final BotanicalInfoImage image = new BotanicalInfoImage();
+        image.setId(dto.getImageId());
+        image.setUrl(dto.getImageUrl());
+        image.setFallbackUrl(dto.getImageFallbackUrl());
+        image.setContent(dto.getImageContent());
+        image.setContentType(dto.getImageContentType());
+        image.setSource(dto.getImageSource());
+        image.setSourceUrl(dto.getImageSourceUrl());
+        image.setLicenseCode(dto.getImageLicenseCode());
+        image.setAttribution(dto.getImageAttribution());
+        return image;
+    }
+
+
+    private boolean hasImage(BotanicalInfoDTO dto) {
+        return isPresent(dto.getImageId()) || isPresent(dto.getImageUrl()) || dto.getImageContent() != null;
+    }
+
+
+    private void applyImage(BotanicalInfoImage image, BotanicalInfoDTO dto) {
+        if (image == null) {
+            dto.setImageId(null);
+            dto.setImageUrl(null);
+            dto.setImageFallbackUrl(null);
+            dto.setImageSource(null);
+            dto.setImageSourceUrl(null);
+            dto.setImageLicenseCode(null);
+            dto.setImageAttribution(null);
+            return;
+        }
+        dto.setImageId(image.getId());
+        dto.setImageUrl(image.getUrl());
+        dto.setImageFallbackUrl(image.getFallbackUrl());
+        dto.setImageSource(image.getSource());
+        dto.setImageSourceUrl(image.getSourceUrl());
+        dto.setImageLicenseCode(image.getLicenseCode());
+        dto.setImageAttribution(image.getAttribution());
+    }
+
+
+    private boolean isPresent(String value) {
+        return value != null && !value.isBlank();
     }
 
 

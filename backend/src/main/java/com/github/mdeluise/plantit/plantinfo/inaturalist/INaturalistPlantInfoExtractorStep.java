@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Set;
 
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfo;
-import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoCreator;
-import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoService;
 import com.github.mdeluise.plantit.exception.InfoExtractionException;
 import com.github.mdeluise.plantit.plantinfo.AbstractPlantInfoExtractorStep;
 import com.github.mdeluise.plantit.plantinfo.config.INaturalistProperties;
@@ -19,16 +17,13 @@ import org.springframework.stereotype.Service;
 @Order(3)
 public class INaturalistPlantInfoExtractorStep extends AbstractPlantInfoExtractorStep {
     private final INaturalistRequestMaker requestMaker;
-    private final BotanicalInfoService botanicalInfoService;
     private final boolean enabled;
     private final Logger logger = LoggerFactory.getLogger(INaturalistPlantInfoExtractorStep.class);
 
 
     public INaturalistPlantInfoExtractorStep(INaturalistRequestMaker requestMaker,
-                                             BotanicalInfoService botanicalInfoService,
                                              INaturalistProperties naturalistProperties) {
         this.requestMaker = requestMaker;
-        this.botanicalInfoService = botanicalInfoService;
         this.enabled = naturalistProperties.isEnabled();
     }
 
@@ -39,9 +34,7 @@ public class INaturalistPlantInfoExtractorStep extends AbstractPlantInfoExtracto
             return new LinkedHashSet<>();
         }
         try {
-            final List<BotanicalInfo> result = requestMaker.search(searchTerm, size, locale, region).stream()
-                                                            .filter(info -> !existsLocally(info))
-                                                            .toList();
+            final List<BotanicalInfo> result = requestMaker.search(searchTerm, size, locale, region);
             return new LinkedHashSet<>(result);
         } catch (InfoExtractionException e) {
             logger.warn("iNaturalist search unavailable; continuing with the next provider: {}", e.getMessage());
@@ -56,10 +49,4 @@ public class INaturalistPlantInfoExtractorStep extends AbstractPlantInfoExtracto
     }
 
 
-    private boolean existsLocally(BotanicalInfo botanicalInfo) {
-        return botanicalInfoService.existsCanonicalTaxon(botanicalInfo.getCanonicalTaxonKey()) ||
-                   botanicalInfoService.existsExternalId(BotanicalInfoCreator.INATURALIST,
-                                                      botanicalInfo.getExternalId()) ||
-                   botanicalInfoService.existsSpecies(botanicalInfo.getSpecies());
-    }
 }

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:plant_it/dto/species_dto.dart';
 import 'package:plant_it/environment.dart';
+import 'package:plant_it/species_image_url.dart';
 import 'package:plant_it/theme.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -26,21 +27,16 @@ class SpeciesImageHeader extends StatefulWidget {
 }
 
 class _SpeciesImageHeaderState extends State<SpeciesImageHeader> {
-  String? _url;
   Future<Uint8List>? _localImageBytes;
+
+  String? get _url =>
+      resolveSpeciesImageUrl(widget.species, widget.env.http.backendUrl);
 
   @override
   void initState() {
     super.initState();
     if (widget.localImage != null) {
       _localImageBytes = widget.localImage!.readAsBytes();
-    }
-    if (widget.species.id != null) {
-      _url =
-          "${widget.env.http.backendUrl}image/content/${widget.species.imageId}";
-    } else if (widget.species.imageUrl != null) {
-      _url =
-          "${widget.env.http.backendUrl}proxy?url=${widget.species.imageUrl}";
     }
   }
 
@@ -58,8 +54,7 @@ class _SpeciesImageHeaderState extends State<SpeciesImageHeader> {
       );
     }
     return CachedNetworkImage(
-      imageUrl:
-          _url ?? "${widget.env.http.backendUrl}image/content/non-existing-id",
+      imageUrl: _url ?? missingSpeciesImageUrl(widget.env.http.backendUrl),
       httpHeaders: {
         "Key": widget.env.http.key!,
       },
