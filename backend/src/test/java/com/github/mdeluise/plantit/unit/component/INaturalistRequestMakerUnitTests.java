@@ -103,6 +103,7 @@ class INaturalistRequestMakerUnitTests {
         final List<BotanicalInfo> results = requestMaker.search("snake plant", 5);
 
         Assertions.assertTrue(naturalistQuery.get().contains("q=snake+plant"));
+        Assertions.assertTrue(naturalistQuery.get().contains("rank=species,hybrid"));
         Assertions.assertTrue(naturalistQuery.get().contains("locale=en"));
         Assertions.assertTrue(naturalistQuery.get().contains("preferred_place_id=1"));
         Assertions.assertEquals(1, results.size());
@@ -125,6 +126,68 @@ class INaturalistRequestMakerUnitTests {
         Assertions.assertEquals("https://www.inaturalist.org/photos/12345", result.getImage().getSourceUrl());
         Assertions.assertEquals("cc-by", result.getImage().getLicenseCode());
         Assertions.assertEquals("(c) Example Photographer, CC BY", result.getImage().getAttribution());
+    }
+
+
+    @Test
+    @DisplayName("Should include cultivated hybrids and preserve their licensed photo")
+    void shouldIncludeCultivatedHybrids() {
+        final AtomicReference<String> naturalistQuery = new AtomicReference<>();
+        server.createContext("/v1/taxa/autocomplete", exchange -> {
+            naturalistQuery.set(exchange.getRequestURI().getRawQuery());
+            respond(exchange, """
+                {
+                  "results": [
+                    {
+                      "id": 55366,
+                      "name": "Fragaria × ananassa",
+                      "rank": "hybrid",
+                      "iconic_taxon_name": "Plantae",
+                      "preferred_common_name": "garden strawberry",
+                      "matched_term": "strawberry",
+                      "observations_count": 9184,
+                      "default_photo": {
+                        "id": 74966564,
+                        "license_code": "cc-by-nc",
+                        "attribution": "(c) cinema, some rights reserved (CC BY-NC)",
+                        "square_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/74966564/square.jpg",
+                        "medium_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/74966564/medium.jpg"
+                      }
+                    }
+                  ]
+                }
+                """);
+        });
+        server.createContext("/v2/species/match", exchange -> respond(exchange, """
+            {
+              "usage": {
+                "key": "3029912",
+                "canonicalName": "Fragaria ananassa",
+                "rank": "SPECIES"
+              },
+              "classification": [
+                {"rank": "FAMILY", "name": "Rosaceae"},
+                {"rank": "GENUS", "name": "Fragaria"}
+              ],
+              "diagnostics": {"confidence": 99}
+            }
+            """));
+        server.start();
+
+        final List<BotanicalInfo> results = createRequestMaker().search("strawberry", 5);
+
+        Assertions.assertTrue(naturalistQuery.get().contains("rank=species,hybrid"));
+        Assertions.assertEquals(1, results.size());
+        final BotanicalInfo result = results.get(0);
+        Assertions.assertEquals("Fragaria ananassa", result.getSpecies());
+        Assertions.assertEquals("garden strawberry", result.getPreferredCommonName());
+        Assertions.assertEquals("3029912", result.getCanonicalTaxonKey());
+        Assertions.assertEquals(
+            "https://inaturalist-open-data.s3.amazonaws.com/photos/74966564/medium.jpg",
+            result.getImage().getUrl());
+        Assertions.assertEquals("cc-by-nc", result.getImage().getLicenseCode());
+        Assertions.assertEquals(
+            "https://www.inaturalist.org/photos/74966564", result.getImage().getSourceUrl());
     }
 
 

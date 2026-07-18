@@ -160,7 +160,7 @@
       "sourceReference": "https://plants.ces.ncsu.edu/plants/cucurbita-pepo/"
     },
     {
-      "scientificNames": ["Fragaria × ananassa", "Fragaria x ananassa"],
+      "scientificNames": ["Fragaria × ananassa", "Fragaria x ananassa", "Fragaria ananassa"],
       "light": 8,
       "soilHumidity": 6,
       "sourceReference": "https://plants.ces.ncsu.edu/plants/fragaria-x-ananassa/"

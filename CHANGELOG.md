@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.15.3 - 2026-07-18 - Cultivated strawberry enrichment
+
+- Include iNaturalist's species-level hybrid rank when enriching common-name search results, so
+  cultivated hybrids such as garden strawberry can provide their licensed photo and attribution.
+- Recognize GBIF's accepted `Fragaria ananassa` canonical form alongside the `x` and `×` hybrid
+  spellings, restoring the reviewed sunlight and watering guide for cultivated strawberry.
+- Invalidate earlier image-less common-name search caches after the provider query change.
+
 ## 0.15.2 - 2026-07-18 - Context-aware identification and hardened self-hosting
 
 - Add a separately reviewed trail field guide with six ecological profiles and 12 attributable

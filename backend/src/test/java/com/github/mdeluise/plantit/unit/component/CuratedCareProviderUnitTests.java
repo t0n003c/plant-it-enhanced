@@ -26,12 +26,30 @@ class CuratedCareProviderUnitTests {
     @DisplayName("Should cover the plants reported missing by exact scientific name")
     void shouldCoverReportedPlants() {
         final List<String> reportedPlants = List.of(
-            "Monstera deliciosa", "Zea mays", "Helianthus annuus", "Lavandula angustifolia", "Rosa");
+            "Monstera deliciosa", "Zea mays", "Helianthus annuus", "Lavandula angustifolia", "Rosa",
+            "Fragaria ananassa");
 
         for (String scientificName : reportedPlants) {
             Assertions.assertTrue(provider.fetch(scientificName).isPresent(), scientificName);
         }
         Assertions.assertTrue(provider.fetch("Rosa rubiginosa").isPresent());
+    }
+
+
+    @Test
+    @DisplayName("Should recognize cultivated strawberry hybrid spellings and the GBIF canonical name")
+    void shouldRecognizeCultivatedStrawberryNames() {
+        final List<String> scientificNames = List.of(
+            "Fragaria × ananassa", "Fragaria x ananassa", "Fragaria ananassa");
+
+        for (String scientificName : scientificNames) {
+            final PlantCareInfo result = provider.fetch(scientificName).orElseThrow();
+            Assertions.assertEquals(8, result.getLight(), scientificName);
+            Assertions.assertEquals(6, result.getSoilHumidity(), scientificName);
+            Assertions.assertEquals(
+                "https://plants.ces.ncsu.edu/plants/fragaria-x-ananassa/",
+                result.getSourceReference(), scientificName);
+        }
     }
 
 
