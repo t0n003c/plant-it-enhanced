@@ -14,6 +14,7 @@ import com.github.mdeluise.plantit.plantinfo.config.PlantSearchProperties;
 import com.github.mdeluise.plantit.plantinfo.gbif.GbifTaxonomyVerifier;
 import com.github.mdeluise.plantit.plantinfo.inaturalist.INaturalistRequestMaker;
 import com.github.mdeluise.plantit.plantinfo.inaturalist.INaturalistRequestThrottle;
+import com.github.mdeluise.plantit.plantinfo.search.TrustedCommonNameIndex;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import org.junit.jupiter.api.AfterEach;
@@ -176,6 +177,61 @@ class INaturalistRequestMakerUnitTests {
     }
 
 
+    @Test
+    @DisplayName("Should enrich a trusted everyday alias through its accepted scientific name")
+    void shouldEnrichTrustedEverydayAlias() {
+        final AtomicReference<String> naturalistQuery = new AtomicReference<>();
+        server.createContext("/v1/taxa/autocomplete", exchange -> {
+            naturalistQuery.set(exchange.getRequestURI().getRawQuery());
+            respond(exchange, """
+                {
+                  "results": [{
+                    "id": 122971,
+                    "name": "Zingiber officinale",
+                    "rank": "species",
+                    "iconic_taxon_name": "Plantae",
+                    "preferred_common_name": "Ginger",
+                    "matched_term": "Zingiber officinale",
+                    "observations_count": 2225,
+                    "default_photo": {
+                      "id": 247973845,
+                      "medium_url": "https://static.inaturalist.org/photos/247973845/medium.jpeg",
+                      "square_url": "https://static.inaturalist.org/photos/247973845/square.jpeg"
+                    }
+                  }]
+                }
+                """);
+        });
+        server.createContext("/v2/species/match", exchange -> respond(exchange, """
+            {
+              "usage": {
+                "key": "2757280",
+                "canonicalName": "Zingiber officinale",
+                "rank": "SPECIES"
+              },
+              "classification": [
+                {"rank": "FAMILY", "name": "Zingiberaceae"},
+                {"rank": "GENUS", "name": "Zingiber"}
+              ],
+              "diagnostics": {"confidence": 100}
+            }
+            """));
+        server.start();
+        final TrustedCommonNameIndex trustedCommonNameIndex = Mockito.mock(TrustedCommonNameIndex.class);
+        Mockito.when(trustedCommonNameIndex.resolveProviderSearchTerm("ginger root"))
+               .thenReturn("Zingiber officinale");
+
+        final List<BotanicalInfo> results = createRequestMaker(trustedCommonNameIndex).search("ginger root", 5);
+
+        Assertions.assertTrue(naturalistQuery.get().contains("q=Zingiber+officinale"));
+        Assertions.assertEquals(1, results.size());
+        Assertions.assertEquals("Zingiber officinale", results.get(0).getSpecies());
+        Assertions.assertTrue(results.get(0).getSynonyms().contains("ginger root"));
+        Assertions.assertEquals("https://static.inaturalist.org/photos/247973845/medium.jpeg",
+                                results.get(0).getImage().getUrl());
+    }
+
+
     private String crowdedStrawberryResponse() {
         final StringBuilder relatedResults = new StringBuilder();
         for (int index = 0; index < 9; index++) {
@@ -242,6 +298,14 @@ class INaturalistRequestMakerUnitTests {
 
 
     private INaturalistRequestMaker createRequestMaker() {
+        final TrustedCommonNameIndex trustedCommonNameIndex = Mockito.mock(TrustedCommonNameIndex.class);
+        Mockito.when(trustedCommonNameIndex.resolveProviderSearchTerm(Mockito.anyString()))
+               .thenAnswer(invocation -> invocation.getArgument(0));
+        return createRequestMaker(trustedCommonNameIndex);
+    }
+
+
+    private INaturalistRequestMaker createRequestMaker(TrustedCommonNameIndex trustedCommonNameIndex) {
         final INaturalistProperties naturalistProperties = Mockito.mock(INaturalistProperties.class);
         final GbifProperties gbifProperties = Mockito.mock(GbifProperties.class);
         final PlantSearchProperties searchProperties = Mockito.mock(PlantSearchProperties.class);
@@ -257,7 +321,10 @@ class INaturalistRequestMakerUnitTests {
         final HttpClient client = HttpClient.newHttpClient();
         final GbifTaxonomyVerifier verifier = new GbifTaxonomyVerifier(client, gbifProperties, searchProperties);
         final INaturalistRequestThrottle throttle = new INaturalistRequestThrottle(naturalistProperties);
-        return new INaturalistRequestMaker(client, verifier, throttle, naturalistProperties, searchProperties);
+        final INaturalistRequestMaker result = new INaturalistRequestMaker(
+            client, verifier, throttle, naturalistProperties, searchProperties);
+        result.setTrustedCommonNameIndex(trustedCommonNameIndex);
+        return result;
     }
 
 

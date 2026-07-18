@@ -25,6 +25,7 @@ import com.github.mdeluise.plantit.plantinfo.config.PlantSearchProperties;
 import com.github.mdeluise.plantit.plantinfo.gbif.GbifTaxonomyVerifier;
 import com.github.mdeluise.plantit.plantinfo.search.PlantNameNormalizer;
 import com.github.mdeluise.plantit.plantinfo.search.PlantSearchScorer;
+import com.github.mdeluise.plantit.plantinfo.search.TrustedCommonNameIndex;
 import com.github.mdeluise.plantit.systeminfo.ProviderStatusRegistry;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
@@ -51,6 +52,7 @@ public class INaturalistRequestMaker {
     private final String region;
     private final int preferredPlaceId;
     private final String userAgent;
+    private TrustedCommonNameIndex trustedCommonNameIndex;
     private ProviderStatusRegistry providerStatusRegistry = new ProviderStatusRegistry();
 
 
@@ -76,6 +78,12 @@ public class INaturalistRequestMaker {
     }
 
 
+    @Autowired
+    public void setTrustedCommonNameIndex(TrustedCommonNameIndex trustedCommonNameIndex) {
+        this.trustedCommonNameIndex = trustedCommonNameIndex;
+    }
+
+
     public List<BotanicalInfo> search(String searchTerm, int size) {
         return search(searchTerm, size, null, null);
     }
@@ -87,9 +95,12 @@ public class INaturalistRequestMaker {
         }
         final String effectiveLocale = fallback(requestedLocale, locale);
         final String effectiveRegion = fallback(requestedRegion, region);
+        final String providerSearchTerm = trustedCommonNameIndex.resolveProviderSearchTerm(searchTerm);
+        final SearchContext searchContext = new SearchContext(
+            searchTerm, providerSearchTerm, effectiveLocale, effectiveRegion);
         final int candidateCount = Math.min(MAXIMUM_CANDIDATES,
                                             Math.max(MINIMUM_CANDIDATES, size * CANDIDATE_MULTIPLIER));
-        final String encodedSearchTerm = URLEncoder.encode(searchTerm, StandardCharsets.UTF_8);
+        final String encodedSearchTerm = URLEncoder.encode(providerSearchTerm, StandardCharsets.UTF_8);
         String url = String.format(
             "%s/v1/taxa/autocomplete?q=%s&rank=species,hybrid&taxon_id=%s&is_active=true&per_page=%s&locale=%s",
             baseEndpoint, encodedSearchTerm, PLANTAE_TAXON_ID, candidateCount,
@@ -114,7 +125,7 @@ public class INaturalistRequestMaker {
         }
         providerStatusRegistry.recordSuccess("INATURALIST", response.statusCode(), quotaRemaining(response));
         try {
-            return parseResponse(searchTerm, size, response.body(), effectiveLocale, effectiveRegion);
+            return parseResponse(searchContext, size, response.body());
         } catch (JsonParseException | IllegalStateException | UnsupportedOperationException | NullPointerException |
                  NumberFormatException e) {
             throw new InfoExtractionException(e);
@@ -122,12 +133,11 @@ public class INaturalistRequestMaker {
     }
 
 
-    private List<BotanicalInfo> parseResponse(String searchTerm, int size, String responseBody,
-                                              String effectiveLocale, String effectiveRegion) {
+    private List<BotanicalInfo> parseResponse(SearchContext searchContext, int size, String responseBody) {
         final JsonObject responseJson = JsonParser.parseString(responseBody).getAsJsonObject();
         final List<RankedCandidate> candidates = new ArrayList<>();
         responseJson.get("results").getAsJsonArray().forEach(result -> addCandidate(
-            searchTerm, result.getAsJsonObject(), candidates, effectiveLocale, effectiveRegion
+            searchContext, result.getAsJsonObject(), candidates
         ));
         candidates.sort(candidateComparator());
 
@@ -138,17 +148,16 @@ public class INaturalistRequestMaker {
                   .forEach(candidate -> mergeCandidate(verifiedResults, candidate));
         return verifiedResults.values().stream()
                   .filter(candidate -> PlantSearchScorer.evaluate(
-                      searchTerm, candidate.botanicalInfo()).isRelevant())
+                      searchContext.searchTerm(), candidate.botanicalInfo()).isRelevant())
                   .sorted(candidateComparator())
                   .limit(size)
                   .map(RankedCandidate::botanicalInfo)
-                  .peek(candidate -> PlantSearchScorer.applyMatchMetadata(searchTerm, candidate))
+                  .peek(candidate -> PlantSearchScorer.applyMatchMetadata(searchContext.searchTerm(), candidate))
                   .toList();
     }
 
 
-    private void addCandidate(String searchTerm, JsonObject result, List<RankedCandidate> candidates,
-                              String effectiveLocale, String effectiveRegion) {
+    private void addCandidate(SearchContext searchContext, JsonObject result, List<RankedCandidate> candidates) {
         if (!isSupportedRank(readString(result, "rank")) ||
                 !"Plantae".equalsIgnoreCase(readString(result, "iconic_taxon_name"))) {
             return;
@@ -168,7 +177,7 @@ public class INaturalistRequestMaker {
         final String commonName = readString(result, "preferred_common_name");
         if (commonName != null) {
             botanicalInfo.getCommonNames().add(new BotanicalCommonName(
-                commonName, effectiveLocale, effectiveRegion, true, BotanicalInfoCreator.INATURALIST
+                commonName, searchContext.locale(), searchContext.region(), true, BotanicalInfoCreator.INATURALIST
             ));
             botanicalInfo.getSynonyms().add(commonName);
         }
@@ -176,12 +185,16 @@ public class INaturalistRequestMaker {
         if (matchedTerm != null && !matchedTerm.equalsIgnoreCase(scientificName)) {
             botanicalInfo.getSynonyms().add(matchedTerm);
         }
+        if (isCanonicalAliasSearch(
+                searchContext.searchTerm(), searchContext.providerSearchTerm(), scientificName)) {
+            botanicalInfo.getSynonyms().add(searchContext.searchTerm());
+        }
         applyDefaultPhoto(result, botanicalInfo);
-        if (PlantSearchScorer.evaluate(searchTerm, botanicalInfo).isRelevant()) {
+        if (PlantSearchScorer.evaluate(searchContext.searchTerm(), botanicalInfo).isRelevant()) {
             candidates.add(new RankedCandidate(
                 botanicalInfo,
-                isExactMatch(searchTerm, matchedTerm),
-                PlantSearchScorer.score(searchTerm, botanicalInfo),
+                isExactMatch(searchContext.providerSearchTerm(), matchedTerm),
+                PlantSearchScorer.score(searchContext.searchTerm(), botanicalInfo),
                 readLong(result, "observations_count")
             ));
         }
@@ -257,6 +270,14 @@ public class INaturalistRequestMaker {
     }
 
 
+    private boolean isCanonicalAliasSearch(String searchTerm, String providerSearchTerm, String scientificName) {
+        final String normalizedSearchTerm = PlantNameNormalizer.normalize(searchTerm);
+        final String normalizedProviderTerm = PlantNameNormalizer.normalize(providerSearchTerm);
+        return !normalizedSearchTerm.equals(normalizedProviderTerm) &&
+                   normalizedProviderTerm.equals(PlantNameNormalizer.normalize(scientificName));
+    }
+
+
     private HttpResponse<String> send(HttpRequest request) {
         try {
             return client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -327,5 +348,9 @@ public class INaturalistRequestMaker {
 
     private record RankedCandidate(BotanicalInfo botanicalInfo, boolean exactProviderMatch,
                                    int score, long popularity) {
+    }
+
+
+    private record SearchContext(String searchTerm, String providerSearchTerm, String locale, String region) {
     }
 }

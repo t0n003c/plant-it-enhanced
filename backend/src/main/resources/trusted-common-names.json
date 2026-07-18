@@ -246,6 +246,11 @@
       "commonNames": ["Cilantro", "coriander", "Chinese parsley", "dhania"]
     },
     {
+      "scientificName": "Zingiber officinale",
+      "scientificSynonyms": [],
+      "commonNames": ["Ginger", "ginger root", "common ginger", "culinary ginger"]
+    },
+    {
       "scientificName": "Allium schoenoprasum",
       "scientificSynonyms": [],
       "commonNames": ["Chives", "common chives", "garden chives", "rush leek"]

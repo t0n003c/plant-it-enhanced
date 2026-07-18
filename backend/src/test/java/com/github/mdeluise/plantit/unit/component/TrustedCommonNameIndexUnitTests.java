@@ -82,6 +82,17 @@ class TrustedCommonNameIndexUnitTests {
 
 
     @Test
+    @DisplayName("Should resolve exact everyday aliases for provider enrichment")
+    void shouldResolveExactProviderSearchTerms() {
+        final TrustedCommonNameIndex index = createIndex();
+
+        Assertions.assertEquals("Coriandrum sativum", index.resolveProviderSearchTerm("CILANTRO"));
+        Assertions.assertEquals("Zingiber officinale", index.resolveProviderSearchTerm("ginger-root"));
+        Assertions.assertEquals("ging", index.resolveProviderSearchTerm("ging"));
+    }
+
+
+    @Test
     @DisplayName("Should reject a misleading word-fragment match")
     void shouldRejectMisleadingPrefix() {
         final BotanicalInfo rosemary = new BotanicalInfo();
