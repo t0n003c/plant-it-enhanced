@@ -148,6 +148,33 @@
   "careDataProvidedByCuratedCatalog": "Plant-it curated catalog (Extension-sourced)",
   "careDataProvidedByPerenual": "Perenual (watering and sunlight data)",
   "careGuidanceDisclaimer": "General guidance only. Check the soil and your plant before watering.",
+  "safetyAtHome": "Safety at home",
+  "humanSafety": "People",
+  "catSafety": "Cats",
+  "dogSafety": "Dogs",
+  "safetyNonToxic": "No known toxicity",
+  "safetyCaution": "Use caution",
+  "safetyToxic": "Toxic",
+  "safetyHighlyToxic": "Highly toxic",
+  "safetyUnknown": "Unknown",
+  "safetyUnknownDescription": "No reviewed safety profile is available for this exact plant yet. Do not assume it is safe to touch or eat.",
+  "hazardousParts": "Hazardous parts",
+  "safetyEmergencyTitle": "Possible exposure?",
+  "safetyEmergencyMessage": "Contact your local poison control service, veterinarian, or emergency service now. Do not wait for symptoms when a highly toxic exposure is possible.",
+  "safetySources": "Reviewed sources",
+  "safetyReviewedFor": "Profile matched to {taxon}",
+  "@safetyReviewedFor": {
+    "placeholders": {
+      "taxon": {"type": "String"}
+    }
+  },
+  "safetyChecked": "Safety data checked {date}",
+  "@safetyChecked": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "safetyDisclaimer": "Reference guidance only—not medical or veterinary advice, and not an edibility guide. Even plants listed as non-toxic can cause stomach upset or other reactions.",
   "refreshCareGuide": "Refresh care guide",
   "careGuideUpdated": "Care guide updated",
   "careDataProvidedByMultiple": "Multiple sources",

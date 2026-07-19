@@ -11,6 +11,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfo;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoCreator;
@@ -38,6 +39,7 @@ public class GbifTaxonomyVerifier {
     private static final Duration VERIFICATION_CACHE_TTL = Duration.ofHours(24);
     private static final int MAX_VERIFICATION_CACHE_ENTRIES = 512;
     private static final int VERIFICATION_CACHE_INITIAL_CAPACITY = 32;
+    private static final Set<String> SUPPORTED_RANKS = Set.of("GENUS", "SPECIES");
     private final HttpClient client;
     private final String baseEndpoint;
     private final String userAgent;
@@ -137,7 +139,7 @@ public class GbifTaxonomyVerifier {
         }
         final JsonObject acceptedUsage = getObject(response, "acceptedUsage");
         final JsonObject usage = acceptedUsage != null ? acceptedUsage : getObject(response, "usage");
-        if (usage == null || !"SPECIES".equalsIgnoreCase(readString(usage, "rank"))) {
+        if (usage == null || !SUPPORTED_RANKS.contains(normalizeRank(readString(usage, "rank")))) {
             return;
         }
 
@@ -224,6 +226,11 @@ public class GbifTaxonomyVerifier {
 
     private int readInt(JsonObject object, String key) {
         return object.has(key) && !object.get(key).isJsonNull() ? object.get(key).getAsInt() : 0;
+    }
+
+
+    private String normalizeRank(String rank) {
+        return rank == null ? "" : rank.toUpperCase(java.util.Locale.ROOT);
     }
 
 

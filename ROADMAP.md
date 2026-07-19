@@ -69,12 +69,14 @@ unless the user explicitly adds a cultivated plant to their collection.
 
 - [x] Define one support manifest for cultivated and trail catalog tiers.
 - [x] Validate every accepted scientific name, synonym, and reviewed alias as a release corpus.
-- [x] Require reviewed light and soil-moisture fields for all 82 cultivated entries.
+- [x] Require reviewed light and soil-moisture fields for all 83 cultivated entries.
 - [x] Replay recorded production deserializers for iNaturalist, GBIF, Trefle, Perenual, and Pl@ntNet.
 - [x] Run quota-safe scheduled provider canaries and deduplicate failure alerts.
 - [x] Track sanitized, account-scoped no-result, missing-image, and missing-care gaps locally.
 - [x] Expose tier coverage and recent gaps in a high-contrast mobile Catalog Health screen.
 - [x] Preserve the query-matched everyday name and keep search responsive during provider work.
+- [x] Add separately reviewed human, cat, and dog safety profiles with attributable sources,
+      explicit unknown states, and urgent-exposure guidance.
 
 ## Next — Care that adapts
 

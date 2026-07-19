@@ -38,6 +38,7 @@ class SpeciesDTO {
   double? searchMatchConfidence;
   String? searchMatchedName;
   List<String> catalogTags;
+  PlantSafetyInfoDTO safety;
 
   SpeciesDTO({
     this.id,
@@ -77,6 +78,7 @@ class SpeciesDTO {
     this.searchMatchConfidence,
     this.searchMatchedName,
     this.catalogTags = const [],
+    this.safety = const PlantSafetyInfoDTO.unknown(),
   });
 
   factory SpeciesDTO.fromJson(Map<String, dynamic> json) {
@@ -145,6 +147,9 @@ class SpeciesDTO {
       catalogTags: (json['catalogTags'] as List<dynamic>? ?? [])
           .map((value) => value.toString())
           .toList(),
+      safety: PlantSafetyInfoDTO.fromJson(
+        json['safety'] as Map<String, dynamic>?,
+      ),
     );
   }
 
@@ -196,6 +201,7 @@ class SpeciesDTO {
       if (establishmentMeans != null) 'establishmentMeans': establishmentMeans,
       if (establishmentPlace != null) 'establishmentPlace': establishmentPlace,
       'catalogTags': catalogTags,
+      'safety': safety.toMap(),
     };
   }
 
@@ -260,6 +266,102 @@ class SpeciesDTO {
       _ => false,
     };
   }
+}
+
+class PlantSafetyInfoDTO {
+  final String humanStatus;
+  final String catStatus;
+  final String dogStatus;
+  final String? summary;
+  final List<String> hazardousParts;
+  final List<PlantSafetySourceDTO> sources;
+  final DateTime? lastVerifiedAt;
+  final bool reviewed;
+  final String? matchedTaxon;
+
+  const PlantSafetyInfoDTO({
+    required this.humanStatus,
+    required this.catStatus,
+    required this.dogStatus,
+    this.summary,
+    this.hazardousParts = const [],
+    this.sources = const [],
+    this.lastVerifiedAt,
+    required this.reviewed,
+    this.matchedTaxon,
+  });
+
+  const PlantSafetyInfoDTO.unknown()
+      : humanStatus = 'UNKNOWN',
+        catStatus = 'UNKNOWN',
+        dogStatus = 'UNKNOWN',
+        summary = null,
+        hazardousParts = const [],
+        sources = const [],
+        lastVerifiedAt = null,
+        reviewed = false,
+        matchedTaxon = null;
+
+  factory PlantSafetyInfoDTO.fromJson(Map<String, dynamic>? json) {
+    if (json == null) return const PlantSafetyInfoDTO.unknown();
+    return PlantSafetyInfoDTO(
+      humanStatus: json['humanStatus'] as String? ?? 'UNKNOWN',
+      catStatus: json['catStatus'] as String? ?? 'UNKNOWN',
+      dogStatus: json['dogStatus'] as String? ?? 'UNKNOWN',
+      summary: json['summary'] as String?,
+      hazardousParts: (json['hazardousParts'] as List<dynamic>? ?? [])
+          .map((value) => value.toString())
+          .toList(),
+      sources: (json['sources'] as List<dynamic>? ?? [])
+          .map(
+            (value) => PlantSafetySourceDTO.fromJson(
+              value as Map<String, dynamic>,
+            ),
+          )
+          .toList(),
+      lastVerifiedAt: json['lastVerifiedAt'] == null
+          ? null
+          : DateTime.parse(json['lastVerifiedAt'] as String),
+      reviewed: json['reviewed'] as bool? ?? false,
+      matchedTaxon: json['matchedTaxon'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'humanStatus': humanStatus,
+      'catStatus': catStatus,
+      'dogStatus': dogStatus,
+      if (summary != null) 'summary': summary,
+      'hazardousParts': hazardousParts,
+      'sources': sources.map((source) => source.toMap()).toList(),
+      if (lastVerifiedAt != null)
+        'lastVerifiedAt': lastVerifiedAt!.toIso8601String(),
+      'reviewed': reviewed,
+      if (matchedTaxon != null) 'matchedTaxon': matchedTaxon,
+    };
+  }
+
+  bool get hasUrgentHazard =>
+      humanStatus == 'HIGHLY_TOXIC' ||
+      catStatus == 'HIGHLY_TOXIC' ||
+      dogStatus == 'HIGHLY_TOXIC';
+}
+
+class PlantSafetySourceDTO {
+  final String name;
+  final String url;
+
+  const PlantSafetySourceDTO({required this.name, required this.url});
+
+  factory PlantSafetySourceDTO.fromJson(Map<String, dynamic> json) {
+    return PlantSafetySourceDTO(
+      name: json['name'] as String? ?? '',
+      url: json['url'] as String? ?? '',
+    );
+  }
+
+  Map<String, dynamic> toMap() => {'name': name, 'url': url};
 }
 
 class PlantLookalikeDTO {

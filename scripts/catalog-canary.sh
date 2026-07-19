@@ -80,7 +80,7 @@ while IFS= read -r canary; do
     requires_image=$(printf '%s' "$canary" | jq -r '.requiresImage')
     encoded_term=$(encode "$provider_term")
 
-    inaturalist_endpoint="$inaturalist_url/v1/taxa/autocomplete?q=$encoded_term&rank=species,hybrid,subspecies,variety&taxon_id=47126&is_active=true&per_page=10"
+    inaturalist_endpoint="$inaturalist_url/v1/taxa/autocomplete?q=$encoded_term&rank=genus,species,hybrid,subspecies,variety&taxon_id=47126&is_active=true&per_page=10"
     if inaturalist_response=$(curl --retry 2 --retry-all-errors --connect-timeout 10 --max-time 30 \
         -fsS -A "$user_agent" "$inaturalist_endpoint"); then
         if printf '%s' "$inaturalist_response" | jq -e \

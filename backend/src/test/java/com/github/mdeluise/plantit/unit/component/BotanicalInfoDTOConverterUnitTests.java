@@ -6,6 +6,7 @@ import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoDTO;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoDTOConverter;
 import com.github.mdeluise.plantit.botanicalinfo.care.PlantCareInfoDTOConverter;
 import com.github.mdeluise.plantit.image.BotanicalInfoImage;
+import com.github.mdeluise.plantit.plantinfo.safety.PlantSafetyCatalog;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -55,9 +56,30 @@ class BotanicalInfoDTOConverterUnitTests {
     }
 
 
+    @Test
+    @DisplayName("Should expose attributable safety without persisting it as user data")
+    void shouldExposeReviewedSafety() {
+        final BotanicalInfo botanicalInfo = new BotanicalInfo();
+        botanicalInfo.setSpecies("Lilium candidum");
+        botanicalInfo.setCreator(BotanicalInfoCreator.TRUSTED_NAME_INDEX);
+
+        final BotanicalInfoDTO dto = createConverter().convertToDTO(botanicalInfo);
+
+        Assertions.assertTrue(dto.getSafety().reviewed());
+        Assertions.assertEquals("Lilium", dto.getSafety().matchedTaxon());
+        Assertions.assertEquals("HIGHLY_TOXIC", dto.getSafety().catStatus().name());
+        Assertions.assertFalse(dto.getSafety().sources().isEmpty());
+    }
+
+
     private BotanicalInfoDTOConverter createConverter() {
         final ModelMapper modelMapper = new ModelMapper();
-        return new BotanicalInfoDTOConverter(modelMapper, new PlantCareInfoDTOConverter(modelMapper));
+        return new BotanicalInfoDTOConverter(
+            modelMapper,
+            new PlantCareInfoDTOConverter(modelMapper),
+            new PlantSafetyCatalog(new org.springframework.core.io.ClassPathResource(
+                "plant-safety-catalog.json"))
+        );
     }
 
 

@@ -19,7 +19,7 @@ merged instead of creating duplicate species.
 
 ### Catalog quality coverage
 
-The reviewed index is released as two explicit support tiers: 82 cultivated plants and 90 North
+The reviewed index is released as two explicit support tiers: 83 cultivated plants and 90 North
 American trail plants. More than 800 accepted-name, synonym, and everyday-name queries are tested
 together. Cultivated entries must also have reviewed light and
 soil-moisture guidance; household care is intentionally not required for wild trail entries.
@@ -31,7 +31,7 @@ your self-hosted database and resolves automatically when a later request succee
 contain photos, notes, coordinates, API credentials, or provider response bodies.
 
 External photos are attributed live resources rather than bundled assets. A weekly, rate-limited
-audit checks all 172 reviewed identities for an expected iNaturalist image and accepted GBIF
+audit checks all 173 reviewed identities for an expected iNaturalist image and accepted GBIF
 taxonomy, while actual searches record local image gaps. Catalog Health therefore describes images
 as runtime-monitored rather than promising that every external photo is permanently available.
 
@@ -72,6 +72,20 @@ confidence, and verification date, and users can still edit their own plant deta
 
 Generalized guidance is a starting point. Check the plant, soil, pot, season, and local conditions
 before watering or changing placement.
+
+## Reviewed household safety
+
+Plant details show human, cat, and dog statuses separately because one plant can affect each very
+differently. The bundled safety catalog initially covers nine common groups: true lilies,
+daylilies, peace lilies, lily-of-the-valley, calla lilies, Monstera, pothos, snake plant, and aloe.
+Each reviewed profile identifies hazardous parts, its matched scientific taxon, when it was
+checked, and links to Extension or ASPCA sources. A highly toxic profile receives an urgent,
+high-contrast exposure callout.
+
+Safety is matched only by exact scientific identity or an explicitly reviewed taxonomic scope.
+Plants outside that set display **Unknown**; a familiar common name or similar spelling is never
+used to infer safety. The guidance is not medical or veterinary advice and is not an edibility
+guide. Even a plant listed as non-toxic can cause stomach upset or another reaction.
 
 ## My Green Friends and Today
 

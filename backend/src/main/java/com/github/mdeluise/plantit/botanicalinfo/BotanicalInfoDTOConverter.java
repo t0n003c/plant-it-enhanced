@@ -10,6 +10,7 @@ import com.github.mdeluise.plantit.botanicalinfo.care.PlantCareInfoDTO;
 import com.github.mdeluise.plantit.botanicalinfo.care.PlantCareInfoDTOConverter;
 import com.github.mdeluise.plantit.common.AbstractDTOConverter;
 import com.github.mdeluise.plantit.image.BotanicalInfoImage;
+import com.github.mdeluise.plantit.plantinfo.safety.PlantSafetyCatalog;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,12 +18,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class BotanicalInfoDTOConverter extends AbstractDTOConverter<BotanicalInfo, BotanicalInfoDTO> {
     private final PlantCareInfoDTOConverter plantCareInfoDtoConverter;
+    private final PlantSafetyCatalog plantSafetyCatalog;
 
 
     @Autowired
-    public BotanicalInfoDTOConverter(ModelMapper modelMapper, PlantCareInfoDTOConverter plantCareInfoDtoConverter) {
+    public BotanicalInfoDTOConverter(ModelMapper modelMapper,
+                                     PlantCareInfoDTOConverter plantCareInfoDtoConverter,
+                                     PlantSafetyCatalog plantSafetyCatalog) {
         super(modelMapper);
         this.plantCareInfoDtoConverter = plantCareInfoDtoConverter;
+        this.plantSafetyCatalog = plantSafetyCatalog;
     }
 
 
@@ -55,6 +60,7 @@ public class BotanicalInfoDTOConverter extends AbstractDTOConverter<BotanicalInf
         result.setSearchMatchedName(data.getSearchMatchedName());
         result.setCatalogTags(data.getCatalogTags() == null
                                   ? new LinkedHashSet<>() : new LinkedHashSet<>(data.getCatalogTags()));
+        result.setSafety(plantSafetyCatalog.find(data.getSpecies()));
         applyImage(data.getImage(), result);
         final PlantCareInfoDTO plantCareInfoDTO = plantCareInfoDtoConverter.convertToDTO(data.getPlantCareInfo());
         result.setPlantCareInfo(plantCareInfoDTO);

@@ -389,6 +389,11 @@
       "commonNames": ["Daffodil", "wild daffodil", "Lent lily", "trumpet narcissus"]
     },
     {
+      "scientificName": "Lilium",
+      "scientificSynonyms": [],
+      "commonNames": ["Lily", "true lily", "garden lily", "lilies"]
+    },
+    {
       "scientificName": "Lilium candidum",
       "scientificSynonyms": [],
       "commonNames": ["Madonna lily", "white lily", "Annunciation lily", "meadow lily"]

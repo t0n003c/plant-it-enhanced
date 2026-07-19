@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:plant_it/dto/species_dto.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:plant_it/info_entries.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SpeciesDetailsTab extends StatefulWidget {
   final SpeciesDTO species;
@@ -55,6 +56,12 @@ class _SpeciesDetailsTabState extends State<SpeciesDetailsTab> {
                       value: widget.species.synonyms?.join(", "),
                     )
                   ],
+          ),
+          InfoGroup(
+            title: AppLocalizations.of(context).safetyAtHome,
+            children: [
+              _PlantSafetyCard(safety: widget.species.safety),
+            ],
           ),
           InfoGroup(
             title: AppLocalizations.of(context).care,
@@ -276,6 +283,255 @@ class _SpeciesDetailsTabState extends State<SpeciesDetailsTab> {
         return AppLocalizations.of(context).moderateWaterGuidance;
     }
   }
+}
+
+class _PlantSafetyCard extends StatelessWidget {
+  final PlantSafetyInfoDTO safety;
+
+  const _PlantSafetyCard({required this.safety});
+
+  @override
+  Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+    return Card(
+      color: const Color(0xFF102B23),
+      margin: const EdgeInsets.only(top: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final double tileWidth = constraints.maxWidth >= 520
+                    ? (constraints.maxWidth - 16) / 3
+                    : constraints.maxWidth;
+                return Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _SafetyStatusTile(
+                      width: tileWidth,
+                      icon: Icons.person_outline,
+                      label: localizations.humanSafety,
+                      status: safety.humanStatus,
+                    ),
+                    _SafetyStatusTile(
+                      width: tileWidth,
+                      icon: Icons.pets_outlined,
+                      label: localizations.catSafety,
+                      status: safety.catStatus,
+                    ),
+                    _SafetyStatusTile(
+                      width: tileWidth,
+                      icon: Icons.pets,
+                      label: localizations.dogSafety,
+                      status: safety.dogStatus,
+                    ),
+                  ],
+                );
+              },
+            ),
+            const SizedBox(height: 14),
+            Text(
+              safety.reviewed && safety.summary?.trim().isNotEmpty == true
+                  ? safety.summary!
+                  : localizations.safetyUnknownDescription,
+              style: const TextStyle(color: Colors.white, height: 1.4),
+            ),
+            if (safety.hazardousParts.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Text(
+                localizations.hazardousParts,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                safety.hazardousParts.join(' · '),
+                style: const TextStyle(color: Colors.white70),
+              ),
+            ],
+            if (safety.hasUrgentHazard) ...[
+              const SizedBox(height: 14),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF7F1D1D),
+                  border: Border.all(color: const Color(0xFFFFA3A3)),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      localizations.safetyEmergencyTitle,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      localizations.safetyEmergencyMessage,
+                      style: const TextStyle(color: Colors.white, height: 1.35),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            if (safety.sources.isNotEmpty) ...[
+              const SizedBox(height: 14),
+              Text(
+                localizations.safetySources,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                children: safety.sources.map((source) {
+                  final Uri? uri = Uri.tryParse(source.url);
+                  return TextButton.icon(
+                    onPressed: uri == null ? null : () => launchUrl(uri),
+                    icon: const Icon(Icons.open_in_new, size: 16),
+                    label: Text(source.name),
+                  );
+                }).toList(),
+              ),
+            ],
+            if (safety.matchedTaxon?.trim().isNotEmpty == true) ...[
+              const SizedBox(height: 8),
+              Text(
+                localizations.safetyReviewedFor(safety.matchedTaxon!),
+                style: const TextStyle(color: Colors.white70, fontSize: 12),
+              ),
+            ],
+            if (safety.lastVerifiedAt != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                localizations.safetyChecked(
+                  MaterialLocalizations.of(context).formatMediumDate(
+                    safety.lastVerifiedAt!.toLocal(),
+                  ),
+                ),
+                style: const TextStyle(color: Colors.white70, fontSize: 12),
+              ),
+            ],
+            const SizedBox(height: 10),
+            Text(
+              localizations.safetyDisclaimer,
+              style: const TextStyle(
+                color: Color(0xFFD1D5DB),
+                fontSize: 12,
+                fontStyle: FontStyle.italic,
+                height: 1.35,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SafetyStatusTile extends StatelessWidget {
+  final double width;
+  final IconData icon;
+  final String label;
+  final String status;
+
+  const _SafetyStatusTile({
+    required this.width,
+    required this.icon,
+    required this.label,
+    required this.status,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final _SafetyStyle style = _style(context, status);
+    return Container(
+      width: width,
+      constraints: const BoxConstraints(minHeight: 62),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: style.background,
+        border: Border.all(color: style.foreground.withOpacity(.65)),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: style.foreground, size: 22),
+          const SizedBox(width: 9),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: style.foreground,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  style.label,
+                  style: TextStyle(color: style.foreground, fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  _SafetyStyle _style(BuildContext context, String status) {
+    final localizations = AppLocalizations.of(context);
+    return switch (status) {
+      'NON_TOXIC' => _SafetyStyle(
+          localizations.safetyNonToxic,
+          const Color(0xFF064E3B),
+          const Color(0xFFD1FAE5),
+        ),
+      'CAUTION' => _SafetyStyle(
+          localizations.safetyCaution,
+          const Color(0xFF713F12),
+          const Color(0xFFFEF3C7),
+        ),
+      'TOXIC' => _SafetyStyle(
+          localizations.safetyToxic,
+          const Color(0xFF7C2D12),
+          const Color(0xFFFFEDD5),
+        ),
+      'HIGHLY_TOXIC' => _SafetyStyle(
+          localizations.safetyHighlyToxic,
+          const Color(0xFF7F1D1D),
+          const Color(0xFFFFE4E6),
+        ),
+      _ => _SafetyStyle(
+          localizations.safetyUnknown,
+          const Color(0xFF374151),
+          const Color(0xFFF3F4F6),
+        ),
+    };
+  }
+}
+
+class _SafetyStyle {
+  final String label;
+  final Color background;
+  final Color foreground;
+
+  const _SafetyStyle(this.label, this.background, this.foreground);
 }
 
 class _CareGuidanceCard extends StatelessWidget {

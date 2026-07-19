@@ -67,6 +67,22 @@ void main() {
       'establishmentMeans': 'native',
       'establishmentPlace': 'United States',
       'catalogTags': ['NORTH_AMERICAN_TRAIL'],
+      'safety': {
+        'humanStatus': 'UNKNOWN',
+        'catStatus': 'HIGHLY_TOXIC',
+        'dogStatus': 'NON_TOXIC',
+        'summary': 'True lilies are dangerous to cats.',
+        'hazardousParts': ['Pollen', 'Vase water'],
+        'sources': [
+          {
+            'name': 'ASPCA Animal Poison Control',
+            'url': 'https://www.aspca.org/example',
+          }
+        ],
+        'lastVerifiedAt': '2026-07-18T00:00:00Z',
+        'reviewed': true,
+        'matchedTaxon': 'Lilium',
+      },
     });
 
     expect(species.synonyms, ['Sansevieria trifasciata', 'snake plant']);
@@ -86,6 +102,12 @@ void main() {
     expect(species.reviewedLookalikes.single.contactHazard, isFalse);
     expect(species.establishmentMeans, 'native');
     expect(species.establishmentPlace, 'United States');
+    expect(species.safety.reviewed, isTrue);
+    expect(species.safety.catStatus, 'HIGHLY_TOXIC');
+    expect(species.safety.dogStatus, 'NON_TOXIC');
+    expect(species.safety.hazardousParts, ['Pollen', 'Vase water']);
+    expect(species.safety.sources.single.name, 'ASPCA Animal Poison Control');
+    expect(species.safety.matchedTaxon, 'Lilium');
     expect(
         species.preferredCommonNameFor('es', region: 'MX'), 'Lengua de suegra');
     expect(species.preferredCommonNameFor('en', region: 'US'), 'Snake Plant');
@@ -95,6 +117,7 @@ void main() {
     expect(species.toMap()['imageSourceUrl'],
         'https://www.inaturalist.org/photos/12345');
     expect(species.toMap()['contextualIdentificationScore'], 0.94);
+    expect(species.toMap()['safety']['catStatus'], 'HIGHLY_TOXIC');
     expect(
       species.toMap()['identificationEvidence'],
       [
@@ -156,5 +179,18 @@ void main() {
     pepper.searchMatchReason = 'SCIENTIFIC_NAME';
     expect(
         pepper.searchDisplayCommonNameFor('en', region: 'US'), 'Bell pepper');
+  });
+
+  test('uses explicit unknown safety when an older server omits it', () {
+    final SpeciesDTO species = SpeciesDTO.fromJson({
+      'scientificName': 'Example plant',
+      'plantCareInfo': <String, dynamic>{},
+      'creator': 'USER',
+    });
+
+    expect(species.safety.reviewed, isFalse);
+    expect(species.safety.humanStatus, 'UNKNOWN');
+    expect(species.safety.catStatus, 'UNKNOWN');
+    expect(species.safety.dogStatus, 'UNKNOWN');
   });
 }

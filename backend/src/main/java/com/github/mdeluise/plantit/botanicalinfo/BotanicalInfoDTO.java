@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import com.github.mdeluise.plantit.botanicalinfo.care.PlantCareInfoDTO;
+import com.github.mdeluise.plantit.botanicalinfo.safety.PlantSafetyInfo;
 import com.github.mdeluise.plantit.plantinfo.identification.PlantIdentificationEvidence;
 import com.github.mdeluise.plantit.plantinfo.identification.PlantLookalike;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -103,6 +104,9 @@ public class BotanicalInfoDTO {
     @Schema(description = "Reviewed catalog collections containing this plant.",
             accessMode = Schema.AccessMode.READ_ONLY)
     private Set<String> catalogTags = new LinkedHashSet<>();
+    @Schema(description = "Reviewed human, cat, and dog safety guidance.",
+            accessMode = Schema.AccessMode.READ_ONLY)
+    private PlantSafetyInfo safety = PlantSafetyInfo.unknown();
 
 
     public Long getId() {
@@ -472,6 +476,16 @@ public class BotanicalInfoDTO {
 
     public void setCatalogTags(Set<String> catalogTags) {
         this.catalogTags = catalogTags == null ? new LinkedHashSet<>() : catalogTags;
+    }
+
+
+    public PlantSafetyInfo getSafety() {
+        return safety;
+    }
+
+
+    public void setSafety(PlantSafetyInfo safety) {
+        this.safety = safety == null ? PlantSafetyInfo.unknown() : safety;
     }
 
 

@@ -92,6 +92,37 @@ class GbifTaxonomyVerifierUnitTests {
     }
 
 
+    @Test
+    @DisplayName("Should verify a reviewed genus without pretending it is a species")
+    void shouldApplyAcceptedGenusTaxonomy() {
+        server.createContext("/v2/species/match", exchange -> respond(exchange, """
+            {
+              "usage": {
+                "key": "2752977",
+                "canonicalName": "Lilium",
+                "rank": "GENUS"
+              },
+              "classification": [
+                {"rank": "FAMILY", "name": "Liliaceae"},
+                {"rank": "GENUS", "name": "Lilium"}
+              ],
+              "diagnostics": {"confidence": 96}
+            }
+            """));
+        server.start();
+        final BotanicalInfo candidate = new BotanicalInfo();
+        candidate.setSpecies("Lilium");
+
+        final BotanicalInfo result = createVerifier().verify(candidate);
+
+        Assertions.assertEquals("Lilium", result.getSpecies());
+        Assertions.assertEquals("Lilium", result.getGenus());
+        Assertions.assertEquals("Liliaceae", result.getFamily());
+        Assertions.assertEquals("2752977", result.getCanonicalTaxonKey());
+        Assertions.assertNotNull(result.getLastVerifiedAt());
+    }
+
+
     private GbifTaxonomyVerifier createVerifier() {
         final GbifProperties gbifProperties = Mockito.mock(GbifProperties.class);
         final PlantSearchProperties searchProperties = Mockito.mock(PlantSearchProperties.class);

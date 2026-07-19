@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.16.2 - 2026-07-18 - Lily coverage and reviewed household safety
+
+- Treat the everyday query `lily` as the true-lily genus `Lilium`, allow reviewed genus results
+  through iNaturalist and GBIF verification, and retain the provider's licensed image attribution.
+- Add an Extension-sourced genus care profile for true lilies and extend the release audit to 173
+  reviewed plants, 83 cultivated care profiles, and 11 representative live canaries.
+- Add a source-attributed safety model with separate statuses for people, cats, and dogs; never
+  infer safety from an unreviewed common name or a merely similar taxon.
+- Ship nine reviewed household-safety profiles covering true lilies, daylilies, peace lilies,
+  lily-of-the-valley, calla lilies, Monstera, pothos, snake plant, and aloe.
+- Show safety in plant details with high-contrast responsive status cards, hazardous plant parts,
+  urgent-exposure guidance, reviewed source links, verification metadata, and a clear unknown state.
+- Keep existing saved plants compatible by deriving safety from their scientific identity when the
+  API response is created; no database migration or environment change is required.
+- Invalidate pre-release search caches and release the backend, web app, and Helm metadata as
+  0.16.2.
+
 ## 0.16.1 - 2026-07-18 - Query-aware, responsive search
 
 - Preserve the exact common name that matched each result, so searches for `Thai chili` or
