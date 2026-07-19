@@ -30,6 +30,10 @@ void main() {
     expect(find.text('Possible exposure?'), findsOneWidget);
     expect(find.text('ASPCA Animal Poison Control'), findsOneWidget);
     expect(find.textContaining('not an edibility guide'), findsOneWidget);
+    expect(find.text('Food and medicine notes'), findsOneWidget);
+    expect(find.text('For people'), findsOneWidget);
+    expect(find.text('Food · Edible fruit'), findsOneWidget);
+    expect(find.textContaining('Nutrition information'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -83,6 +87,19 @@ SpeciesDTO _lily() {
       lastVerifiedAt: DateTime.utc(2026, 7, 18),
       reviewed: true,
       matchedTaxon: 'Lilium',
+    ),
+    benefits: const PlantBenefitInfoDTO(
+      entries: [
+        PlantBenefitEntryDTO(
+          audience: 'HUMAN',
+          category: 'FOOD',
+          title: 'Edible fruit',
+          summary: 'Nutrition information only.',
+          caution: 'Not medical advice.',
+        ),
+      ],
+      reviewed: true,
+      matchedTaxon: 'Example taxon',
     ),
   );
 }

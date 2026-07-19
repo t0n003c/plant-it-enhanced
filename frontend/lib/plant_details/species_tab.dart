@@ -43,7 +43,13 @@ class _SpeciesDetailsTabState extends State<SpeciesDetailsTab> {
                         value: widget.species.genus),
                     SimpleInfoEntry(
                         title: AppLocalizations.of(context).species,
-                        value: widget.species.species)
+                        value: widget.species.species),
+                    if (widget.species.catalogVariant?.trim().isNotEmpty ==
+                        true)
+                      SimpleInfoEntry(
+                        title: AppLocalizations.of(context).catalogVariant,
+                        value: widget.species.catalogVariant,
+                      ),
                   ],
           ),
           InfoGroup(
@@ -61,6 +67,12 @@ class _SpeciesDetailsTabState extends State<SpeciesDetailsTab> {
             title: AppLocalizations.of(context).safetyAtHome,
             children: [
               _PlantSafetyCard(safety: widget.species.safety),
+            ],
+          ),
+          InfoGroup(
+            title: AppLocalizations.of(context).benefitsAtHome,
+            children: [
+              _PlantBenefitsCard(benefits: widget.species.benefits),
             ],
           ),
           InfoGroup(
@@ -438,6 +450,166 @@ class _PlantSafetyCard extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _PlantBenefitsCard extends StatelessWidget {
+  final PlantBenefitInfoDTO benefits;
+
+  const _PlantBenefitsCard({required this.benefits});
+
+  @override
+  Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+    final grouped = <String, List<PlantBenefitEntryDTO>>{
+      'HUMAN':
+          benefits.entries.where((entry) => entry.audience == 'HUMAN').toList(),
+      'PET':
+          benefits.entries.where((entry) => entry.audience == 'PET').toList(),
+    };
+    return Card(
+      color: const Color(0xFF172554),
+      margin: const EdgeInsets.only(top: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (benefits.entries.isEmpty)
+              Text(
+                localizations.benefitUnknownDescription,
+                style: const TextStyle(color: Colors.white, height: 1.4),
+              ),
+            ...grouped.entries
+                .where((group) => group.value.isNotEmpty)
+                .map((group) => _BenefitAudienceSection(
+                      title: group.key == 'HUMAN'
+                          ? localizations.humanBenefits
+                          : localizations.petBenefits,
+                      entries: group.value,
+                    )),
+            if (benefits.sources.isNotEmpty) ...[
+              const SizedBox(height: 14),
+              Text(
+                localizations.benefitSources,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                children: benefits.sources.map((source) {
+                  final Uri? uri = Uri.tryParse(source.url);
+                  return TextButton.icon(
+                    onPressed: uri == null ? null : () => launchUrl(uri),
+                    icon: const Icon(Icons.open_in_new, size: 16),
+                    label: Text(source.name),
+                  );
+                }).toList(),
+              ),
+            ],
+            if (benefits.matchedTaxon?.trim().isNotEmpty == true) ...[
+              const SizedBox(height: 8),
+              Text(
+                localizations.benefitReviewedFor(benefits.matchedTaxon!),
+                style: const TextStyle(color: Colors.white70, fontSize: 12),
+              ),
+            ],
+            if (benefits.lastVerifiedAt != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                localizations.benefitChecked(
+                  MaterialLocalizations.of(context).formatMediumDate(
+                    benefits.lastVerifiedAt!.toLocal(),
+                  ),
+                ),
+                style: const TextStyle(color: Colors.white70, fontSize: 12),
+              ),
+            ],
+            const SizedBox(height: 10),
+            Text(
+              localizations.benefitDisclaimer,
+              style: const TextStyle(
+                color: Color(0xFFD1D5DB),
+                fontSize: 12,
+                fontStyle: FontStyle.italic,
+                height: 1.35,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BenefitAudienceSection extends StatelessWidget {
+  final String title;
+  final List<PlantBenefitEntryDTO> entries;
+
+  const _BenefitAudienceSection({required this.title, required this.entries});
+
+  @override
+  Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
+          const SizedBox(height: 8),
+          ...entries.map((entry) => Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${_categoryLabel(localizations, entry.category)} · ${entry.title}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      entry.summary,
+                      style:
+                          const TextStyle(color: Colors.white70, height: 1.35),
+                    ),
+                    if (entry.caution?.trim().isNotEmpty == true) ...[
+                      const SizedBox(height: 3),
+                      Text(
+                        entry.caution!,
+                        style:
+                            const TextStyle(color: Colors.white60, height: 1.3),
+                      ),
+                    ],
+                  ],
+                ),
+              )),
+        ],
+      ),
+    );
+  }
+
+  String _categoryLabel(AppLocalizations localizations, String category) {
+    return switch (category) {
+      'FOOD' => localizations.foodBenefitCategory,
+      'ENRICHMENT' => localizations.enrichmentBenefitCategory,
+      'MEDICINE' => localizations.medicineBenefitCategory,
+      _ => category,
+    };
   }
 }
 

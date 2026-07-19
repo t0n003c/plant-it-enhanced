@@ -310,16 +310,59 @@
     },
     {
       "scientificName": "Capsicum annuum",
+      "catalogVariant": "Bell pepper",
       "scientificSynonyms": [],
       "commonNames": [
         "Bell pepper",
-        "chili pepper",
         "sweet pepper",
-        "garden pepper",
+        "garden pepper"
+      ],
+      "image": {
+        "url": "https://inaturalist-open-data.s3.amazonaws.com/photos/81790849/medium.jpeg",
+        "fallbackUrl": "https://inaturalist-open-data.s3.amazonaws.com/photos/81790849/square.jpeg",
+        "source": "INATURALIST",
+        "sourceUrl": "https://www.inaturalist.org/photos/81790849",
+        "licenseCode": "cc-by-nc",
+        "attribution": "(c) bigdannyb, some rights reserved (CC BY-NC), uploaded by bigdannyb"
+      }
+    },
+    {
+      "scientificName": "Capsicum annuum",
+      "catalogVariant": "Thai chili",
+      "scientificSynonyms": [],
+      "commonNames": [
+        "chili pepper",
         "Thai pepper",
         "Thai chili",
         "Thai chile"
-      ]
+      ],
+      "image": {
+        "url": "https://inaturalist-open-data.s3.amazonaws.com/photos/699613630/medium.jpg",
+        "fallbackUrl": "https://inaturalist-open-data.s3.amazonaws.com/photos/699613630/square.jpg",
+        "source": "INATURALIST",
+        "sourceUrl": "https://www.inaturalist.org/photos/699613630",
+        "licenseCode": "cc-by-nc",
+        "attribution": "(c) legna_caban, some rights reserved (CC BY-NC), uploaded by legna_caban"
+      }
+    },
+    {
+      "scientificName": "Avena sativa",
+      "catalogVariant": "Cat grass (oat grass)",
+      "scientificSynonyms": [],
+      "commonNames": [
+        "Cat grass",
+        "cat grass (oat)",
+        "oat grass",
+        "cat oat grass"
+      ],
+      "image": {
+        "url": "https://inaturalist-open-data.s3.amazonaws.com/photos/51273833/medium.jpg",
+        "fallbackUrl": "https://inaturalist-open-data.s3.amazonaws.com/photos/51273833/square.jpg",
+        "source": "INATURALIST",
+        "sourceUrl": "https://www.inaturalist.org/photos/51273833",
+        "licenseCode": "cc-by-nc",
+        "attribution": "(c) Tony Ernst, some rights reserved (CC BY-NC), uploaded by Tony Ernst"
+      }
     },
     {
       "scientificName": "Cucumis sativus",

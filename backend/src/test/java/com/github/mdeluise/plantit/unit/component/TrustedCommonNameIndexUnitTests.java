@@ -118,6 +118,20 @@ class TrustedCommonNameIndexUnitTests {
         Assertions.assertNotNull(sunflower.getImage());
         Assertions.assertNull(sunflower.getImage().getId());
         Assertions.assertTrue(sunflower.getImage().getUrl().contains("323768723/medium.jpg"));
+
+        final BotanicalInfo bellPepper = index.search("bell pepper", 1).get(0);
+        final BotanicalInfo thaiChili = index.search("thai chili", 1).get(0);
+        Assertions.assertEquals("Bell pepper", bellPepper.getPreferredCommonName());
+        Assertions.assertEquals("Thai chili", thaiChili.getPreferredCommonName());
+        Assertions.assertEquals("Bell pepper", bellPepper.getCatalogVariant());
+        Assertions.assertEquals("Thai chili", thaiChili.getCatalogVariant());
+        Assertions.assertNotEquals(bellPepper.getImage().getUrl(), thaiChili.getImage().getUrl());
+
+        final BotanicalInfo catGrass = index.search("cat grass", 1).get(0);
+        Assertions.assertEquals("Avena sativa", catGrass.getSpecies());
+        Assertions.assertEquals("Cat grass (oat grass)", catGrass.getCatalogVariant());
+        Assertions.assertNotNull(catGrass.getImage());
+        Assertions.assertTrue(catGrass.getImage().getUrl().contains("51273833/medium.jpg"));
     }
 
 
@@ -158,7 +172,7 @@ class TrustedCommonNameIndexUnitTests {
         final BotanicalInfo thaiPepper = index.search("thai pepper", 1).get(0);
 
         Assertions.assertEquals("Capsicum annuum", thaiChili.getSpecies());
-        Assertions.assertEquals("Bell pepper", thaiChili.getPreferredCommonName());
+        Assertions.assertEquals("Thai chili", thaiChili.getPreferredCommonName());
         Assertions.assertEquals("Thai chili", thaiChili.getSearchMatchedName());
         Assertions.assertEquals("Thai pepper", thaiPepper.getSearchMatchedName());
     }

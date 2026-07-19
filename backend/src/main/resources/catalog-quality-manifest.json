@@ -40,6 +40,18 @@
       "requiresImage": true
     },
     {
+      "query": "bell pepper",
+      "providerTerm": "Capsicum annuum",
+      "acceptedScientificNames": ["Capsicum annuum"],
+      "requiresImage": true
+    },
+    {
+      "query": "cat grass",
+      "providerTerm": "Avena sativa",
+      "acceptedScientificNames": ["Avena sativa"],
+      "requiresImage": true
+    },
+    {
       "query": "cilantro",
       "providerTerm": "Coriandrum sativum",
       "acceptedScientificNames": ["Coriandrum sativum"],

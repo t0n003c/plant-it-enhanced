@@ -1,0 +1,99 @@
+{
+  "verifiedAt": "2026-07-19T00:00:00Z",
+  "profiles": [
+    {
+      "scientificNames": ["Capsicum annuum"],
+      "entries": [
+        {
+          "audience": "HUMAN",
+          "category": "FOOD",
+          "title": "Edible fruit and vitamin C",
+          "summary": "Bell and chili peppers are edible fruits used as foods. Peppers can contribute vitamin C, although the amount varies by cultivar, color, preparation, and serving size.",
+          "caution": "This is nutrition information, not a recommendation to treat or prevent a medical condition. Hot peppers may irritate some people."
+        },
+        {
+          "audience": "HUMAN",
+          "category": "MEDICINE",
+          "title": "No treatment claim",
+          "summary": "This catalog does not recommend Capsicum as medicine or as a treatment for any condition.",
+          "caution": "Do not replace medical care or prescribed treatment with a plant or food."
+        },
+        {
+          "audience": "PET",
+          "category": "FOOD",
+          "title": "Not a pet dietary supplement",
+          "summary": "There is no reviewed pet-health benefit for feeding bell or hot peppers in this catalog. Pets should receive food formulated for their species.",
+          "caution": "Avoid spicy, seasoned, salted, or prepared human foods. Contact a veterinarian for feeding or exposure questions."
+        },
+        {
+          "audience": "PET",
+          "category": "MEDICINE",
+          "title": "No veterinary treatment claim",
+          "summary": "This catalog does not recommend Capsicum as a veterinary medicine or treatment.",
+          "caution": "Do not use peppers or pepper extracts to treat a pet."
+        }
+      ],
+      "sources": [
+        {
+          "name": "USDA SNAP-Ed: Bell peppers",
+          "url": "https://snaped.fns.usda.gov/resources/nutrition-education-materials/seasonal-produce-guide/bell-peppers"
+        },
+        {
+          "name": "USDA FoodData Central: Peppers fact sheet",
+          "url": "https://fdc.nal.usda.gov/docs/Peppers_Fact_Sheet_12-18-2025.pdf"
+        },
+        {
+          "name": "ASPCA: People foods and pets",
+          "url": "https://www.aspca.org/pet-care/aspca-poison-control/people-foods-avoid-feeding-your-pets"
+        }
+      ]
+    },
+    {
+      "scientificNames": ["Avena sativa"],
+      "entries": [
+        {
+          "audience": "HUMAN",
+          "category": "FOOD",
+          "title": "Oat food crop",
+          "summary": "Avena sativa is the common oat, a crop used for human food. A tray sold as cat grass is intended for grazing and is not automatically prepared or labeled as human food.",
+          "caution": "Use only food that has been grown, handled, and labeled for human consumption."
+        },
+        {
+          "audience": "HUMAN",
+          "category": "MEDICINE",
+          "title": "No treatment claim",
+          "summary": "This catalog does not recommend oat grass or oat products as medicine or as a treatment for any condition.",
+          "caution": "Do not replace medical care or prescribed treatment with a plant or food."
+        },
+        {
+          "audience": "PET",
+          "category": "ENRICHMENT",
+          "title": "Grazing and enrichment",
+          "summary": "Oat grass is one of the cereal grasses commonly sold as cat grass and may provide a supervised grazing or enrichment option for some cats. Cats do not need grass when they are eating a balanced diet.",
+          "caution": "Offer only clean, pesticide-free grass. Remove moldy plants, limit grazing, and ask a veterinarian about vomiting or other symptoms."
+        },
+        {
+          "audience": "PET",
+          "category": "MEDICINE",
+          "title": "No veterinary treatment claim",
+          "summary": "Cat grass is not a medicine and is not a treatment for hairballs, constipation, illness, or poisoning.",
+          "caution": "Contact a veterinarian if a pet is unwell or eats a potentially harmful plant."
+        }
+      ],
+      "sources": [
+        {
+          "name": "North Carolina Extension: Avena sativa",
+          "url": "https://plants.ces.ncsu.edu/plants/avena-sativa/"
+        },
+        {
+          "name": "VCA Animal Hospitals: Grass treats for cats",
+          "url": "https://vcahospitals.com/know-your-pet/where-the-green-grass-grows-grass-treats-for-cats"
+        },
+        {
+          "name": "Cornell Feline Health Center: Houseplant chewing",
+          "url": "https://www.vet.cornell.edu/departments-centers-and-institutes/cornell-feline-health-center/health-information/feline-health-topics/feline-behavior-problems-destructive-behavior"
+        }
+      ]
+    }
+  ]
+}

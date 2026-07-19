@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import com.github.mdeluise.plantit.botanicalinfo.care.PlantCareInfoDTO;
+import com.github.mdeluise.plantit.botanicalinfo.benefits.PlantBenefitInfo;
 import com.github.mdeluise.plantit.botanicalinfo.safety.PlantSafetyInfo;
 import com.github.mdeluise.plantit.plantinfo.identification.PlantIdentificationEvidence;
 import com.github.mdeluise.plantit.plantinfo.identification.PlantLookalike;
@@ -104,9 +105,15 @@ public class BotanicalInfoDTO {
     @Schema(description = "Reviewed catalog collections containing this plant.",
             accessMode = Schema.AccessMode.READ_ONLY)
     private Set<String> catalogTags = new LinkedHashSet<>();
+    @Schema(description = "Reviewed catalog variant used to keep distinct everyday-name results separate.",
+            accessMode = Schema.AccessMode.READ_ONLY)
+    private String catalogVariant;
     @Schema(description = "Reviewed human, cat, and dog safety guidance.",
             accessMode = Schema.AccessMode.READ_ONLY)
     private PlantSafetyInfo safety = PlantSafetyInfo.unknown();
+    @Schema(description = "Reviewed food, enrichment, and traditional-use notes.",
+            accessMode = Schema.AccessMode.READ_ONLY)
+    private PlantBenefitInfo benefits = PlantBenefitInfo.unknown();
 
 
     public Long getId() {
@@ -479,6 +486,16 @@ public class BotanicalInfoDTO {
     }
 
 
+    public String getCatalogVariant() {
+        return catalogVariant;
+    }
+
+
+    public void setCatalogVariant(String catalogVariant) {
+        this.catalogVariant = catalogVariant;
+    }
+
+
     public PlantSafetyInfo getSafety() {
         return safety;
     }
@@ -486,6 +503,16 @@ public class BotanicalInfoDTO {
 
     public void setSafety(PlantSafetyInfo safety) {
         this.safety = safety == null ? PlantSafetyInfo.unknown() : safety;
+    }
+
+
+    public PlantBenefitInfo getBenefits() {
+        return benefits;
+    }
+
+
+    public void setBenefits(PlantBenefitInfo benefits) {
+        this.benefits = benefits == null ? PlantBenefitInfo.unknown() : benefits;
     }
 
 

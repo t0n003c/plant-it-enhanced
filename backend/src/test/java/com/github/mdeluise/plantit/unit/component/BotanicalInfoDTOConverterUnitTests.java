@@ -6,6 +6,7 @@ import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoDTO;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoDTOConverter;
 import com.github.mdeluise.plantit.botanicalinfo.care.PlantCareInfoDTOConverter;
 import com.github.mdeluise.plantit.image.BotanicalInfoImage;
+import com.github.mdeluise.plantit.plantinfo.benefits.PlantBenefitCatalog;
 import com.github.mdeluise.plantit.plantinfo.safety.PlantSafetyCatalog;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -72,13 +73,32 @@ class BotanicalInfoDTOConverterUnitTests {
     }
 
 
+    @Test
+    @DisplayName("Should expose the catalog variant and reviewed benefits")
+    void shouldExposeCatalogVariantAndBenefits() {
+        final BotanicalInfo botanicalInfo = new BotanicalInfo();
+        botanicalInfo.setSpecies("Capsicum annuum");
+        botanicalInfo.setCatalogVariant("Thai chili");
+        botanicalInfo.setCreator(BotanicalInfoCreator.TRUSTED_NAME_INDEX);
+
+        final BotanicalInfoDTO dto = createConverter().convertToDTO(botanicalInfo);
+
+        Assertions.assertEquals("Thai chili", dto.getCatalogVariant());
+        Assertions.assertTrue(dto.getBenefits().reviewed());
+        Assertions.assertTrue(dto.getBenefits().entries().stream().anyMatch(entry ->
+            entry.audience().equals("PET") && entry.category().equals("MEDICINE")));
+    }
+
+
     private BotanicalInfoDTOConverter createConverter() {
         final ModelMapper modelMapper = new ModelMapper();
         return new BotanicalInfoDTOConverter(
             modelMapper,
             new PlantCareInfoDTOConverter(modelMapper),
             new PlantSafetyCatalog(new org.springframework.core.io.ClassPathResource(
-                "plant-safety-catalog.json"))
+                "plant-safety-catalog.json")),
+            new PlantBenefitCatalog(new org.springframework.core.io.ClassPathResource(
+                "plant-benefit-catalog.json"))
         );
     }
 
