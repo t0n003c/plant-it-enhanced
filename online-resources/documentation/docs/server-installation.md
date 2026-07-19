@@ -81,23 +81,20 @@ The proxy network must already exist:
 docker network inspect TinhnasNetwork >/dev/null
 ```
 
-Validate and deploy from the stack directory or use the matching Dockge actions:
+Validate and deploy from the stack directory or use the matching Dockge actions. The repository's
+deploy helper is the preferred path because it pulls `latest`, force-recreates only the server,
+waits for startup, and verifies the exact revision baked into the pulled image:
 
 ```bash
-docker compose config --quiet
-docker compose pull
-docker compose up -d
-docker compose ps
-docker compose logs --since=10m server
+./source/scripts/deploy-nas.sh "$PWD" https://plants.example.com
 ```
 
-Then verify the same hostname users open in their browser. If this repository is kept in the
-stack's `source` directory, the expected revision can be checked at the same time:
+For a deployment without a public hostname, omit the second argument. The helper still validates
+the Compose file, pulls the current image, recreates the server, waits for it, and checks the
+running image's revision label:
 
 ```bash
-EXPECTED_REVISION=$(git -C source rev-parse HEAD)
-./source/scripts/verify-deployment.sh \
-  https://plants.example.com "$EXPECTED_REVISION"
+./source/scripts/deploy-nas.sh "$PWD"
 ```
 
 After signing in, open **More → Catalog health**. Release 0.17.1 should report 177 reviewed plants,
@@ -350,19 +347,15 @@ DATA_DIRECTORY=/volume1/docker/plantit \
 BACKUP_DIRECTORY=/volume1/docker/plantit-backups \
 ./source/scripts/backup.sh
 
-docker compose pull server
-docker compose up -d --no-deps --force-recreate server
-docker compose ps
-docker compose logs --since=10m server
+./source/scripts/deploy-nas.sh "$PWD" https://plants.example.com
 ```
 
 Confirm the public route and running image before testing features:
 
-```bash
-EXPECTED_REVISION=$(git -C source rev-parse HEAD)
-./source/scripts/verify-deployment.sh \
-  https://plants.example.com "$EXPECTED_REVISION"
-```
+The helper obtains the expected revision from the image label after pulling it, so the source
+checkout and the mutable `latest` tag cannot accidentally be compared as if they were the same
+deployment artifact. Search and care result caches also include the build revision in their keys;
+deploying a new image therefore bypasses stale results automatically without a manual Redis flush.
 
 If the interface and server revisions differ, Plant-it shows a high-contrast update notice. Its
 **Refresh app safely** action opens `/update.html`, which clears only the old Flutter app shell.
