@@ -40,7 +40,7 @@ curl -fsS --max-time 20 "$BASE_URL/" > "$WORK_DIRECTORY/index.html" ||
 if grep -Eiq 'nginx proxy manager|congratulations.*proxy host' "$WORK_DIRECTORY/index.html"; then
     fail "the hostname is serving the Nginx Proxy Manager default site"
 fi
-grep -Eiq 'flutter(?:_bootstrap)?\.js|main\.dart\.js|_flutter\.loader' \
+grep -Eiq 'flutter(_bootstrap)?\.js|main\.dart\.js|_flutter\.loader' \
     "$WORK_DIRECTORY/index.html" ||
     fail "the public root does not look like the Plant-it Flutter app"
 pass "the public root serves Plant-it"
