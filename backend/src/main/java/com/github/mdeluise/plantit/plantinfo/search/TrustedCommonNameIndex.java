@@ -144,6 +144,10 @@ public class TrustedCommonNameIndex {
         }
         if (entry.image != null && entry.image.url != null && !entry.image.url.isBlank()) {
             final BotanicalInfoImage image = new BotanicalInfoImage();
+            // The catalog entry points at a remote provider image. The entity-image
+            // constructor creates a UUID by default, but that UUID is not backed by
+            // local storage and must not be exposed as imageId in the API response.
+            image.setId(null);
             image.setUrl(entry.image.url);
             image.setFallbackUrl(entry.image.fallbackUrl);
             image.setSource(entry.image.source);
