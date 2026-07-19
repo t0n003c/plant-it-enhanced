@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:plant_it/dto/plant_dto.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:plant_it/info_entries.dart';
+import 'package:plant_it/plant_care_profile_editor.dart';
 
 class EditPlantBody extends StatefulWidget {
   final PlantDTO plant;
@@ -60,15 +60,20 @@ class _EditPlantBodyState extends State<EditPlantBody> {
           ),
           EditableSimpleInfoEntry(
             title: AppLocalizations.of(context).seller,
-            value: widget.plant.info.seller.toString(),
+            value: widget.plant.info.seller,
             onChanged: (s) => widget.plant.info.seller = s,
             onlyNumber: false,
           ),
           EditableSimpleInfoEntry(
             title: AppLocalizations.of(context).location,
-            value: widget.plant.info.location.toString(),
+            value: widget.plant.info.location,
             onChanged: (l) => widget.plant.info.location = l,
             onlyNumber: false,
+          ),
+          const SizedBox(height: 18),
+          PlantCareProfileEditor(
+            info: widget.plant.info,
+            onChanged: () => setState(() {}),
           ),
           EditableFullWidthInfoEntry(
             value: widget.plant.info.note,

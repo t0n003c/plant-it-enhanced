@@ -26,7 +26,8 @@ class ReminderSection extends StatefulWidget {
 class _ReminderSectionState extends State<ReminderSection> {
   final GlobalKey<MonthViewState> _globalKey = GlobalKey<MonthViewState>();
   final EventController _eventController = EventController();
-  late final DateTime _lastStartMonthDateFetched;
+  late DateTime _lastStartMonthDateFetched;
+  late final EventsNotifier _eventsNotifier;
 
   Widget _getDayOfWeek(int day) {
     final now = DateTime.now();
@@ -111,6 +112,7 @@ class _ReminderSectionState extends State<ReminderSection> {
         ),
       ));
     }
+    if (!mounted) return;
     _eventController.removeWhere((e) => !toAdd.contains(e));
     _eventController.addAll(toAdd);
     _lastStartMonthDateFetched = startMonthDate;
@@ -181,9 +183,19 @@ class _ReminderSectionState extends State<ReminderSection> {
     super.initState();
     _lastStartMonthDateFetched = _getStartMonthDate(DateTime.now());
     _fetchReminderOccurrences(_lastStartMonthDateFetched);
-    Provider.of<EventsNotifier>(context, listen: false).addListener(() {
-      _fetchReminderOccurrences(_getStartMonthDate(_lastStartMonthDateFetched));
-    });
+    _eventsNotifier = Provider.of<EventsNotifier>(context, listen: false);
+    _eventsNotifier.addListener(_refreshVisibleMonth);
+  }
+
+  void _refreshVisibleMonth() {
+    _fetchReminderOccurrences(_getStartMonthDate(_lastStartMonthDateFetched));
+  }
+
+  @override
+  void dispose() {
+    _eventsNotifier.removeListener(_refreshVisibleMonth);
+    _eventController.dispose();
+    super.dispose();
   }
 
   @override

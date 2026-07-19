@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.17.0 - 2026-07-18 - Care tools and UI reliability
+
+- Add a privacy-first **Care tools** hub from Home, More, saved-plant details, and catalog details.
+- Add a four-step plant-health check that combines selected symptoms, observed soil moisture,
+  light, airflow, and recent changes into conservative issue patterns with a next safe inspection
+  step and University Extension references. It explicitly does not diagnose images or recommend
+  pesticides.
+- Add a manual light-placement check that estimates a broad low, moderate, or high category from
+  direct-light duration, window distance, and obstructions; compare it with reviewed species care
+  guidance and optionally save the observation to a plant profile.
+- Let an owned plant's complete care profile be viewed and edited after onboarding, including
+  growing environment, light, window direction, pot, drainage, soil, recent watering, and repotting.
+- Fix collection search so every query filters the complete collection, support personal and
+  scientific names, debounce typing, and add clear empty, no-match, and reset states.
+- Make detail and calendar sections controlled, wrapping, keyboard-accessible controls; fix the
+  dead nested add-plant action and prevent stale species-detail loading content.
+- Repair calendar month state and unregister event, photo, locale, and settings listeners when
+  screens close, preventing callbacks into disposed pages.
+- Apply one higher-contrast Material 3 theme with consistent 48-pixel controls, cards, chips,
+  forms, date pickers, dialogs, and feedback; replace primary tap-only settings, filter, reminder,
+  event, and collection controls with accessible Material actions.
+- Correct PWA name, description, colors, orientation, and modern Flutter bootstrap metadata so the
+  installed web app behaves consistently on mobile, landscape, and desktop.
+- Add focused assessment and narrow-screen widget regressions, update the maintained docs and
+  roadmap, and release backend, frontend, and Helm metadata as 0.17.0. No migration or environment
+  change is required.
+
 ## 0.16.3 - 2026-07-18 - Photo-first search discovery
 
 - Replace cropped search imagery with a stable, centered 4:3 frame that uses `BoxFit.contain`,

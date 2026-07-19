@@ -107,18 +107,17 @@ class _LoginPageState extends State<LoginPage> {
                               },
                             ),
                             Padding(
-                              padding: const EdgeInsets.only(top: 8.0),
+                              padding: const EdgeInsets.only(top: 4.0),
                               child: Align(
                                 alignment: Alignment.centerRight,
-                                child: GestureDetector(
-                                  onTap: () => goToPageSlidingUp(
+                                child: TextButton(
+                                  onPressed: () => goToPageSlidingUp(
                                       context,
                                       ResetPassword(
                                         env: widget.env,
                                       )),
-                                  child: Text(
-                                    AppLocalizations.of(context).forgotPassword,
-                                  ),
+                                  child: Text(AppLocalizations.of(context)
+                                      .forgotPassword),
                                 ),
                               ),
                             ),

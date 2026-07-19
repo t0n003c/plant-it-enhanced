@@ -13,7 +13,7 @@
 
 <p align="center"><a href="online-resources/documentation/docs/index.md">Explore the maintained documentation</a></p>
 
-<p align="center"><a href="#why">Why?</a> • <a href="#features-highlight">Features highlights</a> • <a href="#quickstart">Quickstart</a> • <a href="BACKUP_AND_RESTORE.md">Backups</a> • <a href="ROADMAP.md">Roadmap</a> • <a href="#support-the-project">Support</a> • <a href="#contribute">Contribute</a></p>
+<p align="center"><a href="#why">Why?</a> • <a href="#features-highlight">Features highlights</a> • <a href="#quickstart">Quickstart</a> • <a href="online-resources/documentation/docs/care-tools.md">Care tools</a> • <a href="BACKUP_AND_RESTORE.md">Backups</a> • <a href="ROADMAP.md">Roadmap</a> • <a href="#support-the-project">Support</a> • <a href="#contribute">Contribute</a></p>
 
 <p align="center">
   <img src="/images/banner.png" width="100%" />
@@ -55,7 +55,12 @@ Plant-it helps you remember the last time you did a treatment of your plants, wh
 * Verify accepted scientific taxonomy through GBIF, with iNaturalist discovery and FloraCodex fallback
 * View field-level sources and confidence for light, moisture, temperature, and pH guidance
 * Review separate, source-attributed human, cat, and dog safety guidance in plant details
+* Work through a private guided health check that ranks conservative issue patterns and links to
+  Extension guidance without claiming to diagnose a photo
+* Check whether a window placement broadly matches a plant's reviewed light needs and save that
+  observed light category to the plant
 * Create a personalized care reminder from placement, light, pot, drainage, and soil details
+* View and update that complete personalized care profile after adding the plant
 * Work through due, overdue, snoozed, and upcoming care in a Today list
 * Log events like watering, fertilizing, biostimulating, etc. for your plants
 * View all the logged events, filtering by plant and event type
@@ -214,6 +219,20 @@ grown plant profiles, including common scientific synonyms, and requires no API 
 scientific-name matching prevents care from being attached to the wrong species. Each stored care
 field retains its source, reference, confidence, and verification time and can still be edited
 manually.
+
+### Private care tools
+
+Open **Care tools** from Home, More, a saved plant, or a catalog plant. The guided health check
+combines symptoms and observable growing conditions into at most three issue patterns, labels them
+as possible or strong, and provides a conservative next inspection step with a University
+Extension source. Optional photos are reference-only, remain on the device, and are not analyzed
+or uploaded by this tool. The result is not a diagnosis and does not choose a pesticide, dose,
+edibility status, or medical response.
+
+The light-placement check uses direct-light duration, distance from a window, and obstructions to
+estimate only a broad low, moderate, or high category. It is not a calibrated lux or PAR meter. If
+the species has reviewed light guidance, the app compares the two and can save the estimate to an
+owned plant's editable care profile. See the maintained [care-tools and UI audit](online-resources/documentation/docs/care-tools.md).
 
 Plant details also include reviewed household-safety guidance for nine common plant groups, with
 separate statuses for people, cats, and dogs. The first release covers true lilies, daylilies,

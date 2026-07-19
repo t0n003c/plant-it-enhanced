@@ -29,20 +29,16 @@ class PlantDetailsPage extends StatefulWidget {
 }
 
 class _PlantDetailsPageState extends State<PlantDetailsPage> {
-  late final SpeciesDTO _species;
+  SpeciesDTO? _species;
   late PlantDTO _toShow;
   bool _isLoading = true;
-  late Widget _activeTab;
+  int _activeIndex = 0;
 
   @override
   void initState() {
     super.initState();
     _toShow = widget.plant;
     _fetchAndSetSpecies();
-    _activeTab = DetailsTab(
-      plant: _toShow,
-      env: widget.env,
-    );
   }
 
   void _updatePlantLocally(PlantDTO updated) {
@@ -54,34 +50,7 @@ class _PlantDetailsPageState extends State<PlantDetailsPage> {
     }).toList();
     setState(() {
       _toShow = PlantDTO.fromJson(updated.toMap());
-      _refreshActiveTab();
     });
-  }
-
-  void _refreshActiveTab() {
-    if (_activeTab is DetailsTab) {
-      _activeTab = DetailsTab(
-        plant: _toShow,
-        env: widget.env,
-      );
-    } else if (_activeTab is PlantTab) {
-      _activeTab = PlantTab(
-        plant: _toShow,
-        env: widget.env,
-        updatePlantLocally: _updatePlantLocally,
-      );
-    } else if (_activeTab is SpeciesDetailsTab) {
-      _activeTab = SpeciesDetailsTab(
-        species: _isLoading
-            ? SpeciesDTO(
-                scientificName: "foo",
-                care: SpeciesCareInfoDTO(),
-                creator: "USER",
-              )
-            : _species,
-        isLoading: _isLoading,
-      );
-    }
   }
 
   void _fetchAndSetSpecies() async {
@@ -94,8 +63,8 @@ class _PlantDetailsPageState extends State<PlantDetailsPage> {
         widget.env.logger.error(responseBody["message"]);
         throw AppException(responseBody["message"]);
       }
-      _species = SpeciesDTO.fromJson(responseBody);
       setState(() {
+        _species = SpeciesDTO.fromJson(responseBody);
         _isLoading = false;
       });
     } catch (e, st) {
@@ -107,6 +76,24 @@ class _PlantDetailsPageState extends State<PlantDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final SpeciesDTO species = _species ??
+        SpeciesDTO(
+          scientificName: '',
+          care: SpeciesCareInfoDTO(),
+          creator: 'USER',
+        );
+    final Widget activeTab = switch (_activeIndex) {
+      0 => DetailsTab(plant: _toShow, env: widget.env),
+      1 => PlantTab(
+          plant: _toShow,
+          env: widget.env,
+          updatePlantLocally: _updatePlantLocally,
+        ),
+      _ => SpeciesDetailsTab(
+          species: species,
+          isLoading: _isLoading,
+        ),
+    };
     return Scaffold(
       bottomNavigationBar: PlantDetailsBottomActionBar(
         plant: _toShow,
@@ -134,33 +121,16 @@ class _PlantDetailsPageState extends State<PlantDetailsPage> {
                   child: Column(
                     children: [
                       FloatingTabBar(
+                        selectedIndex: _activeIndex,
                         titles: [
                           AppLocalizations.of(context).activity, // or "Tasks"
                           AppLocalizations.of(context).plant,
                           AppLocalizations.of(context).species,
                         ],
-                        callbacks: [
-                          () => setState(() => _activeTab = DetailsTab(
-                                plant: _toShow,
-                                env: widget.env,
-                              )),
-                          () => setState(() => _activeTab = PlantTab(
-                                plant: _toShow,
-                                env: widget.env,
-                                updatePlantLocally: _updatePlantLocally,
-                              )),
-                          () => setState(() => _activeTab = SpeciesDetailsTab(
-                                species: _isLoading
-                                    ? SpeciesDTO(
-                                        scientificName: "foo",
-                                        care: SpeciesCareInfoDTO(),
-                                        creator: "USER")
-                                    : _species,
-                                isLoading: _isLoading,
-                              )),
-                        ],
+                        onSelected: (index) =>
+                            setState(() => _activeIndex = index),
                       ),
-                      _activeTab,
+                      activeTab,
                     ],
                   ),
                 ),

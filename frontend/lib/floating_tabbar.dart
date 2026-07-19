@@ -1,65 +1,41 @@
 import 'package:flutter/material.dart';
 
-class FloatingTabBar extends StatefulWidget {
+/// Accessible, controlled section navigation used inside detail and calendar
+/// pages. A wrapping chip group keeps every label visible at large text sizes
+/// instead of hiding tabs in a horizontal scroller.
+class FloatingTabBar extends StatelessWidget {
   final List<String> titles;
-  final List<VoidCallback> callbacks;
+  final int selectedIndex;
+  final ValueChanged<int> onSelected;
 
   const FloatingTabBar({
     super.key,
     required this.titles,
-    required this.callbacks,
-  });
-
-  @override
-  State<FloatingTabBar> createState() => _FloatingTabBarState();
-}
-
-class _FloatingTabBarState extends State<FloatingTabBar> {
-  int _activeIndex = 0;
+    required this.selectedIndex,
+    required this.onSelected,
+  }) : assert(selectedIndex >= 0 && selectedIndex < titles.length);
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: List.generate(widget.titles.length, (index) {
-          final bool isActive = _activeIndex == index;
-
-          return GestureDetector(
-            onTap: () {
-              setState(() {
-                _activeIndex = index;
-              });
-              widget.callbacks[index]();
-            },
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 8.0),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 15.0, vertical: 4.0),
-              decoration: BoxDecoration(
-                color: isActive
-                    ? Color.fromARGB(255, 240, 227, 227)
-                    : Color.fromARGB(255, 18, 48, 42),
-                borderRadius: BorderRadius.circular(15.0),
-                border: Border.all(color: Color.fromARGB(255, 18, 48, 42)),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color.fromARGB(255, 12, 33, 29),
-                    blurRadius: 10.0,
-                    offset: Offset(0, 5),
-                  )
-                ],
-              ),
-              child: Text(
-                widget.titles[index],
-                style: TextStyle(
-                  color: isActive ? Colors.black : Colors.white,
-                ),
-              ),
-            ),
-          );
-        }),
+    return Semantics(
+      container: true,
+      explicitChildNodes: true,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 8,
+          runSpacing: 8,
+          children: List<Widget>.generate(titles.length, (index) {
+            return ChoiceChip(
+              key: ValueKey<String>('section-tab-$index'),
+              selected: selectedIndex == index,
+              showCheckmark: false,
+              label: Text(titles[index]),
+              onSelected: (_) => onSelected(index),
+            );
+          }),
+        ),
       ),
     );
   }

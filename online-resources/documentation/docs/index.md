@@ -17,6 +17,8 @@ private hiking journal in one AMD64/ARM64 container image.
 - Review where each care value came from and how confident the source is.
 - Review separately sourced safety guidance for people, cats, and dogs without treating unknown as
   safe.
+- Use a private guided health check and an honest manual light-placement estimate with Extension
+  references.
 - Track owned plants, care events, reminders, snoozes, and upcoming work.
 - Save private trail observations offline, group them into hikes, and retry interrupted sync safely.
 - Keep MySQL, Redis, uploads, provider keys, exact coordinates, and original photos on your server.

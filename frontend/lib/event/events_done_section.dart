@@ -37,25 +37,22 @@ class _FilterWidgetState extends State<FilterWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          GestureDetector(
+          ListTile(
+            contentPadding: EdgeInsets.zero,
             onTap: () {
               setState(() {
                 _isOpen = !_isOpen;
               });
             },
-            child: Row(
-              children: [
-                Text(
-                  AppLocalizations.of(context).filter,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16.0,
-                  ),
-                ),
-                Icon(
-                  _isOpen ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-                ),
-              ],
+            title: Text(
+              AppLocalizations.of(context).filter,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16.0,
+              ),
+            ),
+            trailing: Icon(
+              _isOpen ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
             ),
           ),
           if (_isOpen) ...[
@@ -101,17 +98,19 @@ class _EventsDoneSectionState extends State<EventsDoneSection> {
       PagingController(firstPageKey: 0);
   List<String> _selectedPlants = [];
   List<String> _selectedEventTypes = [];
+  late final EventsNotifier _eventsNotifier;
 
   @override
   void initState() {
+    super.initState();
     _pagingController.addPageRequestListener((pageKey) {
       _fetchPage(pageKey);
     });
-    Provider.of<EventsNotifier>(context, listen: false).addListener(() {
-      _pagingController.refresh();
-    });
-    super.initState();
+    _eventsNotifier = Provider.of<EventsNotifier>(context, listen: false);
+    _eventsNotifier.addListener(_refreshEvents);
   }
+
+  void _refreshEvents() => _pagingController.refresh();
 
   Future<void> _fetchPage(int pageKey) async {
     try {
@@ -156,6 +155,7 @@ class _EventsDoneSectionState extends State<EventsDoneSection> {
 
   @override
   void dispose() {
+    _eventsNotifier.removeListener(_refreshEvents);
     _pagingController.dispose();
     super.dispose();
   }

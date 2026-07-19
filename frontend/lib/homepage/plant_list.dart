@@ -26,283 +26,284 @@ class PlantList extends StatefulWidget {
 }
 
 class _PlantListState extends State<PlantList> {
-  final controller = PageController(viewportFraction: .8, keepPage: true);
-  double _page = 0.0;
+  final PageController _pageController =
+      PageController(viewportFraction: .8, keepPage: true);
   final TextEditingController _searchController = TextEditingController();
   List<PlantDTO> _filteredPlants = [];
   Timer? _debounce;
 
   @override
   void initState() {
-    controller.addListener(() {
-      setState(() {
-        _page = controller.page!;
-      });
-    });
-    _filteredPlants = widget.env.plants;
     super.initState();
+    _filteredPlants = List<PlantDTO>.from(widget.env.plants);
   }
 
-  bool _matchName(String plantName, String matchingTerm) {
-    return plantName.toLowerCase().contains(matchingTerm.toLowerCase());
+  @override
+  void didUpdateWidget(covariant PlantList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _applyFilter(_searchController.text);
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _pageController.dispose();
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  bool _matchesPlant(PlantDTO plant, String matchingTerm) {
+    final String query = matchingTerm.trim().toLowerCase();
+    if (query.isEmpty) return true;
+    return [plant.info.personalName, plant.species]
+        .whereType<String>()
+        .any((value) => value.toLowerCase().contains(query));
+  }
+
+  void _applyFilter(String value) {
+    if (!mounted) return;
+    setState(() {
+      _filteredPlants = widget.env.plants
+          .where((plant) => _matchesPlant(plant, value))
+          .toList();
+    });
+    if (_pageController.hasClients && _filteredPlants.isNotEmpty) {
+      _pageController.jumpToPage(0);
+    }
+  }
+
+  void _clearSearch() {
+    _debounce?.cancel();
+    _searchController.clear();
+    _applyFilter('');
   }
 
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: AppLocalizations.of(context).searchInYourPlants,
-                prefixIcon: const Icon(Icons.search_outlined),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _searchController.clear();
-                            _filteredPlants = widget.env.plants;
-                          });
-                        },
-                        child: const Icon(Icons.close_outlined),
-                      )
-                    : null,
-                border: const OutlineInputBorder(),
-              ),
-              onChanged: (value) {
-                if (_debounce?.isActive ?? false) _debounce!.cancel();
-                _debounce = Timer(const Duration(milliseconds: 500), () {
-                  setState(() {
-                    if (value.isEmpty) {
-                      _filteredPlants = widget.env.plants;
-                    } else {
-                      _filteredPlants = _filteredPlants
-                          .where((p) => _matchName(p.info.personalName!, value))
-                          .toList();
-                    }
-                  });
-                });
-              },
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+          child: TextField(
+            controller: _searchController,
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context).searchInYourPlants,
+              prefixIcon: const Icon(Icons.search_outlined),
+              suffixIcon: _searchController.text.isNotEmpty
+                  ? IconButton(
+                      onPressed: _clearSearch,
+                      tooltip:
+                          MaterialLocalizations.of(context).deleteButtonTooltip,
+                      icon: const Icon(Icons.close_outlined),
+                    )
+                  : null,
+              border: const OutlineInputBorder(),
             ),
+            onChanged: (value) {
+              setState(() {});
+              _debounce?.cancel();
+              _debounce = Timer(
+                const Duration(milliseconds: 250),
+                () => _applyFilter(value),
+              );
+            },
+            onSubmitted: _applyFilter,
           ),
+        ),
+        if (_filteredPlants.isEmpty)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 28, 24, 32),
+            child: Column(
+              children: [
+                Icon(
+                  widget.env.plants.isEmpty
+                      ? Icons.local_florist_outlined
+                      : Icons.search_off_outlined,
+                  size: 44,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  widget.env.plants.isEmpty
+                      ? AppLocalizations.of(context).noPlantsYet
+                      : AppLocalizations.of(context).noPlantsMatch,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  widget.env.plants.isEmpty
+                      ? AppLocalizations.of(context).noPlantsYetHint
+                      : AppLocalizations.of(context).tryAnotherPlantSearch,
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          )
+        else
           SizedBox(
             height: min(screenSize.width, maxWidth) *
                 .7, // height: screenSize.width * .8 // screenSize.height * .55
             child: PageView.builder(
               itemCount: _filteredPlants.length,
-              controller: controller,
+              controller: _pageController,
               itemBuilder: (_, index) {
-                return GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onTap: () async {
-                    goToPageSlidingUp(
-                      context,
-                      PlantDetailsPage(
-                        env: widget.env,
-                        plant: _filteredPlants[index],
-                      ),
-                    ).then((reload) {
-                      setState(() {
-                        _filteredPlants = widget.env.plants;
-                      });
-                    });
-                  },
-                  child: Padding(
+                final PlantDTO plant = _filteredPlants[index];
+                return Semantics(
+                  button: true,
+                  label: plant.info.personalName ?? plant.species,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () async {
+                      await goToPageSlidingUp(
+                        context,
+                        PlantDetailsPage(
+                          env: widget.env,
+                          plant: plant,
+                        ),
+                      );
+                      _applyFilter(_searchController.text);
+                    },
+                    child: Padding(
                       padding: const EdgeInsets.all(10.0),
                       child: PlantCard(
-                        horizontalSlide:
-                            (index - _page).clamp(-1, 1).toDouble(),
-                        plant: _filteredPlants[index],
+                        plant: plant,
                         http: widget.env.http,
-                        filteredPlants: _filteredPlants,
-                      )),
+                      ),
+                    ),
+                  ),
                 );
               },
             ),
           ),
-          if (_filteredPlants.isNotEmpty)
-            SmoothPageIndicator(
-              controller: controller,
-              count: _filteredPlants.length,
-              effect: const ScrollingDotsEffect(
-                dotWidth: 5.0,
-                dotHeight: 5.0,
-                activeDotScale: 2,
-                activeDotColor: Color(
-                  0xFF6DD075,
-                ),
+        if (_filteredPlants.isNotEmpty)
+          SmoothPageIndicator(
+            controller: _pageController,
+            count: _filteredPlants.length,
+            effect: const ScrollingDotsEffect(
+              dotWidth: 5.0,
+              dotHeight: 5.0,
+              activeDotScale: 2,
+              activeDotColor: Color(
+                0xFF6DD075,
               ),
-              onDotClicked: (index) => controller.animateToPage(
-                index,
-                duration: const Duration(milliseconds: 500),
-                curve: Curves.ease,
-              ),
-            )
-        ],
-      ),
+            ),
+            onDotClicked: (index) => _pageController.animateToPage(
+              index,
+              duration: const Duration(milliseconds: 500),
+              curve: Curves.ease,
+            ),
+          )
+      ],
     );
   }
 }
 
-class PlantCard extends StatefulWidget {
+class PlantCard extends StatelessWidget {
   final PlantDTO plant;
-  final double horizontalSlide;
   final AppHttpClient http;
-  final List<PlantDTO> filteredPlants;
 
   const PlantCard({
     super.key,
     required this.plant,
-    required this.horizontalSlide,
     required this.http,
-    required this.filteredPlants,
   });
 
   @override
-  State<PlantCard> createState() => _PlantCardState();
-}
-
-class _PlantCardState extends State<PlantCard> {
-
-  @override
   Widget build(BuildContext context) {
-    return CachedNetworkImage(
-      imageUrl:
-          "${widget.http.backendUrl}image/content/${widget.plant.avatarImageId}",
-      httpHeaders: {
-        "Key": widget.http.key!,
-      },
-      imageRenderMethodForWeb: ImageRenderMethodForWeb.HttpGet,
-      fit: BoxFit.cover,
-      placeholder: (context, url) => Skeletonizer(
-        enabled: true,
-        effect: skeletonizerEffect,
-        child: Container(
-          constraints: BoxConstraints(
-            maxHeight: 10,
-            maxWidth: 10,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: CachedNetworkImage(
+        imageUrl: "${http.backendUrl}image/content/${plant.avatarImageId}",
+        httpHeaders: {
+          if (http.key != null) "Key": http.key!,
+        },
+        imageRenderMethodForWeb: ImageRenderMethodForWeb.HttpGet,
+        fit: BoxFit.cover,
+        placeholder: (context, url) => Skeletonizer(
+          enabled: true,
+          effect: skeletonizerEffect,
+          child: Container(
+            color: Theme.of(context).colorScheme.surfaceContainerHigh,
           ),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            image: const DecorationImage(
-              image: AssetImage("assets/images/no-image.png"),
-              fit: BoxFit.cover,
+        ),
+        errorWidget: (context, url, error) => _withLabels(
+          context,
+          Container(
+            color: Theme.of(context).colorScheme.surfaceContainerHigh,
+            alignment: Alignment.center,
+            padding: const EdgeInsets.all(36),
+            child: Image.asset(
+              'assets/images/no-image.png',
+              fit: BoxFit.contain,
             ),
           ),
         ),
+        imageBuilder: (context, imageProvider) {
+          return _withLabels(
+            context,
+            DecoratedBox(
+              decoration: BoxDecoration(
+                image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
+              ),
+            ),
+          );
+        },
       ),
-      errorWidget: (context, url, error) {
-        return Stack(
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                color: const Color.fromRGBO(24, 44, 37, 1),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(100),
-                child: Container(
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage("assets/images/no-image.png"),
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: 10,
-              left: 10,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.plant.info.personalName!,
-                    softWrap: false,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        color: Colors
-                            .white), // Make text color white for better contrast
-                  ),
-                  Text(
-                    widget.plant.species!,
-                    softWrap: false,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: Colors.grey),
-                  ),
+    );
+  }
+
+  Widget _withLabels(BuildContext context, Widget background) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        background,
+        Positioned(
+          bottom: 0,
+          left: 0,
+          right: 0,
+          child: Container(
+            height: 80, // Adjust the height as needed
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.black.withOpacity(0.0),
+                  Colors.black.withOpacity(0.9),
                 ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
               ),
             ),
-          ],
-        );
-      },
-      imageBuilder: (context, imageProvider) {
-        return Stack(
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                image: DecorationImage(
-                  image: imageProvider,
-                  fit: BoxFit.cover,
+          ),
+        ),
+        Positioned(
+          bottom: 10,
+          left: 10,
+          right: 10,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                plant.info.personalName ?? '',
+                softWrap: false,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-            ),
-            // Add a gradient overlay to the bottom
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                height: 80, // Adjust the height as needed
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.vertical(
-                    bottom: Radius.circular(
-                        10), // Match the container's borderRadius
-                  ),
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.black.withOpacity(0.0),
-                      Colors.black.withOpacity(0.9),
-                    ],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  ),
-                ),
+              Text(
+                plant.species ?? '',
+                softWrap: false,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(color: Colors.white70),
               ),
-            ),
-            Positioned(
-              bottom: 10,
-              left: 10,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.plant.info.personalName!,
-                    softWrap: false,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        color: Colors
-                            .white), // Make text color white for better contrast
-                  ),
-                  Text(
-                    widget.plant.species!,
-                    softWrap: false,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: Colors.grey),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        );
-      },
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

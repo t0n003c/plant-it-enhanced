@@ -211,7 +211,8 @@ class _GalleryImageViewWrapperState extends State<GalleryImageViewWrapper> {
   Widget _buildLitImage(GalleryItemModel item) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 5),
-      child: GestureDetector(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(widget.radius),
         onTap: () {
           setState(() {
             _controller.jumpToPage(item.index);

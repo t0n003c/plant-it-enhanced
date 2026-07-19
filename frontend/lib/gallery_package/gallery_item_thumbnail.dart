@@ -24,7 +24,8 @@ class GalleryItemThumbnail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return InkWell(
+      borderRadius: BorderRadius.circular(radius),
       onTap: onTap,
       child: Hero(
         tag: galleryItem.id,

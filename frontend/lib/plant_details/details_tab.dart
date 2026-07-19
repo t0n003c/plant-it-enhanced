@@ -35,6 +35,8 @@ class _DetailsTabState extends State<DetailsTab> {
   late final Map<String, String> _eventsStats;
   late List<ReminderDTO> _reminders;
   bool _isRemindersLoading = true;
+  late final EventsNotifier _eventsNotifier;
+  late final PhotosNotifier _photosNotifier;
 
   void _fetchAndSetPhotosNumber() async {
     try {
@@ -169,12 +171,17 @@ class _DetailsTabState extends State<DetailsTab> {
     _fetchAndSetEventsNumber();
     _fetchAndSetPlantStats();
     _fetchAndSetPlantReminders();
-    Provider.of<EventsNotifier>(context, listen: false).addListener(() {
-      _fetchAndSetEventsNumber();
-    });
-    Provider.of<PhotosNotifier>(context, listen: false).addListener(() {
-      _fetchAndSetPhotosNumber();
-    });
+    _eventsNotifier = Provider.of<EventsNotifier>(context, listen: false);
+    _photosNotifier = Provider.of<PhotosNotifier>(context, listen: false);
+    _eventsNotifier.addListener(_fetchAndSetEventsNumber);
+    _photosNotifier.addListener(_fetchAndSetPhotosNumber);
+  }
+
+  @override
+  void dispose() {
+    _eventsNotifier.removeListener(_fetchAndSetEventsNumber);
+    _photosNotifier.removeListener(_fetchAndSetPhotosNumber);
+    super.dispose();
   }
 
   @override
@@ -200,7 +207,8 @@ class _DetailsTabState extends State<DetailsTab> {
             children: _isRemindersLoading
                 ? generateSkeleton(3, _isRemindersLoading)
                 : [
-                    GestureDetector(
+                    InkWell(
+                      borderRadius: BorderRadius.circular(8),
                       onTap: () async {
                         final bool added = await goToPageSlidingUp(
                           context,
@@ -218,7 +226,8 @@ class _DetailsTabState extends State<DetailsTab> {
                         targetId: widget.plant.id!,
                       ),
                     ),
-                    ..._reminders.map((r) => GestureDetector(
+                    ..._reminders.map((r) => InkWell(
+                          borderRadius: BorderRadius.circular(8),
                           onTap: () async {
                             final bool updated = await goToPageSlidingUp(
                               context,

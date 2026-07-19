@@ -1,25 +1,56 @@
 import 'package:flutter/material.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
+const Color appBackgroundColor = Color(0xFF061913);
+const Color appSurfaceColor = Color(0xFF102B23);
+const Color appSurfaceHighColor = Color(0xFF183A30);
+const Color appPrimaryColor = Color(0xFF6DD075);
+const Color appOnPrimaryColor = Color(0xFF061913);
+const Color appSecondaryColor = Color(0xFFB8D6C4);
+
+const ColorScheme appColorScheme = ColorScheme.dark(
+  primary: appPrimaryColor,
+  onPrimary: appOnPrimaryColor,
+  primaryContainer: Color(0xFF224F40),
+  onPrimaryContainer: Color(0xFFC7F9CC),
+  secondary: appSecondaryColor,
+  onSecondary: Color(0xFF10231C),
+  secondaryContainer: Color(0xFF29483D),
+  onSecondaryContainer: Color(0xFFD4EBDD),
+  tertiary: Color(0xFFFFC66D),
+  onTertiary: Color(0xFF2B1900),
+  surface: appBackgroundColor,
+  onSurface: Color(0xFFF0F5F2),
+  surfaceDim: Color(0xFF04120E),
+  surfaceBright: Color(0xFF29483D),
+  surfaceContainerLowest: Color(0xFF04120E),
+  surfaceContainerLow: Color(0xFF0B211A),
+  surfaceContainer: appSurfaceColor,
+  surfaceContainerHigh: appSurfaceHighColor,
+  surfaceContainerHighest: Color(0xFF21483C),
+  onSurfaceVariant: Color(0xFFC4D4CB),
+  outline: Color(0xFF91B4A1),
+  outlineVariant: Color(0xFF355449),
+  error: Color(0xFFFFB4AB),
+  onError: Color(0xFF690005),
+);
+
 const PaintingEffect skeletonizerEffect = PulseEffect(
-  from: Colors.grey,
-  to: Color.fromARGB(255, 207, 207, 207),
+  from: Color(0xFF40574F),
+  to: Color(0xFF6B8179),
 );
 
 Widget Function(BuildContext context, Widget? widget) datePickerTheme =
     (context, child) {
+  final ThemeData base = Theme.of(context);
   return Theme(
-    data: Theme.of(context).copyWith(
-      colorScheme: const ColorScheme.dark(
-        primary: Color.fromARGB(255, 94, 156, 134), // header background color
-        onPrimary: Colors.white, // header text color
-        onSurface: Colors.white, // body text color
+    data: base.copyWith(
+      colorScheme: base.colorScheme.copyWith(
+        primary: appPrimaryColor,
+        onPrimary: appOnPrimaryColor,
       ),
       textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-          foregroundColor:
-              const Color.fromARGB(255, 120, 30, 136), // button text color
-        ),
+        style: TextButton.styleFrom(foregroundColor: appPrimaryColor),
       ),
     ),
     child: child!,
@@ -27,82 +58,150 @@ Widget Function(BuildContext context, Widget? widget) datePickerTheme =
 };
 
 final ThemeData theme = ThemeData(
-  scaffoldBackgroundColor: const Color(0xFF061913), // Background color
-
-  // Text styles
+  useMaterial3: true,
+  brightness: Brightness.dark,
+  colorScheme: appColorScheme,
+  scaffoldBackgroundColor: appBackgroundColor,
+  canvasColor: appSurfaceColor,
+  focusColor: appPrimaryColor.withOpacity(.22),
+  hoverColor: appPrimaryColor.withOpacity(.10),
   textTheme: const TextTheme(
-    bodyMedium: TextStyle(
-        color: Color.fromARGB(255, 221, 220, 220)), // Default text color
-    bodyLarge: TextStyle(
-        color: Color.fromARGB(255, 221, 220, 220)), // Large body text color
-  ),
-
-  // Radio button style
-  radioTheme: RadioThemeData( 
-    fillColor: WidgetStateProperty.resolveWith<Color>(
-      (Set<WidgetState> states) {
-        if (states.contains(WidgetState.disabled)) {
-          return Colors.grey; // Color when radio button is disabled
-        }
-        return Colors.white; // Color when radio button is enabled
-      },
+    headlineSmall: TextStyle(
+      color: Color(0xFFF4F8F5),
+      fontWeight: FontWeight.w700,
     ),
+    titleLarge: TextStyle(
+      color: Color(0xFFF4F8F5),
+      fontWeight: FontWeight.w700,
+    ),
+    titleMedium: TextStyle(
+      color: Color(0xFFF4F8F5),
+      fontWeight: FontWeight.w700,
+    ),
+    bodyLarge: TextStyle(color: Color(0xFFE4ECE7), height: 1.4),
+    bodyMedium: TextStyle(color: Color(0xFFDDE7E1), height: 1.35),
+    bodySmall: TextStyle(color: Color(0xFFB8C8BF), height: 1.3),
   ),
-
-  // Form field styles
   inputDecorationTheme: InputDecorationTheme(
-    labelStyle: TextStyle(
-        color: Colors.grey
-            .withOpacity(0.7)), // Form field label color with opacity
-    hintStyle:
-        const TextStyle(color: Colors.grey), // Form field hint text color
-    focusedBorder: const OutlineInputBorder(
-      borderSide:
-          BorderSide(color: Color(0xFF6DD075)), // Border color when focused
+    filled: true,
+    fillColor: appSurfaceColor,
+    labelStyle: const TextStyle(color: Color(0xFFC4D4CB)),
+    hintStyle: const TextStyle(color: Color(0xFFAABCB2)),
+    prefixIconColor: appSecondaryColor,
+    suffixIconColor: appSecondaryColor,
+    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: const BorderSide(color: Color(0xFF6E8C7D)),
     ),
     enabledBorder: OutlineInputBorder(
-      borderSide: BorderSide(
-          color: const Color(0xFF6DD075)
-              .withOpacity(0.5)), // Border color with opacity
+      borderRadius: BorderRadius.circular(12),
+      borderSide: const BorderSide(color: Color(0xFF6E8C7D)),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: const BorderSide(color: appPrimaryColor, width: 2),
     ),
   ),
-
-  // Button styles
   elevatedButtonTheme: ElevatedButtonThemeData(
-    style: ButtonStyle(
-      backgroundColor: WidgetStateProperty.all<Color>(
-          const Color(0xFF6DD075)), // Button background color
-      foregroundColor:
-          WidgetStateProperty.all<Color>(Colors.black), // Button text color
+    style: ElevatedButton.styleFrom(
+      backgroundColor: appPrimaryColor,
+      foregroundColor: appOnPrimaryColor,
+      minimumSize: const Size(64, 48),
+      textStyle: const TextStyle(fontWeight: FontWeight.w700),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     ),
   ),
-
-  // AppBar styles
-  appBarTheme: const AppBarTheme(
-    backgroundColor: Colors.transparent, // Make AppBar transparent
-    elevation: 0, // Remove shadow
-    iconTheme: IconThemeData(color: Colors.white), // Icon color
-    titleTextStyle: TextStyle(color: Colors.white), // Title text color
+  filledButtonTheme: FilledButtonThemeData(
+    style: FilledButton.styleFrom(
+      backgroundColor: appPrimaryColor,
+      foregroundColor: appOnPrimaryColor,
+      minimumSize: const Size(64, 48),
+      textStyle: const TextStyle(fontWeight: FontWeight.w700),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    ),
   ),
-
-  // FloatingActionButton styles
+  outlinedButtonTheme: OutlinedButtonThemeData(
+    style: OutlinedButton.styleFrom(
+      foregroundColor: const Color(0xFFE9F6ED),
+      minimumSize: const Size(64, 48),
+      side: const BorderSide(color: Color(0xFF91B4A1)),
+      textStyle: const TextStyle(fontWeight: FontWeight.w700),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    ),
+  ),
+  textButtonTheme: TextButtonThemeData(
+    style: TextButton.styleFrom(
+      foregroundColor: const Color(0xFFC7F9CC),
+      minimumSize: const Size(48, 48),
+    ),
+  ),
+  appBarTheme: const AppBarTheme(
+    backgroundColor: appBackgroundColor,
+    foregroundColor: Color(0xFFF4F8F5),
+    elevation: 0,
+    centerTitle: false,
+    titleTextStyle: TextStyle(
+      color: Color(0xFFF4F8F5),
+      fontSize: 20,
+      fontWeight: FontWeight.w700,
+    ),
+  ),
+  cardTheme: CardTheme(
+    color: appSurfaceColor,
+    elevation: 0,
+    margin: EdgeInsets.zero,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(16),
+      side: const BorderSide(color: Color(0xFF29483D)),
+    ),
+  ),
   floatingActionButtonTheme: const FloatingActionButtonThemeData(
-    backgroundColor: Color.fromRGBO(76, 175, 80, 1),
+    backgroundColor: appPrimaryColor,
+    foregroundColor: appOnPrimaryColor,
     shape: CircleBorder(),
   ),
-
-  // Dialog theme configuration
-  dialogTheme: const DialogTheme(
-    backgroundColor:
-        Color.fromRGBO(24, 44, 37, 1), // Change background color for dialogs
-    // Dialog theme configuration
-    titleTextStyle: TextStyle(
-      color: Colors.white, // Change title text color
+  dialogTheme: DialogTheme(
+    backgroundColor: appSurfaceColor,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+    titleTextStyle: const TextStyle(
+      color: Color(0xFFF4F8F5),
       fontWeight: FontWeight.bold,
       fontSize: 20,
     ),
   ),
-
-  // Other element styles
-  iconTheme: const IconThemeData(color: Colors.white), // Icon color
+  snackBarTheme: SnackBarThemeData(
+    backgroundColor: const Color(0xFF29483D),
+    contentTextStyle: const TextStyle(color: Color(0xFFF4F8F5)),
+    behavior: SnackBarBehavior.floating,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+  ),
+  dividerTheme: const DividerThemeData(color: Color(0xFF355449)),
+  iconTheme: const IconThemeData(color: Color(0xFFE4ECE7)),
+  checkboxTheme: CheckboxThemeData(
+    fillColor: WidgetStateProperty.resolveWith((states) {
+      if (states.contains(WidgetState.selected)) return appPrimaryColor;
+      return Colors.transparent;
+    }),
+    checkColor: WidgetStateProperty.all(appOnPrimaryColor),
+    side: const BorderSide(color: Color(0xFF9AB8A8), width: 1.5),
+  ),
+  radioTheme: RadioThemeData(
+    fillColor: WidgetStateProperty.resolveWith((states) {
+      if (states.contains(WidgetState.disabled)) return Colors.grey;
+      return appPrimaryColor;
+    }),
+  ),
+  chipTheme: ChipThemeData(
+    backgroundColor: const Color(0xFF183A30),
+    selectedColor: const Color(0xFF315D4E),
+    side: const BorderSide(color: Color(0xFF547466)),
+    labelStyle: const TextStyle(color: Color(0xFFF0F5F2)),
+    secondaryLabelStyle: const TextStyle(
+      color: Color(0xFFC7F9CC),
+      fontWeight: FontWeight.w700,
+    ),
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+  ),
 );

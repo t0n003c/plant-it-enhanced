@@ -26,14 +26,20 @@ class _RecentEventsState extends State<RecentEvents> {
   final int _pageSize = 5;
   bool _isLoading = true;
   List<Widget> _recentEvents = [];
+  late final EventsNotifier _eventsNotifier;
 
   @override
   void initState() {
     super.initState();
-    Provider.of<EventsNotifier>(context, listen: false).addListener(() {
-      _fetchRecentEvents();
-    });
+    _eventsNotifier = Provider.of<EventsNotifier>(context, listen: false);
+    _eventsNotifier.addListener(_fetchRecentEvents);
     _fetchRecentEvents();
+  }
+
+  @override
+  void dispose() {
+    _eventsNotifier.removeListener(_fetchRecentEvents);
+    super.dispose();
   }
 
   Future<void> _fetchRecentEvents() async {
@@ -55,6 +61,7 @@ class _RecentEventsState extends State<RecentEvents> {
           );
         }).toList();
       }
+      if (!mounted) return;
       setState(() {
         _recentEvents = newEvents;
         _isLoading = false;
