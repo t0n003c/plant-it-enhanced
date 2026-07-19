@@ -63,12 +63,12 @@ bool isValidUrl(String url) {
 }
 
 bool isValidEmail(String email) {
-    final RegExp emailRegex = RegExp(
-      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,}$',
-      caseSensitive: false,
-    );
-    return emailRegex.hasMatch(email);
-  }
+  final RegExp emailRegex = RegExp(
+    r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,}$',
+    caseSensitive: false,
+  );
+  return emailRegex.hasMatch(email);
+}
 
 String formatDate(DateTime toFormat) {
   final DateFormat dateFormat = DateFormat('dd/MM/yy');
@@ -191,7 +191,6 @@ String localizedFrequency(BuildContext context, int amount, Unit unitKey) {
   }
   return AppLocalizations.of(context).frequencyEvery(amount, localizedUnit);
 }
-
 
 Future<void> prefetchImages(BuildContext context, Environment env) {
   for (var plant in env.plants) {

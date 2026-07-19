@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:plant_it/app_layout.dart';
 import 'package:plant_it/dto/species_dto.dart';
 import 'package:plant_it/environment.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -25,7 +26,6 @@ class SearchPage extends StatefulWidget {
 class _SearchPageState extends State<SearchPage> {
   static const Duration _searchDelay = Duration(milliseconds: 400);
   static const int _minimumSearchLength = 2;
-  static const double _contentMaxWidth = 720;
   final TextEditingController _searchController = TextEditingController();
   late final PlantSearchRepository _repository;
   List<SpeciesDTO> _result = [];
@@ -230,15 +230,26 @@ class _SearchPageState extends State<SearchPage> {
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       physics: const ClampingScrollPhysics(),
       slivers: [
-        const SliverToBoxAdapter(child: SizedBox(height: 16)),
         SliverToBoxAdapter(
-          child: _constrainContent(
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
+          child: AppContent(
+            maxWidth: appReadableMaxWidth,
+            child: AppPageHeader(
+              icon: Icons.travel_explore_rounded,
+              title: AppLocalizations.of(context).search,
+              subtitle: AppLocalizations.of(context).searchNewGreenFriends,
+            ),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: AppContent(
+            maxWidth: appReadableMaxWidth,
+            child: Card(
+              clipBehavior: Clip.antiAlias,
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final Widget searchField = TextField(
                       key: const ValueKey('plant-search-field'),
                       controller: _searchController,
                       textInputAction: TextInputAction.search,
@@ -259,24 +270,41 @@ class _SearchPageState extends State<SearchPage> {
                       ),
                       onChanged: _handleSearchChanged,
                       onSubmitted: _submitSearch,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  IconButton.filled(
-                    key: const ValueKey('identify-plant-by-photo'),
-                    onPressed: _showPhotoOptions,
-                    tooltip: AppLocalizations.of(context).identifyByPhoto,
-                    icon: const Icon(Icons.camera_alt_outlined),
-                  ),
-                ],
+                    );
+                    final Widget photoButton = FilledButton.tonalIcon(
+                      key: const ValueKey('identify-plant-by-photo'),
+                      onPressed: _showPhotoOptions,
+                      icon: const Icon(Icons.camera_alt_outlined),
+                      label: Text(AppLocalizations.of(context).identifyByPhoto),
+                    );
+                    if (constraints.maxWidth < 560) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          searchField,
+                          const SizedBox(height: 10),
+                          photoButton,
+                        ],
+                      );
+                    }
+                    return Row(
+                      children: [
+                        Expanded(child: searchField),
+                        const SizedBox(width: 10),
+                        photoButton,
+                      ],
+                    );
+                  },
+                ),
               ),
             ),
           ),
         ),
+        const SliverToBoxAdapter(child: SizedBox(height: 10)),
         if (_loading)
           SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+            child: AppContent(
+              maxWidth: appReadableMaxWidth,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -288,7 +316,7 @@ class _SearchPageState extends State<SearchPage> {
                         : AppLocalizations.of(context)
                             .searchingForPlant(normalizedTerm),
                     key: const ValueKey('plant-search-progress-label'),
-                    style: const TextStyle(color: Colors.white70),
+                    style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
               ),
@@ -296,39 +324,58 @@ class _SearchPageState extends State<SearchPage> {
           ),
         if (_identificationMode && !_loading && _errorMessage == null)
           SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+            child: AppContent(
+              maxWidth: appReadableMaxWidth,
               child: Text(
                 AppLocalizations.of(context).identificationCandidates,
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.grey),
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
             ),
           ),
         if (_errorMessage != null)
           SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Text(
-                _errorMessage!,
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
+            child: AppContent(
+              maxWidth: appReadableMaxWidth,
+              child: Card(
+                child: AppEmptyState(
+                  icon: Icons.cloud_off_outlined,
+                  title: AppLocalizations.of(context).generalError,
+                  message: _errorMessage,
+                  action: normalizedTerm.length >= _minimumSearchLength
+                      ? OutlinedButton.icon(
+                          onPressed: () => _fetchAndSetResult(normalizedTerm),
+                          icon: const Icon(Icons.refresh),
+                          label: Text(AppLocalizations.of(context).retry),
+                        )
+                      : null,
+                ),
               ),
             ),
           ),
         if (showSearchPrompt)
           SliverToBoxAdapter(
-            child: _SearchMessage(
-              icon: Icons.local_florist_outlined,
-              message: AppLocalizations.of(context).plantSearchStartHint,
+            child: AppContent(
+              maxWidth: appReadableMaxWidth,
+              child: Card(
+                child: AppEmptyState(
+                  icon: Icons.local_florist_outlined,
+                  title: AppLocalizations.of(context).plantSearchStartHint,
+                ),
+              ),
             ),
           ),
         if (showNoResults)
           SliverToBoxAdapter(
-            child: _SearchMessage(
-              icon: Icons.search_off_outlined,
-              message: AppLocalizations.of(context)
-                  .noPlantSearchResults(normalizedTerm),
+            child: AppContent(
+              maxWidth: appReadableMaxWidth,
+              child: Card(
+                child: AppEmptyState(
+                  icon: Icons.search_off_outlined,
+                  title: AppLocalizations.of(context)
+                      .noPlantSearchResults(normalizedTerm),
+                ),
+              ),
             ),
           ),
         if (_errorMessage == null && cardCount > 0)
@@ -340,8 +387,10 @@ class _SearchPageState extends State<SearchPage> {
                   if (index == _result.length) {
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 20),
-                      child: _constrainContent(
-                        AddCustomCard(
+                      child: AppContent(
+                        maxWidth: appReadableMaxWidth,
+                        padding: EdgeInsets.zero,
+                        child: AddCustomCard(
                           key: const ValueKey('add-custom-plant-result'),
                           env: widget.env,
                           species: normalizedTerm,
@@ -357,8 +406,10 @@ class _SearchPageState extends State<SearchPage> {
                       species.scientificName;
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 20),
-                    child: _constrainContent(
-                      SearchResultCard(
+                    child: AppContent(
+                      maxWidth: appReadableMaxWidth,
+                      padding: EdgeInsets.zero,
+                      child: SearchResultCard(
                         key: ValueKey('plant-search-result-$resultKey'),
                         species: species,
                         env: widget.env,
@@ -377,41 +428,6 @@ class _SearchPageState extends State<SearchPage> {
           ),
         const SliverToBoxAdapter(child: SizedBox(height: 100)),
       ],
-    );
-  }
-
-  Widget _constrainContent(Widget child) {
-    return Align(
-      alignment: Alignment.topCenter,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: _contentMaxWidth),
-        child: SizedBox(width: double.infinity, child: child),
-      ),
-    );
-  }
-}
-
-class _SearchMessage extends StatelessWidget {
-  final IconData icon;
-  final String message;
-
-  const _SearchMessage({required this.icon, required this.message});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 36),
-      child: Column(
-        children: [
-          Icon(icon, size: 40, color: const Color(0xFF9BE7A1)),
-          const SizedBox(height: 12),
-          Text(
-            message,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-        ],
-      ),
     );
   }
 }

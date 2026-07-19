@@ -9,6 +9,5 @@ class EmptyWidget extends StatelessWidget {
   }
 }
 
-
-  /// reference
-  /// https://stackoverflow.com/a/55796929/2172590
+/// reference
+/// https://stackoverflow.com/a/55796929/2172590

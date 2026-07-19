@@ -20,6 +20,8 @@ void main() {
     await tester.pumpWidget(await _searchApp(client));
 
     expect(client.requestCount, 0);
+    expect(find.text('Search'), findsOneWidget);
+    expect(find.text('Identify by photo'), findsOneWidget);
     expect(find.textContaining('Type at least 2 characters'), findsOneWidget);
 
     await tester.enterText(

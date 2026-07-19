@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:plant_it/app_layout.dart';
 import 'package:plant_it/app_exception.dart';
 import 'package:plant_it/care/care_tools_page.dart';
 import 'package:plant_it/deployment_build_info.dart';
@@ -64,7 +65,7 @@ class _MorePageState extends State<MorePage> {
     } catch (e, st) {
       if (!mounted) return;
       widget.env.logger.error(e, st);
-      throw AppException.withInnerException(e as Exception);
+      setState(() => _statsLoading = false);
     }
   }
 
@@ -77,6 +78,7 @@ class _MorePageState extends State<MorePage> {
           child: SettingsInfo(
             title: element.toString() * (8 + element),
             value: element.toString() * (8 + element),
+            icon: Icons.bar_chart_rounded,
           ),
         );
       }).toList();
@@ -85,9 +87,20 @@ class _MorePageState extends State<MorePage> {
         return SettingsInfo(
           title: _formatStats(context, entry.key),
           value: entry.value.toString(),
+          icon: _statsIcon(entry.key),
         );
       }).toList();
     }
+  }
+
+  IconData _statsIcon(String statName) {
+    return switch (statName) {
+      'diaryEntryCount' => Icons.event_note_rounded,
+      'plantCount' => Icons.local_florist_rounded,
+      'botanicalInfoCount' => Icons.eco_rounded,
+      'imageCount' => Icons.photo_library_rounded,
+      _ => Icons.bar_chart_rounded,
+    };
   }
 
   String _formatStats(BuildContext context, String statName) {
@@ -151,214 +164,240 @@ class _MorePageState extends State<MorePage> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      physics: ClampingScrollPhysics(),
-      child: Column(
-        children: [
-          SettingsHeader(
-            username: widget.env.credentials.username,
-            email: widget.env.credentials.email,
-          ),
-          SettingsSection(
-            title: AppLocalizations.of(context).account,
-            children: [
-              SettingsInternalLink(
-                title: AppLocalizations.of(context).editProfile,
-                onClick: () async {
-                  final dynamic isUpdated = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => EditProfilePage(
-                        env: widget.env,
-                      ),
-                    ),
-                  );
-                  if (isUpdated is bool && isUpdated) {
-                    setState(() {});
-                  }
-                },
-              ),
-              SettingsInternalLink(
-                title: AppLocalizations.of(context).changePassword,
-                onClick: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ChangePasswordPage(
-                      env: widget.env,
-                    ),
-                  ),
-                ),
-              ),
-              SettingsInternalLink(
-                title: AppLocalizations.of(context).changeLanguage,
-                onClick: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ChangeLanguagePage(
-                      env: widget.env,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SettingsSection(
-            title: AppLocalizations.of(context).stats,
-            children: _buildStatsList(),
-          ),
-          SettingsSection(
-            title: AppLocalizations.of(context).careTools,
-            children: [
-              SettingsInternalLink(
-                title: AppLocalizations.of(context).openCareTools,
-                onClick: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => CareToolsPage(env: widget.env),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SettingsSection(
-            title: AppLocalizations.of(context).server,
-            children: [
-              SettingsInternalLink(
-                title: AppLocalizations.of(context).serverURL,
-                onClick: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ChangeServerPage(
-                      env: widget.env,
-                    ),
-                  ),
-                ), //
-              ),
-              SettingsInternalLink(
-                title: AppLocalizations.of(context).notifications,
-                onClick: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ChangeNotificationsPage(
-                      env: widget.env,
-                    ),
-                  ),
-                ),
-              ),
-              SettingsInternalLink(
-                title: AppLocalizations.of(context).systemDiagnostics,
-                onClick: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SystemDiagnosticsPage(
-                      env: widget.env,
-                    ),
-                  ),
-                ),
-              ),
-              SettingsInternalLink(
-                title: AppLocalizations.of(context).catalogHealth,
-                onClick: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => CatalogHealthPage(
-                      env: widget.env,
-                    ),
-                  ),
-                ),
-              ),
-              if (_ntfyVisible)
+      physics: const ClampingScrollPhysics(),
+      child: AppContent(
+        maxWidth: appReadableMaxWidth,
+        child: Column(
+          children: [
+            AppPageHeader(
+              icon: Icons.tune_rounded,
+              title: AppLocalizations.of(context).settings,
+              subtitle: AppLocalizations.of(context).settingsSubtitle,
+            ),
+            SettingsHeader(
+              username: widget.env.credentials.username,
+              email: widget.env.credentials.email,
+            ),
+            SettingsSection(
+              title: AppLocalizations.of(context).account,
+              children: [
                 SettingsInternalLink(
-                  title: AppLocalizations.of(context).ntfySettings,
+                  title: AppLocalizations.of(context).editProfile,
+                  icon: Icons.manage_accounts_outlined,
+                  onClick: () async {
+                    final dynamic isUpdated = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => EditProfilePage(
+                          env: widget.env,
+                        ),
+                      ),
+                    );
+                    if (isUpdated is bool && isUpdated) {
+                      setState(() {});
+                    }
+                  },
+                ),
+                SettingsInternalLink(
+                  title: AppLocalizations.of(context).changePassword,
+                  icon: Icons.lock_outline_rounded,
                   onClick: () => Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => NtfySettingsPage(
+                      builder: (context) => ChangePasswordPage(
                         env: widget.env,
                       ),
                     ),
                   ),
                 ),
-              if (_gotifyVisible)
                 SettingsInternalLink(
-                  title: AppLocalizations.of(context).gotifySettings,
+                  title: AppLocalizations.of(context).changeLanguage,
+                  icon: Icons.translate_rounded,
                   onClick: () => Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => GotifySettingsPage(
+                      builder: (context) => ChangeLanguagePage(
                         env: widget.env,
                       ),
                     ),
                   ),
                 ),
-            ],
-          ),
-          SettingsSection(
-            title: AppLocalizations.of(context).supportTheProject,
-            children: [
-              SettingsExternalLink(
-                title: AppLocalizations.of(context).buyMeACoffee,
-                url: "https://www.buymeacoffee.com/mdeluise",
-              ),
-            ],
-          ),
-          SettingsSection(
-            title: AppLocalizations.of(context).more,
-            children: [
-              SettingsInfo(
-                title: AppLocalizations.of(context).appVersion,
-                isValueLoading: _appVersionLoading,
-                value: _appVersionLoading ? "loading..." : _appVersion,
-              ),
-              SettingsInfo(
-                title: AppLocalizations.of(context).serverVersion,
-                value: widget.env.backendVersion,
-              ),
-              SettingsInfo(
-                title: AppLocalizations.of(context).interfaceBuild,
-                value: DeploymentBuildInfo.displayRevision(
-                  frontendBuildRevision,
+              ],
+            ),
+            SettingsSection(
+              title: AppLocalizations.of(context).stats,
+              children: _buildStatsList(),
+            ),
+            SettingsSection(
+              title: AppLocalizations.of(context).careTools,
+              children: [
+                SettingsInternalLink(
+                  title: AppLocalizations.of(context).openCareTools,
+                  icon: Icons.health_and_safety_outlined,
+                  onClick: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CareToolsPage(env: widget.env),
+                    ),
+                  ),
                 ),
-              ),
-              SettingsExternalLink(
-                title: AppLocalizations.of(context).documentation,
-                url:
-                    "https://github.com/t0n003c/plant-it-enhanced/tree/main/online-resources/documentation/docs",
-              ),
-              SettingsExternalLink(
-                title: AppLocalizations.of(context).openSource,
-                url: "https://github.com/t0n003c/plant-it-enhanced",
-              ),
-              SettingsExternalLink(
-                title: AppLocalizations.of(context).reportIssue,
-                url:
-                    "https://github.com/t0n003c/plant-it-enhanced/issues/new/choose",
-              ),
-              SettingsInternalLink(
-                title: AppLocalizations.of(context).appLog,
-                onClick: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => TalkerScreen(
-                      talker:
-                          (widget.env.logger as my_logger.TalkerLogger).talker,
-                      appBarTitle: AppLocalizations.of(context).appLog,
-                      theme: TalkerScreenTheme(
-                        backgroundColor:
-                            Theme.of(context).scaffoldBackgroundColor,
+              ],
+            ),
+            SettingsSection(
+              title: AppLocalizations.of(context).server,
+              children: [
+                SettingsInternalLink(
+                  title: AppLocalizations.of(context).serverURL,
+                  icon: Icons.dns_outlined,
+                  onClick: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ChangeServerPage(
+                        env: widget.env,
+                      ),
+                    ),
+                  ), //
+                ),
+                SettingsInternalLink(
+                  title: AppLocalizations.of(context).notifications,
+                  icon: Icons.notifications_outlined,
+                  onClick: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ChangeNotificationsPage(
+                        env: widget.env,
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          LogoutButton(
-            env: widget.env,
-          ),
-          const SizedBox(
-            height: 100,
-          ),
-        ],
+                SettingsInternalLink(
+                  title: AppLocalizations.of(context).systemDiagnostics,
+                  icon: Icons.monitor_heart_outlined,
+                  onClick: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SystemDiagnosticsPage(
+                        env: widget.env,
+                      ),
+                    ),
+                  ),
+                ),
+                SettingsInternalLink(
+                  title: AppLocalizations.of(context).catalogHealth,
+                  icon: Icons.fact_check_outlined,
+                  onClick: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CatalogHealthPage(
+                        env: widget.env,
+                      ),
+                    ),
+                  ),
+                ),
+                if (_ntfyVisible)
+                  SettingsInternalLink(
+                    title: AppLocalizations.of(context).ntfySettings,
+                    icon: Icons.campaign_outlined,
+                    onClick: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => NtfySettingsPage(
+                          env: widget.env,
+                        ),
+                      ),
+                    ),
+                  ),
+                if (_gotifyVisible)
+                  SettingsInternalLink(
+                    title: AppLocalizations.of(context).gotifySettings,
+                    icon: Icons.send_to_mobile_outlined,
+                    onClick: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => GotifySettingsPage(
+                          env: widget.env,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            SettingsSection(
+              title: AppLocalizations.of(context).supportTheProject,
+              children: [
+                SettingsExternalLink(
+                  title: AppLocalizations.of(context).buyMeACoffee,
+                  url: "https://www.buymeacoffee.com/mdeluise",
+                  icon: Icons.coffee_outlined,
+                ),
+              ],
+            ),
+            SettingsSection(
+              title: AppLocalizations.of(context).more,
+              children: [
+                SettingsInfo(
+                  title: AppLocalizations.of(context).appVersion,
+                  isValueLoading: _appVersionLoading,
+                  value: _appVersionLoading ? "loading..." : _appVersion,
+                  icon: Icons.apps_rounded,
+                ),
+                SettingsInfo(
+                  title: AppLocalizations.of(context).serverVersion,
+                  value: widget.env.backendVersion,
+                  icon: Icons.dns_outlined,
+                ),
+                SettingsInfo(
+                  title: AppLocalizations.of(context).interfaceBuild,
+                  value: DeploymentBuildInfo.displayRevision(
+                    frontendBuildRevision,
+                  ),
+                  icon: Icons.commit_rounded,
+                ),
+                SettingsExternalLink(
+                  title: AppLocalizations.of(context).documentation,
+                  url:
+                      "https://github.com/t0n003c/plant-it-enhanced/tree/main/online-resources/documentation/docs",
+                  icon: Icons.menu_book_outlined,
+                ),
+                SettingsExternalLink(
+                  title: AppLocalizations.of(context).openSource,
+                  url: "https://github.com/t0n003c/plant-it-enhanced",
+                  icon: Icons.code_rounded,
+                ),
+                SettingsExternalLink(
+                  title: AppLocalizations.of(context).reportIssue,
+                  url:
+                      "https://github.com/t0n003c/plant-it-enhanced/issues/new/choose",
+                  icon: Icons.bug_report_outlined,
+                ),
+                SettingsInternalLink(
+                  title: AppLocalizations.of(context).appLog,
+                  icon: Icons.receipt_long_outlined,
+                  onClick: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => TalkerScreen(
+                        talker: (widget.env.logger as my_logger.TalkerLogger)
+                            .talker,
+                        appBarTitle: AppLocalizations.of(context).appLog,
+                        theme: TalkerScreenTheme(
+                          backgroundColor:
+                              Theme.of(context).scaffoldBackgroundColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            LogoutButton(
+              env: widget.env,
+            ),
+            const SizedBox(
+              height: 100,
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:plant_it/app_layout.dart';
 import 'package:plant_it/app_extended_floating_action_button.dart';
 import 'package:plant_it/environment.dart';
 import 'package:plant_it/event/add_new_event.dart';
@@ -51,13 +52,14 @@ class _EventsPageState extends State<EventsPage> {
         label: AppLocalizations.of(context).addNewEvent,
         tooltip: AppLocalizations.of(context).addNewEvent,
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 8.0,
-          vertical: 32,
-        ),
+      body: AppContent(
         child: Column(
           children: [
+            AppPageHeader(
+              icon: Icons.calendar_month_rounded,
+              title: AppLocalizations.of(context).calendar,
+              subtitle: AppLocalizations.of(context).careCalendarSubtitle,
+            ),
             FloatingTabBar(
               selectedIndex: _activeIndex,
               titles: [
@@ -67,7 +69,7 @@ class _EventsPageState extends State<EventsPage> {
               ],
               onSelected: _onTabSelected,
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
             Expanded(
               child: getCurrentSection(),
             ),

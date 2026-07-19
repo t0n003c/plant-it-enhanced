@@ -66,9 +66,19 @@ final ThemeData theme = ThemeData(
   focusColor: appPrimaryColor.withOpacity(.22),
   hoverColor: appPrimaryColor.withOpacity(.10),
   textTheme: const TextTheme(
+    headlineMedium: TextStyle(
+      color: Color(0xFFF4F8F5),
+      fontSize: 28,
+      height: 1.15,
+      fontWeight: FontWeight.w700,
+      letterSpacing: -0.4,
+    ),
     headlineSmall: TextStyle(
       color: Color(0xFFF4F8F5),
+      fontSize: 23,
+      height: 1.2,
       fontWeight: FontWeight.w700,
+      letterSpacing: -0.2,
     ),
     titleLarge: TextStyle(
       color: Color(0xFFF4F8F5),
@@ -77,6 +87,11 @@ final ThemeData theme = ThemeData(
     titleMedium: TextStyle(
       color: Color(0xFFF4F8F5),
       fontWeight: FontWeight.w700,
+    ),
+    labelLarge: TextStyle(
+      color: Color(0xFFF0F5F2),
+      fontWeight: FontWeight.w700,
+      letterSpacing: .1,
     ),
     bodyLarge: TextStyle(color: Color(0xFFE4ECE7), height: 1.4),
     bodyMedium: TextStyle(color: Color(0xFFDDE7E1), height: 1.35),
@@ -91,15 +106,15 @@ final ThemeData theme = ThemeData(
     suffixIconColor: appSecondaryColor,
     contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
     border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(14),
       borderSide: const BorderSide(color: Color(0xFF6E8C7D)),
     ),
     enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(14),
       borderSide: const BorderSide(color: Color(0xFF6E8C7D)),
     ),
     focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(14),
       borderSide: const BorderSide(color: appPrimaryColor, width: 2),
     ),
   ),
@@ -109,7 +124,7 @@ final ThemeData theme = ThemeData(
       foregroundColor: appOnPrimaryColor,
       minimumSize: const Size(64, 48),
       textStyle: const TextStyle(fontWeight: FontWeight.w700),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
     ),
   ),
   filledButtonTheme: FilledButtonThemeData(
@@ -118,7 +133,7 @@ final ThemeData theme = ThemeData(
       foregroundColor: appOnPrimaryColor,
       minimumSize: const Size(64, 48),
       textStyle: const TextStyle(fontWeight: FontWeight.w700),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
     ),
   ),
   outlinedButtonTheme: OutlinedButtonThemeData(
@@ -127,7 +142,7 @@ final ThemeData theme = ThemeData(
       minimumSize: const Size(64, 48),
       side: const BorderSide(color: Color(0xFF91B4A1)),
       textStyle: const TextStyle(fontWeight: FontWeight.w700),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
     ),
   ),
   textButtonTheme: TextButtonThemeData(
@@ -140,7 +155,9 @@ final ThemeData theme = ThemeData(
     backgroundColor: appBackgroundColor,
     foregroundColor: Color(0xFFF4F8F5),
     elevation: 0,
+    scrolledUnderElevation: 0,
     centerTitle: false,
+    toolbarHeight: 64,
     titleTextStyle: TextStyle(
       color: Color(0xFFF4F8F5),
       fontSize: 20,
@@ -152,14 +169,15 @@ final ThemeData theme = ThemeData(
     elevation: 0,
     margin: EdgeInsets.zero,
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(20),
       side: const BorderSide(color: Color(0xFF29483D)),
     ),
   ),
-  floatingActionButtonTheme: const FloatingActionButtonThemeData(
+  floatingActionButtonTheme: FloatingActionButtonThemeData(
     backgroundColor: appPrimaryColor,
     foregroundColor: appOnPrimaryColor,
-    shape: CircleBorder(),
+    elevation: 2,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
   ),
   dialogTheme: DialogTheme(
     backgroundColor: appSurfaceColor,
@@ -178,6 +196,45 @@ final ThemeData theme = ThemeData(
   ),
   dividerTheme: const DividerThemeData(color: Color(0xFF355449)),
   iconTheme: const IconThemeData(color: Color(0xFFE4ECE7)),
+  listTileTheme: const ListTileThemeData(
+    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 3),
+    minTileHeight: 56,
+    iconColor: Color(0xFFB8D6C4),
+    textColor: Color(0xFFF0F5F2),
+  ),
+  navigationBarTheme: NavigationBarThemeData(
+    height: 72,
+    backgroundColor: const Color(0xFF0B211A),
+    indicatorColor: const Color(0xFF315D4E),
+    elevation: 0,
+    labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+    iconTheme: WidgetStateProperty.resolveWith((states) => IconThemeData(
+          color: states.contains(WidgetState.selected)
+              ? const Color(0xFFC7F9CC)
+              : const Color(0xFF9FB9AB),
+          size: 24,
+        )),
+    labelTextStyle: WidgetStateProperty.resolveWith((states) => TextStyle(
+          color: states.contains(WidgetState.selected)
+              ? const Color(0xFFC7F9CC)
+              : const Color(0xFF9FB9AB),
+          fontSize: 11,
+          fontWeight: states.contains(WidgetState.selected)
+              ? FontWeight.w700
+              : FontWeight.w500,
+        )),
+  ),
+  bottomSheetTheme: const BottomSheetThemeData(
+    backgroundColor: appSurfaceColor,
+    surfaceTintColor: Colors.transparent,
+    showDragHandle: true,
+    dragHandleColor: Color(0xFF91B4A1),
+  ),
+  progressIndicatorTheme: const ProgressIndicatorThemeData(
+    color: appPrimaryColor,
+    linearTrackColor: Color(0xFF29483D),
+    circularTrackColor: Color(0xFF29483D),
+  ),
   checkboxTheme: CheckboxThemeData(
     fillColor: WidgetStateProperty.resolveWith((states) {
       if (states.contains(WidgetState.selected)) return appPrimaryColor;

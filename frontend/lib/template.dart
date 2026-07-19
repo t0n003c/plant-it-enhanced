@@ -37,32 +37,54 @@ class _TemplatePageState extends State<TemplatePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: navigatorKey,
-      body: Container(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        child: SafeArea(
-          bottom: false,
-          child: Column(
-            children: [
-              DeploymentStatusBanner(env: _env),
-              Expanded(
-                child: IndexedStack(
-                  index: _currentIndex,
-                  children: List<Widget>.generate(
-                    _pages.length,
-                    (index) => _pages[index] ?? const SizedBox.shrink(),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bool useNavigationRail = constraints.maxWidth >= 1000;
+        final Widget content = Container(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          child: SafeArea(
+            bottom: false,
+            child: Column(
+              children: [
+                DeploymentStatusBanner(env: _env),
+                Expanded(
+                  child: IndexedStack(
+                    index: _currentIndex,
+                    children: List<Widget>.generate(
+                      _pages.length,
+                      (index) => _pages[index] ?? const SizedBox.shrink(),
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ),
-      bottomNavigationBar: PrimaryNavigationBar(
-        selectedIndex: _currentIndex,
-        onDestinationSelected: _selectPage,
-      ),
+        );
+        return Scaffold(
+          key: navigatorKey,
+          body: useNavigationRail
+              ? Row(
+                  children: [
+                    SafeArea(
+                      right: false,
+                      child: PrimaryNavigationRail(
+                        selectedIndex: _currentIndex,
+                        onDestinationSelected: _selectPage,
+                      ),
+                    ),
+                    const VerticalDivider(width: 1),
+                    Expanded(child: content),
+                  ],
+                )
+              : content,
+          bottomNavigationBar: useNavigationRail
+              ? null
+              : PrimaryNavigationBar(
+                  selectedIndex: _currentIndex,
+                  onDestinationSelected: _selectPage,
+                ),
+        );
+      },
     );
   }
 

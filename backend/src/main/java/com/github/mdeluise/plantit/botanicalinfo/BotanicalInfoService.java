@@ -65,10 +65,7 @@ public class BotanicalInfoService {
                                                    authenticatedUserService.getAuthenticatedUser()))
                                                .filter(botanicalInfo -> PlantSearchScorer.evaluate(
                                                    searchTerm, botanicalInfo).isRelevant())
-                                               .sorted((left, right) -> Integer.compare(
-                                                   PlantSearchScorer.score(searchTerm, right),
-                                                   PlantSearchScorer.score(searchTerm, left)
-                                               ))
+                                               .sorted(PlantSearchScorer.relevanceComparator(searchTerm))
                                                .limit(size)
                                                .peek(botanicalInfo -> PlantSearchScorer.applyMatchMetadata(
                                                    searchTerm, botanicalInfo))

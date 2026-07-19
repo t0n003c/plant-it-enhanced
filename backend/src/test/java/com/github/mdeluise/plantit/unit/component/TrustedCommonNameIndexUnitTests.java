@@ -17,12 +17,12 @@ import org.springframework.core.io.ClassPathResource;
 class TrustedCommonNameIndexUnitTests {
 
     @Test
-    @DisplayName("Should keep at least 800 trusted name queries mapped to the expected taxon")
+    @DisplayName("Should keep at least 850 trusted name queries mapped to the expected taxon")
     void shouldPassLargeTrustedNameCorpus() {
         final TrustedCommonNameIndex index = createIndex();
         final List<TrustedCommonNameIndex.TrustedNameExample> examples = index.qualityExamples();
 
-        Assertions.assertTrue(examples.size() >= 800, "The trusted-name corpus must not shrink below 800");
+        Assertions.assertTrue(examples.size() >= 850, "The trusted-name corpus must not shrink below 850");
         for (TrustedCommonNameIndex.TrustedNameExample example : examples) {
             final List<BotanicalInfo> result = index.search(example.query(), 1);
             Assertions.assertFalse(result.isEmpty(), "No trusted result for " + example.query());
@@ -91,7 +91,28 @@ class TrustedCommonNameIndexUnitTests {
         Assertions.assertEquals("Brassica oleracea", index.resolveProviderSearchTerm("kale"));
         Assertions.assertEquals("Capsicum annuum", index.resolveProviderSearchTerm("Thai pepper"));
         Assertions.assertEquals("Lilium", index.resolveProviderSearchTerm("lily"));
+        Assertions.assertEquals("Mentha × piperita", index.resolveProviderSearchTerm("peppermint"));
+        Assertions.assertEquals(
+            "Daucus carota sativus", index.resolveProviderSearchTerm("garden carrot"));
+        Assertions.assertEquals("Solanum tuberosum", index.resolveProviderSearchTerm("russet potato"));
         Assertions.assertEquals("ging", index.resolveProviderSearchTerm("ging"));
+    }
+
+
+    @Test
+    @DisplayName("Should keep cultivated carrot separate from the wild trail plant")
+    void shouldDistinguishCultivatedAndWildCarrot() {
+        final TrustedCommonNameIndex index = createIndex();
+
+        final BotanicalInfo cultivated = index.search("carrot", 1).get(0);
+        final BotanicalInfo wild = index.search("wild carrot", 1).get(0);
+
+        Assertions.assertEquals("Daucus carota sativus", cultivated.getSpecies());
+        Assertions.assertFalse(cultivated.getCatalogTags().contains(
+            TrustedCommonNameIndex.NORTH_AMERICAN_TRAIL_TAG));
+        Assertions.assertEquals("Daucus carota", wild.getSpecies());
+        Assertions.assertTrue(wild.getCatalogTags().contains(
+            TrustedCommonNameIndex.NORTH_AMERICAN_TRAIL_TAG));
     }
 
 

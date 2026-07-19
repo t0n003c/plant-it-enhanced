@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:material_loading_buttons/material_loading_buttons.dart';
 import 'package:plant_it/app_exception.dart';
+import 'package:plant_it/auth_scaffold.dart';
 import 'package:plant_it/commons.dart';
 import 'package:plant_it/environment.dart';
 import 'package:plant_it/login.dart';
@@ -55,9 +56,7 @@ class _SetServerState extends State<SetServer> {
       widget.env.toastManager.showToast(context, ToastNotificationType.error,
           AppLocalizations.of(context).noBackend);
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -69,79 +68,52 @@ class _SetServerState extends State<SetServer> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(),
-      body: Center(
-        child: SingleChildScrollView(
-          child: Center(
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                ClipRRect(
-                    borderRadius: BorderRadius.circular(15.0),
-                    child: Image.asset(
-                      'assets/images/logo.png',
-                      width: 150,
-                      height: 150,
-                    )),
-                Form(
-                  key: _formKey,
-                  child: Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(20.0),
-                          child: Text(
-                              AppLocalizations.of(context).insertBackendURL,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: DefaultTextStyle.of(context)
-                                        .style
-                                        .fontSize! *
-                                    0.35,
-                                decoration: TextDecoration.none,
-                              )),
-                        ),
-                        TextFormField(
-                          autofocus: true,
-                          controller: _backendController,
-                          decoration: InputDecoration(
-                              labelText: AppLocalizations.of(context).serverURL,
-                              border: const OutlineInputBorder(),
-                              hintText: "http://192.168.1.5:8080"),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return AppLocalizations.of(context).enterValue;
-                            }
-                            if (!isValidUrl(value)) {
-                              return AppLocalizations.of(context).enterValidURL;
-                            }
-                            return null;
-                          },
-                          onFieldSubmitted: (value) {
-                            if (_formKey.currentState!.validate()) {
-                              _ping();
-                            }
-                          },
-                        ),
-                        const SizedBox(height: 20),
-                        ElevatedLoadingButton(
-                          isLoading: _isLoading,
-                          onPressed: () async {
-                            if (_formKey.currentState!.validate()) {
-                              _ping();
-                            }
-                          },
-                          child: Text(AppLocalizations.of(context).go),
-                        ),
-                        const SizedBox(height: 20),
-                      ],
-                    ),
-                  ),
-                )
-              ])),
+    final localizations = AppLocalizations.of(context);
+    return AuthScaffold(
+      title: localizations.appName,
+      subtitle: localizations.insertBackendURL,
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextFormField(
+              autofocus: true,
+              controller: _backendController,
+              decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context).serverURL,
+                  prefixIcon: const Icon(Icons.link_rounded),
+                  border: const OutlineInputBorder(),
+                  hintText: "http://192.168.1.5:8080"),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return AppLocalizations.of(context).enterValue;
+                }
+                if (!isValidUrl(value)) {
+                  return AppLocalizations.of(context).enterValidURL;
+                }
+                return null;
+              },
+              onFieldSubmitted: (value) {
+                if (_formKey.currentState!.validate()) {
+                  _ping();
+                }
+              },
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedLoadingButton(
+                isLoading: _isLoading,
+                onPressed: () async {
+                  if (_formKey.currentState!.validate()) {
+                    _ping();
+                  }
+                },
+                child: Text(AppLocalizations.of(context).go),
+              ),
+            ),
+          ],
         ),
       ),
     );

@@ -23,8 +23,8 @@ merged instead of creating duplicate species.
 
 ### Catalog quality coverage
 
-The reviewed index is released as two explicit support tiers: 83 cultivated plants and 90 North
-American trail plants. More than 800 accepted-name, synonym, and everyday-name queries are tested
+The reviewed index is released as two explicit support tiers: 86 cultivated plants and 90 North
+American trail plants. All 853 accepted-name, synonym, and everyday-name queries are tested
 together. Cultivated entries must also have reviewed light and
 soil-moisture guidance; household care is intentionally not required for wild trail entries.
 
@@ -35,7 +35,7 @@ your self-hosted database and resolves automatically when a later request succee
 contain photos, notes, coordinates, API credentials, or provider response bodies.
 
 External photos are attributed live resources rather than bundled assets. A weekly, rate-limited
-audit checks all 173 reviewed identities for an expected iNaturalist image and accepted GBIF
+audit checks all 176 reviewed identities for an expected iNaturalist image and accepted GBIF
 taxonomy, while actual searches record local image gaps. Catalog Health therefore describes images
 as runtime-monitored rather than promising that every external photo is permanently available.
 
@@ -113,6 +113,15 @@ direction, pot, drainage, soil, recent-care, and approximate-location context to
 schedule. The Today view groups
 due, overdue, snoozed, and upcoming work. Completing a task creates a care event so the plant's
 history remains visible.
+
+## Responsive interface
+
+Home, Search, Calendar, Trail, and Settings share one visual hierarchy, bounded content widths,
+consistent cards and forms, and explicit empty, loading, error, and retry states. Phones use the
+five-destination bottom navigation; wide browsers switch to a labeled navigation rail and
+responsive collection grids so content remains organized instead of stretching across the screen.
+Authentication and server setup use the same high-contrast Material 3 controls and readable card
+layout as the signed-in app.
 
 ## Care history and reminders
 

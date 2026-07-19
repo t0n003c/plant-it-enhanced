@@ -90,7 +90,7 @@ Future<Environment> _environment() async {
   return Environment(
     prefs: await SharedPreferences.getInstance(),
     http: http,
-    backendVersion: '0.17.0',
+    backendVersion: '0.17.1',
     credentials: Credentials(
       username: 'gardener',
       email: 'garden@example.com',

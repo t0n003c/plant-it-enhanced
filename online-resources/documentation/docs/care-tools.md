@@ -5,6 +5,11 @@ mobile and web interactions. Open **Care tools** from Home, More, an owned plant
 details. No new environment variable, provider key, database migration, or reverse-proxy route is
 required.
 
+Release 0.17.1 extends that audit across the full application shell: shared page and section
+hierarchy, bounded readable content, consistent authentication and settings cards, useful
+empty/error/retry states, a responsive collection grid, and a labeled desktop navigation rail.
+Phones retain the five clear bottom destinations.
+
 ## Guided plant-health check
 
 The health check asks for:

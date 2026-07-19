@@ -277,8 +277,7 @@ class _TextFieldSingleDropDownState extends State<TextFieldSingleDropDown> {
                       item,
                       style: TextStyle(
                           fontSize: 14,
-                          color:
-                              Theme.of(context).textTheme.bodyLarge!.color),
+                          color: Theme.of(context).textTheme.bodyLarge!.color),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ))

@@ -44,77 +44,76 @@ class EventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color backgroundColor = Colors.grey[200]!; // Default color
-
-    if (typeColors.containsKey(action)) {
-      backgroundColor = typeColors[action]!;
-    }
-
+    final ColorScheme colors = Theme.of(context).colorScheme;
+    final Color accent = typeColors[action] ?? colors.primary;
     final timePassed = DateTime.now().difference(date);
-    final formattedDate =
-        '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+    final String formattedDate =
+        MaterialLocalizations.of(context).formatMediumDate(date);
     final formattedTimePassed = _formatTimePassed(context, timePassed);
+    final IconData actionIcon = typeIcons[action] ?? Icons.info_outline;
 
-    IconData actionIcon = Icons.info; // Default icon
-
-    if (typeIcons.containsKey(action)) {
-      actionIcon = typeIcons[action]!;
-    }
-
-    return InkWell(
-      borderRadius: BorderRadius.circular(12),
-      onTap: () => goToPageSlidingUp(
-          context, EditEventPage(env: env, eventDTO: eventDTO)),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: SizedBox(
-          width: double.infinity,
-          child: Card(
-            elevation: 6,
-            color: backgroundColor,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10.0),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          '$formattedDate ($formattedTimePassed)',
-                          style: const TextStyle(
-                              fontSize: 16,
-                              color: Color.fromARGB(255, 216, 216, 216)),
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          plant,
-                          style: const TextStyle(
-                              fontSize: 13,
-                              color: Color.fromARGB(255, 180, 180, 180)),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Align(
-                    alignment: Alignment.center,
-                    child: Opacity(
-                      opacity: .5,
-                      child: Icon(
-                        actionIcon,
-                        size: 40,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ],
+    return Card(
+      margin: const EdgeInsets.only(bottom: 10),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => goToPageSlidingUp(
+          context,
+          EditEventPage(env: env, eventDTO: eventDTO),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 14, 10, 14),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: accent.withOpacity(.2),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Icon(actionIcon,
+                    color: accent.computeLuminance() < .35
+                        ? colors.onSurface
+                        : accent),
               ),
-            ),
+              const SizedBox(width: 13),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      getLocaleEvent(context, action),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    if (plant.trim().isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        plant,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: colors.onSurfaceVariant,
+                            ),
+                      ),
+                    ],
+                    const SizedBox(height: 5),
+                    Text(
+                      '$formattedDate · $formattedTimePassed',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: colors.onSurfaceVariant,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: colors.onSurfaceVariant,
+              ),
+            ],
           ),
         ),
       ),

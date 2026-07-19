@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cached_network_image_platform_interface/cached_network_image_platform_interface.dart';
 import 'package:flutter/material.dart';
+import 'package:plant_it/app_layout.dart';
 import 'package:plant_it/app_http_client.dart';
 import 'package:plant_it/commons.dart';
 import 'package:plant_it/dto/plant_dto.dart';
@@ -27,7 +27,7 @@ class PlantList extends StatefulWidget {
 
 class _PlantListState extends State<PlantList> {
   final PageController _pageController =
-      PageController(viewportFraction: .8, keepPage: true);
+      PageController(viewportFraction: .86, keepPage: true);
   final TextEditingController _searchController = TextEditingController();
   List<PlantDTO> _filteredPlants = [];
   Timer? _debounce;
@@ -80,12 +80,16 @@ class _PlantListState extends State<PlantList> {
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
+        AppSectionHeader(
+          title: AppLocalizations.of(context).plants,
+          subtitle:
+              '${_filteredPlants.length} / ${widget.env.plants.length} ${AppLocalizations.of(context).plants.toLowerCase()}',
+        ),
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+          padding: const EdgeInsets.only(bottom: 12),
           child: TextField(
             controller: _searchController,
             decoration: InputDecoration(
@@ -113,90 +117,101 @@ class _PlantListState extends State<PlantList> {
           ),
         ),
         if (_filteredPlants.isEmpty)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 28, 24, 32),
-            child: Column(
-              children: [
-                Icon(
-                  widget.env.plants.isEmpty
-                      ? Icons.local_florist_outlined
-                      : Icons.search_off_outlined,
-                  size: 44,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  widget.env.plants.isEmpty
-                      ? AppLocalizations.of(context).noPlantsYet
-                      : AppLocalizations.of(context).noPlantsMatch,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  widget.env.plants.isEmpty
-                      ? AppLocalizations.of(context).noPlantsYetHint
-                      : AppLocalizations.of(context).tryAnotherPlantSearch,
-                  textAlign: TextAlign.center,
-                ),
-              ],
+          Card(
+            child: AppEmptyState(
+              icon: widget.env.plants.isEmpty
+                  ? Icons.local_florist_outlined
+                  : Icons.search_off_outlined,
+              title: widget.env.plants.isEmpty
+                  ? AppLocalizations.of(context).noPlantsYet
+                  : AppLocalizations.of(context).noPlantsMatch,
+              message: widget.env.plants.isEmpty
+                  ? AppLocalizations.of(context).noPlantsYetHint
+                  : AppLocalizations.of(context).tryAnotherPlantSearch,
             ),
           )
         else
-          SizedBox(
-            height: min(screenSize.width, maxWidth) *
-                .7, // height: screenSize.width * .8 // screenSize.height * .55
-            child: PageView.builder(
-              itemCount: _filteredPlants.length,
-              controller: _pageController,
-              itemBuilder: (_, index) {
-                final PlantDTO plant = _filteredPlants[index];
-                return Semantics(
-                  button: true,
-                  label: plant.info.personalName ?? plant.species,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(12),
-                    onTap: () async {
-                      await goToPageSlidingUp(
-                        context,
-                        PlantDetailsPage(
-                          env: widget.env,
-                          plant: plant,
-                        ),
-                      );
-                      _applyFilter(_searchController.text);
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: PlantCard(
-                        plant: plant,
-                        http: widget.env.http,
+          LayoutBuilder(
+            builder: (context, constraints) {
+              if (constraints.maxWidth >= 720) {
+                final int columns = constraints.maxWidth >= 980 ? 3 : 2;
+                return GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: columns,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 4 / 3,
+                  ),
+                  itemCount: _filteredPlants.length,
+                  itemBuilder: (context, index) =>
+                      _buildPlantLink(_filteredPlants[index]),
+                );
+              }
+              final double carouselHeight =
+                  (constraints.maxWidth * .74).clamp(250.0, 350.0).toDouble();
+              return Column(
+                children: [
+                  SizedBox(
+                    height: carouselHeight,
+                    child: PageView.builder(
+                      itemCount: _filteredPlants.length,
+                      controller: _pageController,
+                      padEnds: false,
+                      itemBuilder: (_, index) => Padding(
+                        padding: const EdgeInsets.only(right: 12),
+                        child: _buildPlantLink(_filteredPlants[index]),
                       ),
                     ),
                   ),
-                );
-              },
-            ),
+                  if (_filteredPlants.length > 1) ...[
+                    const SizedBox(height: 14),
+                    SmoothPageIndicator(
+                      controller: _pageController,
+                      count: _filteredPlants.length,
+                      effect: const ScrollingDotsEffect(
+                        dotWidth: 7,
+                        dotHeight: 7,
+                        spacing: 7,
+                        activeDotScale: 1.5,
+                        activeDotColor: Color(0xFF6DD075),
+                        dotColor: Color(0xFF547466),
+                      ),
+                      onDotClicked: (index) => _pageController.animateToPage(
+                        index,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeOutCubic,
+                      ),
+                    ),
+                  ],
+                ],
+              );
+            },
           ),
-        if (_filteredPlants.isNotEmpty)
-          SmoothPageIndicator(
-            controller: _pageController,
-            count: _filteredPlants.length,
-            effect: const ScrollingDotsEffect(
-              dotWidth: 5.0,
-              dotHeight: 5.0,
-              activeDotScale: 2,
-              activeDotColor: Color(
-                0xFF6DD075,
-              ),
-            ),
-            onDotClicked: (index) => _pageController.animateToPage(
-              index,
-              duration: const Duration(milliseconds: 500),
-              curve: Curves.ease,
-            ),
-          )
       ],
+    );
+  }
+
+  Widget _buildPlantLink(PlantDTO plant) {
+    return Semantics(
+      button: true,
+      label: plant.info.personalName ?? plant.species,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(20),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () async {
+            await goToPageSlidingUp(
+              context,
+              PlantDetailsPage(env: widget.env, plant: plant),
+            );
+            _applyFilter(_searchController.text);
+          },
+          child: PlantCard(plant: plant, http: widget.env.http),
+        ),
+      ),
     );
   }
 }
@@ -213,44 +228,52 @@ class PlantCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: CachedNetworkImage(
-        imageUrl: "${http.backendUrl}image/content/${plant.avatarImageId}",
-        httpHeaders: {
-          if (http.key != null) "Key": http.key!,
-        },
-        imageRenderMethodForWeb: ImageRenderMethodForWeb.HttpGet,
-        fit: BoxFit.cover,
-        placeholder: (context, url) => Skeletonizer(
-          enabled: true,
-          effect: skeletonizerEffect,
-          child: Container(
-            color: Theme.of(context).colorScheme.surfaceContainerHigh,
-          ),
-        ),
-        errorWidget: (context, url, error) => _withLabels(
-          context,
-          Container(
-            color: Theme.of(context).colorScheme.surfaceContainerHigh,
-            alignment: Alignment.center,
-            padding: const EdgeInsets.all(36),
-            child: Image.asset(
-              'assets/images/no-image.png',
-              fit: BoxFit.contain,
+    final ColorScheme colors = Theme.of(context).colorScheme;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: colors.outlineVariant),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(19),
+        child: CachedNetworkImage(
+          imageUrl: "${http.backendUrl}image/content/${plant.avatarImageId}",
+          httpHeaders: {
+            if (http.key != null) "Key": http.key!,
+          },
+          imageRenderMethodForWeb: ImageRenderMethodForWeb.HttpGet,
+          fit: BoxFit.cover,
+          placeholder: (context, url) => Skeletonizer(
+            enabled: true,
+            effect: skeletonizerEffect,
+            child: Container(
+              color: Theme.of(context).colorScheme.surfaceContainerHigh,
             ),
           ),
-        ),
-        imageBuilder: (context, imageProvider) {
-          return _withLabels(
+          errorWidget: (context, url, error) => _withLabels(
             context,
-            DecoratedBox(
-              decoration: BoxDecoration(
-                image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
+            Container(
+              color: Theme.of(context).colorScheme.surfaceContainerHigh,
+              alignment: Alignment.center,
+              padding: const EdgeInsets.all(36),
+              child: Image.asset(
+                'assets/images/no-image.png',
+                fit: BoxFit.contain,
               ),
             ),
-          );
-        },
+          ),
+          imageBuilder: (context, imageProvider) {
+            return _withLabels(
+              context,
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  image:
+                      DecorationImage(image: imageProvider, fit: BoxFit.cover),
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -265,7 +288,7 @@ class PlantCard extends StatelessWidget {
           left: 0,
           right: 0,
           child: Container(
-            height: 80, // Adjust the height as needed
+            height: 118,
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
@@ -279,14 +302,14 @@ class PlantCard extends StatelessWidget {
           ),
         ),
         Positioned(
-          bottom: 10,
-          left: 10,
-          right: 10,
+          bottom: 14,
+          left: 16,
+          right: 16,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                plant.info.personalName ?? '',
+                plant.info.personalName ?? plant.species ?? '',
                 softWrap: false,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
@@ -294,12 +317,16 @@ class PlantCard extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              Text(
-                plant.species ?? '',
-                softWrap: false,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: Colors.white70),
-              ),
+              if (plant.info.personalName != null && plant.species != null)
+                Text(
+                  plant.species!,
+                  softWrap: false,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
             ],
           ),
         ),

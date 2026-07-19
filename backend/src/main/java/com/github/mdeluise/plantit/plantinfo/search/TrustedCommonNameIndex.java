@@ -5,7 +5,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -39,8 +38,7 @@ public class TrustedCommonNameIndex {
         return entries.stream()
                       .map(this::toBotanicalInfo)
                       .filter(candidate -> PlantSearchScorer.evaluate(query, candidate).isRelevant())
-                      .sorted(Comparator.comparingInt(
-                          (BotanicalInfo candidate) -> PlantSearchScorer.score(query, candidate)).reversed())
+                      .sorted(PlantSearchScorer.relevanceComparator(query))
                       .limit(size)
                       .peek(candidate -> PlantSearchScorer.applyMatchMetadata(query, candidate))
                       .toList();
