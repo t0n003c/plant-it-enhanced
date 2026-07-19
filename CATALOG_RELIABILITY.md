@@ -10,7 +10,7 @@ reviewed household-safety profiles remain in `plant-safety-catalog.json`.
 
 | Tier | Entries in 0.17.1 | Search contract | Care contract | Image contract |
 | --- | ---: | --- | --- | --- |
-| Curated cultivated | 86 | Accepted name, reviewed aliases, and synonyms must resolve to one taxon | Reviewed light and soil-moisture fields are required | A provider image is expected and missing results are tracked |
+| Curated cultivated | 87 | Accepted name, reviewed aliases, and synonyms must resolve to one taxon | Reviewed light and soil-moisture fields are required | A provider image is expected and missing results are tracked |
 | North American trail | 90 | Same identity and alias validation, plus trail metadata | Household care is intentionally not required | A provider image is expected and missing results are tracked |
 
 An image requirement is not a promise that a photo is bundled or permanently available. Images
@@ -27,7 +27,7 @@ whenever a real search lacks a top-result image.
 - Recorded iNaturalist, GBIF, Trefle, Perenual, and Pl@ntNet responses still deserialize through the
   production code.
 - Representative live iNaturalist images and GBIF taxonomy matches remain available after retries;
-  the scheduled audit expands the same checks across all 176 reviewed entries.
+  the scheduled audit expands the same checks across all 177 reviewed entries.
 - Every household-safety status maps by exact scientific identity or a deliberately reviewed
   taxonomic scope; unreviewed taxa remain explicitly unknown.
 - Optional Trefle and Pl@ntNet repository credentials remain valid when their GitHub secrets are
@@ -86,7 +86,7 @@ CATALOG_CANARY_DELAY_SECONDS=1 \
 
 `TREFLE_TOKEN` and `PLANTNET_API_KEY` are optional. Without them, their checks are reported as
 skipped while iNaturalist and GBIF still run. The generated `catalog-canary-report.json` is ignored
-by Git and contains no credentials. GitHub audits all 176 reviewed entries every Monday and opens
+by Git and contains no credentials. GitHub audits all 177 reviewed entries every Monday and opens
 one deduplicated issue if any expected taxonomy or image remains unavailable after retries.
 
 When adding or changing a plant:

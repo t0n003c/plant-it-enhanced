@@ -25,7 +25,7 @@ key. A provider being unconfigured should not break the bundled catalog or ordin
 For a missing search result, photo, or care guide, open **More → Catalog health** and use the copy
 button. The report contains catalog totals and sanitized account-local gaps, not API credentials,
 photos, notes, or coordinates. Review it before posting and include the everyday query plus the
-result you expected. A weekly GitHub workflow also checks all 176 reviewed identities for the
+result you expected. A weekly GitHub workflow also checks all 177 reviewed identities for the
 expected iNaturalist image and GBIF taxonomy, so link any open automated provider-canary issue when
 the symptoms match.
 
