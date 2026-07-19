@@ -35,9 +35,9 @@ class CatalogHealthServiceUnitTests {
 
         Assertions.assertTrue(result.healthy());
         Assertions.assertEquals(177, result.totals().reviewedEntries());
-        Assertions.assertEquals(859, result.totals().reviewedQueries());
+        Assertions.assertEquals(863, result.totals().reviewedQueries());
         Assertions.assertEquals(87, result.totals().curatedCareProfiles());
-        Assertions.assertEquals(15, result.totals().liveCanaries());
+        Assertions.assertEquals(17, result.totals().liveCanaries());
         Assertions.assertTrue(result.policyIssues().isEmpty());
         final CatalogHealthSnapshot.TierCoverage cultivated = result.tiers().stream()
             .filter(tier -> "CURATED_CULTIVATED".equals(tier.name()))

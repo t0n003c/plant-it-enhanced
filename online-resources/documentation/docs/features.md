@@ -24,7 +24,7 @@ merged instead of creating duplicate species.
 ### Catalog quality coverage
 
 The reviewed index is released as two explicit support tiers: 87 cultivated plants and 90 North
-American trail plants. All 859 accepted-name, synonym, and everyday-name queries are tested
+American trail plants. All 863 accepted-name, synonym, and everyday-name queries are tested
 together. Cultivated entries must also have reviewed light and
 soil-moisture guidance; household care is intentionally not required for wild trail entries.
 

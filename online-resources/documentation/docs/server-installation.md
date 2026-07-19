@@ -101,7 +101,7 @@ EXPECTED_REVISION=$(git -C source rev-parse HEAD)
 ```
 
 After signing in, open **More → Catalog health**. Release 0.17.1 should report 177 reviewed plants,
-87 curated care profiles, 15 live canaries, and no release-policy issue. A search that returns no
+87 curated care profiles, 17 live canaries, and no release-policy issue. A search that returns no
 result, lacks a top-result image, or has no structured care will appear there only for the signed-in
 account and will resolve after a later successful request.
 

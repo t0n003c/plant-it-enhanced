@@ -98,6 +98,18 @@
       "requiresImage": true
     },
     {
+      "query": "pumpkin",
+      "providerTerm": "Cucurbita pepo",
+      "acceptedScientificNames": ["Cucurbita pepo"],
+      "requiresImage": true
+    },
+    {
+      "query": "sunflower",
+      "providerTerm": "Helianthus annuus",
+      "acceptedScientificNames": ["Helianthus annuus"],
+      "requiresImage": true
+    },
+    {
       "query": "white trillium",
       "providerTerm": "Trillium grandiflorum",
       "acceptedScientificNames": ["Trillium grandiflorum"],
