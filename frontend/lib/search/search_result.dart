@@ -104,9 +104,8 @@ class _SearchResultCardState extends State<SearchResultCard> {
     bool showAddAction = false,
   }) {
     final String photoLabel = _displayName(context);
-    return Material(
-      color: const Color(0xFF182C25),
-      borderRadius: BorderRadius.circular(14),
+    return Card(
+      margin: EdgeInsets.zero,
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () => _openDetails(context),
@@ -152,7 +151,7 @@ class _SearchResultCardState extends State<SearchResultCard> {
     final List<Widget> tags = _buildTags(context);
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(14, 12, 10, 8),
+      padding: const EdgeInsets.fromLTRB(18, 16, 12, 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -165,7 +164,6 @@ class _SearchResultCardState extends State<SearchResultCard> {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: Colors.white,
                   fontWeight: FontWeight.w700,
                 ),
           ),
@@ -175,8 +173,8 @@ class _SearchResultCardState extends State<SearchResultCard> {
               widget.species.scientificName,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: Color(0xFFB7C9C0),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 fontStyle: FontStyle.italic,
               ),
             ),
@@ -189,14 +187,16 @@ class _SearchResultCardState extends State<SearchResultCard> {
                   widget.species.family ?? '',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: Color(0xFF9FB2A9)),
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
               TextButton.icon(
                 key: const ValueKey('open-plant-details'),
                 onPressed: () => _openDetails(context),
                 style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFFC7F9CC),
+                  foregroundColor: Theme.of(context).colorScheme.primary,
                 ),
                 iconAlignment: IconAlignment.end,
                 icon: const Icon(Icons.arrow_forward, size: 18),

@@ -231,6 +231,11 @@
       "commonNames": ["Spearmint", "garden mint", "lamb mint", "common spearmint"]
     },
     {
+      "scientificName": "Mentha × piperita",
+      "scientificSynonyms": ["Mentha x piperita", "Mentha piperita"],
+      "commonNames": ["Peppermint", "English peppermint", "black peppermint", "peppermint plant"]
+    },
+    {
       "scientificName": "Origanum vulgare",
       "scientificSynonyms": [],
       "commonNames": ["Oregano", "wild marjoram", "common oregano", "pot marjoram"]
@@ -286,6 +291,19 @@
       "commonNames": ["Tomato", "tomato plant", "garden tomato", "cherry tomato"]
     },
     {
+      "scientificName": "Solanum tuberosum",
+      "scientificSynonyms": [],
+      "commonNames": [
+        "Potato",
+        "potato plant",
+        "Irish potato",
+        "white potato",
+        "russet potato",
+        "Russet Burbank potato",
+        "baking potato"
+      ]
+    },
+    {
       "scientificName": "Capsicum annuum",
       "scientificSynonyms": [],
       "commonNames": [
@@ -312,6 +330,15 @@
       "scientificName": "Brassica oleracea",
       "scientificSynonyms": ["Brassica oleracea var. sabellica"],
       "commonNames": ["Kale", "garden kale", "curly kale", "lacinato kale", "dinosaur kale"]
+    },
+    {
+      "scientificName": "Daucus carota sativus",
+      "scientificSynonyms": [
+        "Daucus carota subsp. sativus",
+        "Daucus carota var. sativa",
+        "Daucus carota subsp sativus"
+      ],
+      "commonNames": ["Carrot", "garden carrot", "cultivated carrot", "domestic carrot"]
     },
     {
       "scientificName": "Phaseolus vulgaris",

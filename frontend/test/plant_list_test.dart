@@ -48,6 +48,27 @@ void main() {
     expect(find.text('Your green-friend collection is empty'), findsOneWidget);
     expect(find.textContaining('Use Search'), findsOneWidget);
   });
+
+  testWidgets('wide collections use a scannable responsive grid',
+      (tester) async {
+    tester.view.physicalSize = const Size(1100, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final Environment env = await _environment([
+      _plant(1, 'Kitchen mint', 'Mentha spicata'),
+      _plant(2, 'Big Monstera', 'Monstera deliciosa'),
+      _plant(3, 'Sunny aloe', 'Aloe vera'),
+    ]);
+
+    await tester.pumpWidget(_app(PlantList(env: env)));
+    await tester.pump();
+
+    expect(find.byType(GridView), findsOneWidget);
+    expect(find.byType(PageView), findsNothing);
+    expect(find.byType(PlantCard), findsNWidgets(3));
+    expect(tester.takeException(), isNull);
+  });
 }
 
 PlantDTO _plant(int id, String name, String species) {

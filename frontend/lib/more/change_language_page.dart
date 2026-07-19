@@ -126,7 +126,8 @@ class _ChangeLanguagePageState extends State<ChangeLanguagePage> {
                   ),
                   leading: Radio<Locale>(
                     value: locale,
-                    groupValue: _selectedLocale ?? Localizations.localeOf(context),
+                    groupValue:
+                        _selectedLocale ?? Localizations.localeOf(context),
                     onChanged: (Locale? value) {
                       setState(() {
                         _selectedLocale = value;

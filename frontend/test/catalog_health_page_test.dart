@@ -19,7 +19,7 @@ void main() {
     final Environment env = Environment(
       prefs: await SharedPreferences.getInstance(),
       http: _CatalogHealthHttpClient(),
-      backendVersion: '0.16.0',
+      backendVersion: '0.17.1',
       credentials:
           Credentials(username: 'gardener', email: 'garden@example.com'),
       notificationDispatcher: [],
@@ -38,7 +38,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('The reviewed catalog is healthy'), findsOneWidget);
-    expect(find.text('172'), findsOneWidget);
+    expect(find.text('176'), findsOneWidget);
     expect(find.text('Cultivated plants'), findsOneWidget);
     expect(find.byKey(const ValueKey('copy-catalog-health-report')),
         findsOneWidget);
@@ -63,20 +63,20 @@ class _CatalogHealthHttpClient extends AppHttpClient {
         "schemaVersion": 1,
         "healthy": true,
         "totals": {
-          "reviewedEntries": 172,
-          "reviewedQueries": 800,
-          "curatedCareProfiles": 82,
-          "liveCanaries": 10,
+          "reviewedEntries": 176,
+          "reviewedQueries": 853,
+          "curatedCareProfiles": 86,
+          "liveCanaries": 14,
           "contactHazards": 11
         },
         "tiers": [
           {
             "name": "CURATED_CULTIVATED",
-            "entries": 82,
-            "reviewedQueries": 400,
-            "imageRequiredEntries": 82,
-            "careRequiredEntries": 82,
-            "careCompleteEntries": 82,
+            "entries": 86,
+            "reviewedQueries": 453,
+            "imageRequiredEntries": 86,
+            "careRequiredEntries": 86,
+            "careCompleteEntries": 86,
             "searchCoveragePercent": 100,
             "careCoveragePercent": 100
           },

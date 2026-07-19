@@ -20,18 +20,21 @@ class SettingsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 20.0,
-        vertical: 10,
-      ),
+      padding: const EdgeInsets.only(bottom: 22),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 0, 4.0),
-            child: Text(title),
+            padding: const EdgeInsets.fromLTRB(2, 0, 0, 9),
+            child: Text(
+              title,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
           ),
-          ..._buildSeparatedChildren(),
+          Card(
+            clipBehavior: Clip.antiAlias,
+            child: Column(children: _buildSeparatedChildren()),
+          ),
         ],
       ),
     );
@@ -42,29 +45,8 @@ class SettingsSection extends StatelessWidget {
     for (int i = 0; i < children.length; i++) {
       separatedChildren.add(children[i]);
       if (i < children.length - 1) {
-        separatedChildren.add(Divider(
-          color: Colors.grey.withOpacity(.3),
-          height: 1,
-        ));
+        separatedChildren.add(const Divider(height: 1, indent: 56));
       }
-    }
-    if (separatedChildren.isNotEmpty) {
-      final firstChild = separatedChildren.first;
-      final lastChild = separatedChildren.last;
-      separatedChildren[0] = ClipRRect(
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(5),
-          topRight: Radius.circular(5),
-        ),
-        child: firstChild,
-      );
-      separatedChildren[separatedChildren.length - 1] = ClipRRect(
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(5),
-          bottomRight: Radius.circular(5),
-        ),
-        child: lastChild,
-      );
     }
     return separatedChildren;
   }
@@ -74,29 +56,38 @@ class SettingsInfo extends StatelessWidget {
   final String title;
   final String value;
   final bool? isValueLoading;
+  final IconData? icon;
 
   const SettingsInfo({
     super.key,
     required this.title,
     required this.value,
     this.isValueLoading,
+    this.icon,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: const Color.fromRGBO(24, 44, 37, 1),
-      child: Padding(
-        padding: const EdgeInsets.all(13.0),
-        child: Row(
-          children: [
-            Text(title),
-            const Spacer(),
-            Skeletonizer(
-                enabled: isValueLoading ?? false,
-                effect: skeletonizerEffect,
-                child: Text(value)),
-          ],
+    final ColorScheme colors = Theme.of(context).colorScheme;
+    return ListTile(
+      leading: icon == null
+          ? null
+          : Icon(icon, color: colors.onSurfaceVariant, size: 22),
+      title: Text(title),
+      trailing: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 170),
+        child: Skeletonizer(
+          enabled: isValueLoading ?? false,
+          effect: skeletonizerEffect,
+          child: Text(
+            value,
+            textAlign: TextAlign.end,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: colors.onSurfaceVariant,
+                ),
+          ),
         ),
       ),
     );
@@ -106,10 +97,12 @@ class SettingsInfo extends StatelessWidget {
 class SettingsExternalLink extends StatelessWidget {
   final String title;
   final String url;
+  final IconData? icon;
   const SettingsExternalLink({
     super.key,
     required this.title,
     required this.url,
+    this.icon,
   });
 
   void _launchURL(String url) async {
@@ -125,25 +118,16 @@ class SettingsExternalLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: const Color.fromRGBO(24, 44, 37, 1),
-      child: InkWell(
-        onTap: () => _launchURL(url),
-        child: Padding(
-          padding: const EdgeInsets.all(13.0),
-          child: Row(
-            children: [
-              Text(title),
-              const Spacer(),
-              Icon(
-                Icons.open_in_new,
-                size: 20,
-                color: Colors.white.withOpacity(.7),
-              ),
-            ],
-          ),
-        ),
+    final ColorScheme colors = Theme.of(context).colorScheme;
+    return ListTile(
+      leading: icon == null ? null : Icon(icon, size: 22),
+      title: Text(title),
+      trailing: Icon(
+        Icons.open_in_new_rounded,
+        size: 19,
+        color: colors.onSurfaceVariant,
       ),
+      onTap: () => _launchURL(url),
     );
   }
 }
@@ -160,37 +144,49 @@ class SettingsHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: Container(
-        decoration: BoxDecoration(
-          color: const Color.fromRGBO(24, 44, 37, 1),
-          borderRadius: BorderRadius.circular(4.0),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              AdvancedAvatar(
-                name: username,
-                size: 70,
-                style:
-                    const TextStyle(color: Color.fromARGB(255, 156, 192, 172)),
-                decoration: BoxDecoration(
-                  color: const Color.fromRGBO(53, 98, 82, 1),
-                  borderRadius: BorderRadius.circular(50),
-                ),
+    final ColorScheme colors = Theme.of(context).colorScheme;
+    return Card(
+      margin: const EdgeInsets.only(bottom: 22),
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Row(
+          children: [
+            AdvancedAvatar(
+              name: username,
+              size: 58,
+              style: TextStyle(
+                color: colors.onPrimaryContainer,
+                fontWeight: FontWeight.w700,
               ),
-              Column(
+              decoration: BoxDecoration(
+                color: colors.primaryContainer,
+                borderRadius: BorderRadius.circular(18),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(username),
-                  Text(email),
+                  Text(
+                    username,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    email,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: colors.onSurfaceVariant,
+                        ),
+                  ),
                 ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -207,11 +203,12 @@ class LogoutButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ColorScheme colors = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.all(20.0),
+      padding: const EdgeInsets.only(top: 2),
       child: SizedBox(
         width: double.infinity,
-        child: ElevatedButton(
+        child: OutlinedButton.icon(
           onPressed: () {
             env.http.jwt = null;
             env.http.key = null;
@@ -223,30 +220,12 @@ class LogoutButton extends StatelessWidget {
               ),
             );
           },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color.fromARGB(255, 179, 48, 39),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(5.0),
-            ),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: colors.error,
+            side: BorderSide(color: colors.error.withOpacity(.75)),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.logout,
-                color: Colors.white,
-              ),
-              const SizedBox(width: 8.0),
-              Text(
-                AppLocalizations.of(context).logout.toUpperCase(),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 13.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
+          icon: const Icon(Icons.logout_rounded),
+          label: Text(AppLocalizations.of(context).logout),
         ),
       ),
     );
@@ -256,34 +235,26 @@ class LogoutButton extends StatelessWidget {
 class SettingsInternalLink extends StatelessWidget {
   final String title;
   final VoidCallback onClick;
+  final IconData? icon;
 
   const SettingsInternalLink({
     super.key,
     required this.title,
     required this.onClick,
+    this.icon,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: const Color.fromRGBO(24, 44, 37, 1),
-      child: InkWell(
-        onTap: onClick,
-        child: Padding(
-          padding: const EdgeInsets.all(13.0),
-          child: Row(
-            children: [
-              Text(title),
-              const Spacer(),
-              Icon(
-                Icons.arrow_right_alt_outlined,
-                size: 20,
-                color: Colors.white.withOpacity(.7),
-              ),
-            ],
-          ),
-        ),
+    final ColorScheme colors = Theme.of(context).colorScheme;
+    return ListTile(
+      leading: icon == null ? null : Icon(icon, size: 22),
+      title: Text(title),
+      trailing: Icon(
+        Icons.chevron_right_rounded,
+        color: colors.onSurfaceVariant,
       ),
+      onTap: onClick,
     );
   }
 }

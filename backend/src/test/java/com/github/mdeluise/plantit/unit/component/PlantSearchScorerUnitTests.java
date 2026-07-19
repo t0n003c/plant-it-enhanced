@@ -28,6 +28,22 @@ class PlantSearchScorerUnitTests {
         Assertions.assertTrue(match.isRelevant());
     }
 
+
+    @Test
+    @DisplayName("Should rank an exact species above a longer scientific synonym prefix")
+    void shouldPreferExactSpeciesOverSubspeciesPrefix() {
+        final BotanicalInfo species = createPlant("Daucus carota", "Wild carrot");
+        final BotanicalInfo subspecies = createPlant(
+            "Daucus carota subsp. sativus", "Carrot");
+        subspecies.getSynonyms().add("Daucus carota var. sativa");
+
+        final var ranked = java.util.stream.Stream.of(subspecies, species)
+            .sorted(PlantSearchScorer.relevanceComparator("Daucus carota"))
+            .toList();
+
+        Assertions.assertEquals(species, ranked.get(0));
+    }
+
     @Test
     @DisplayName("Should normalize punctuation, whitespace, case, and accents")
     void shouldNormalizePlantNames() {

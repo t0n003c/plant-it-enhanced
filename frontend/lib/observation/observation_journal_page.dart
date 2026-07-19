@@ -5,6 +5,7 @@ import 'package:cached_network_image_platform_interface/cached_network_image_pla
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
+import 'package:plant_it/app_layout.dart';
 import 'package:plant_it/app_extended_floating_action_button.dart';
 import 'package:plant_it/dto/hike_session_dto.dart';
 import 'package:plant_it/dto/observation_dto.dart';
@@ -467,27 +468,6 @@ class _ObservationJournalPageState extends State<ObservationJournalPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context).trailJournal),
-        actions: [
-          if (_syncing || _preparingReview)
-            const Padding(
-              padding: EdgeInsets.only(right: 16),
-              child: Center(
-                child: SizedBox.square(
-                  dimension: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-              ),
-            )
-          else
-            IconButton(
-              tooltip: AppLocalizations.of(context).syncNow,
-              onPressed: _refresh,
-              icon: const Icon(Icons.sync),
-            ),
-        ],
-      ),
       floatingActionButton: AppExtendedFloatingActionButton(
         key: const ValueKey<String>('trail-record-find'),
         heroTag: 'trail-record-find',
@@ -496,9 +476,32 @@ class _ObservationJournalPageState extends State<ObservationJournalPage> {
         label: AppLocalizations.of(context).recordTrailFind,
         tooltip: AppLocalizations.of(context).recordTrailFind,
       ),
-      body: RefreshIndicator(
-        onRefresh: _refresh,
-        child: _buildBody(context),
+      body: AppContent(
+        child: Column(
+          children: [
+            AppPageHeader(
+              icon: Icons.hiking_rounded,
+              title: AppLocalizations.of(context).trailJournal,
+              subtitle: AppLocalizations.of(context).trailJournalSubtitle,
+              trailing: _syncing || _preparingReview
+                  ? const SizedBox.square(
+                      dimension: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2.5),
+                    )
+                  : IconButton.filledTonal(
+                      tooltip: AppLocalizations.of(context).syncNow,
+                      onPressed: _refresh,
+                      icon: const Icon(Icons.sync_rounded),
+                    ),
+            ),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: _refresh,
+                child: _buildBody(context),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

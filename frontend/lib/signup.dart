@@ -1,9 +1,9 @@
 import 'dart:convert';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:material_loading_buttons/material_loading_buttons.dart';
 import 'package:plant_it/app_exception.dart';
+import 'package:plant_it/auth_scaffold.dart';
 import 'package:plant_it/commons.dart';
 import 'package:plant_it/environment.dart';
 import 'package:plant_it/login.dart';
@@ -27,7 +27,7 @@ class _SignupPageState extends State<SignupPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  bool _showPassword = true;
+  bool _showPassword = false;
   bool _isLoading = false;
 
   Future<void> _signup() async {
@@ -68,155 +68,147 @@ class _SignupPageState extends State<SignupPage> {
       widget.env.logger.error(e, st);
       throw AppException.withInnerException(e as Exception);
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   @override
   void dispose() {
     _usernameController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(),
-      body: Center(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const HeaderMessage(),
-                  Form(
-                    key: _formKey,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Username
-                        TextFormField(
-                          controller: _usernameController,
-                          decoration: InputDecoration(
-                            labelText: AppLocalizations.of(context).username,
-                            border: const OutlineInputBorder(),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return AppLocalizations.of(context).enterValue;
-                            }
-                            if (value.length < 3 || value.length > 20) {
-                              return AppLocalizations.of(context).usernameSize;
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 20),
+    final localizations = AppLocalizations.of(context);
+    return AuthScaffold(
+      title: '${localizations.signupMessage} ${localizations.appName}',
+      subtitle: localizations.singupTagline,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Username
+                TextFormField(
+                  controller: _usernameController,
+                  autofillHints: const [AutofillHints.newUsername],
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context).username,
+                    border: const OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return AppLocalizations.of(context).enterValue;
+                    }
+                    if (value.length < 3 || value.length > 20) {
+                      return AppLocalizations.of(context).usernameSize;
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
 
-                        // Email
-                        TextFormField(
-                          controller: _emailController,
-                          decoration: InputDecoration(
-                            labelText: AppLocalizations.of(context).email,
-                            border: const OutlineInputBorder(),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return AppLocalizations.of(context).enterValue;
-                            }
-                            if (!isValidEmail(value)) {
-                              return AppLocalizations.of(context)
-                                  .enterValidEmail;
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 20),
+                // Email
+                TextFormField(
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  autofillHints: const [AutofillHints.email],
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context).email,
+                    border: const OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return AppLocalizations.of(context).enterValue;
+                    }
+                    if (!isValidEmail(value)) {
+                      return AppLocalizations.of(context).enterValidEmail;
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
 
-                        // Password
-                        Column(
-                          children: [
-                            TextFormField(
-                              controller: _passwordController,
-                              obscureText: !_showPassword,
-                              decoration: InputDecoration(
-                                labelText:
-                                    AppLocalizations.of(context).password,
-                                border: const OutlineInputBorder(),
-                                suffixIcon: IconButton(
-                                  icon: Icon(_showPassword
-                                      ? Icons.visibility
-                                      : Icons.visibility_off),
-                                  onPressed: () {
-                                    setState(() {
-                                      _showPassword = !_showPassword;
-                                    });
-                                  },
-                                ),
-                              ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return AppLocalizations.of(context)
-                                      .enterValue;
-                                }
-                                if (value.length < 6 || value.length > 20) {
-                                  return AppLocalizations.of(context)
-                                      .passwordSize;
-                                }
-                                return null;
-                              },
-                            )
-                          ],
-                        ),
-
-                        // Button
-                        const SizedBox(height: 20),
-                        ElevatedLoadingButton(
-                          isLoading: _isLoading,
+                // Password
+                Column(
+                  children: [
+                    TextFormField(
+                      controller: _passwordController,
+                      autofillHints: const [AutofillHints.newPassword],
+                      obscureText: !_showPassword,
+                      decoration: InputDecoration(
+                        labelText: AppLocalizations.of(context).password,
+                        border: const OutlineInputBorder(),
+                        suffixIcon: IconButton(
+                          icon: Icon(_showPassword
+                              ? Icons.visibility
+                              : Icons.visibility_off),
                           onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              _signup();
-                            }
+                            setState(() {
+                              _showPassword = !_showPassword;
+                            });
                           },
-                          child: Text(AppLocalizations.of(context).signup),
-                        ),
-                        const SizedBox(height: 20),
-                      ],
-                    ),
-                  ),
-
-                  // Divider
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Expanded(
-                        child: Divider(),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Text(
-                          AppLocalizations.of(context).or,
-                          style: const TextStyle(fontSize: 16),
                         ),
                       ),
-                      const Expanded(
-                        child: Divider(),
-                      ),
-                    ],
-                  ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return AppLocalizations.of(context).enterValue;
+                        }
+                        if (value.length < 6 || value.length > 20) {
+                          return AppLocalizations.of(context).passwordSize;
+                        }
+                        return null;
+                      },
+                    )
+                  ],
+                ),
 
-                  // Signup
-                  Login(env: widget.env)
-                ],
-              ),
+                // Button
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedLoadingButton(
+                    isLoading: _isLoading,
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        _signup();
+                      }
+                    },
+                    child: Text(AppLocalizations.of(context).signup),
+                  ),
+                ),
+              ],
             ),
           ),
-        ),
+          const SizedBox(height: 22),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Expanded(
+                child: Divider(),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Text(
+                  AppLocalizations.of(context).or,
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ),
+              const Expanded(
+                child: Divider(),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Login(env: widget.env),
+        ],
       ),
     );
   }
@@ -229,32 +221,18 @@ class Login extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: RichText(
-          text: TextSpan(
-            children: [
-              TextSpan(
-                text: AppLocalizations.of(context).alreadyRegistered,
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              const TextSpan(text: " "),
-              TextSpan(
-                text: AppLocalizations.of(context).login,
-                style: const TextStyle(color: Color(0xFF6DD075)),
-                recognizer: TapGestureRecognizer()
-                  ..onTap = () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => LoginPage(env: env),
-                      ),
-                    );
-                  },
-              ),
-            ],
+    return Column(
+      children: [
+        Text(AppLocalizations.of(context).alreadyRegistered),
+        TextButton(
+          onPressed: () => Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => LoginPage(env: env)),
           ),
-        ));
+          child: Text(AppLocalizations.of(context).login),
+        ),
+      ],
+    );
   }
 }
 

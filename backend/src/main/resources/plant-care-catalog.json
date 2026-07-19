@@ -76,6 +76,12 @@
       "sourceReference": "https://plants.ces.ncsu.edu/plants/mentha-spicata/"
     },
     {
+      "scientificNames": ["Mentha × piperita", "Mentha x piperita", "Mentha piperita"],
+      "light": 7,
+      "soilHumidity": 7,
+      "sourceReference": "https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=281400"
+    },
+    {
       "scientificNames": ["Origanum vulgare"],
       "light": 7,
       "soilHumidity": 5,
@@ -92,6 +98,12 @@
       "light": 9,
       "soilHumidity": 7,
       "sourceReference": "https://plants.ces.ncsu.edu/plants/solanum-lycopersicum/"
+    },
+    {
+      "scientificNames": ["Solanum tuberosum"],
+      "light": 9,
+      "soilHumidity": 7,
+      "sourceReference": "https://extension.umn.edu/vegetables/growing-potatoes"
     },
     {
       "scientificNames": ["Capsicum annuum"],
@@ -116,6 +128,17 @@
       "light": 8,
       "soilHumidity": 7,
       "sourceReference": "https://plants.ces.ncsu.edu/plants/brassica-oleracea/"
+    },
+    {
+      "scientificNames": [
+        "Daucus carota sativus",
+        "Daucus carota subsp. sativus",
+        "Daucus carota var. sativa",
+        "Daucus carota subsp sativus"
+      ],
+      "light": 8,
+      "soilHumidity": 7,
+      "sourceReference": "https://extension.umn.edu/vegetables/growing-carrots-and-parsnips"
     },
     {
       "scientificNames": ["Helianthus annuus"],

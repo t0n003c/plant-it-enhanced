@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.17.1 - 2026-07-18 - Catalog coverage and interface polish
+
+- Add reviewed peppermint, cultivated carrot, and potato identities with everyday aliases,
+  accepted scientific synonyms, and source-attributed light and soil-moisture guidance.
+- Resolve `russet potato` and related household terms to `Solanum tuberosum`, while keeping
+  cultivated carrot separate from the existing wild-carrot trail identity.
+- Apply the shared confidence-first relevance comparator to the reviewed catalog and saved plants,
+  ensuring exact identities rank above longer scientific-name prefix matches.
+- Expand the release contract to 176 reviewed taxa, 853 searchable names, 86 complete cultivated
+  care profiles, and 14 representative provider canaries.
+- Introduce reusable page, section, empty-state, and authentication layouts; organize Home,
+  Search, Calendar, Trail, Settings, sign-in, sign-up, and server setup around a consistent visual
+  hierarchy and bounded responsive content width.
+- Add a desktop navigation rail, responsive collection grids, clearer page and section titles,
+  labeled photo identification, useful empty/error/retry states, and more readable activity cards.
+- Refine the Material 3 palette, typography, cards, forms, navigation, touch targets, and account
+  actions for a cohesive, high-contrast interface across mobile and wide web layouts.
+- Add responsive widget regressions, update all maintained catalog, feature, installation, and
+  roadmap documentation, and release backend, frontend, and Helm metadata as 0.17.1. No database
+  migration, environment change, or reverse-proxy change is required.
+
 ## 0.17.0 - 2026-07-18 - Care tools and UI reliability
 
 - Add a privacy-first **Care tools** hub from Home, More, saved-plant details, and catalog details.

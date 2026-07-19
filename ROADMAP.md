@@ -15,7 +15,7 @@ unless the user explicitly adds a cultivated plant to their collection.
 
 - [x] Rank everyday common names ahead of misleading partial matches.
 - [x] Explain why each search result matched and show a confidence level.
-- [x] Maintain an offline trusted-name index and an 800+ query regression corpus.
+- [x] Maintain an offline trusted-name index and an 850+ query regression corpus.
 - [x] Add a tagged 90-species North American hiking starter set with contact-hazard warnings.
 - [x] Merge care data field by field instead of stopping at the first provider.
 - [x] Retain source, source reference, confidence, and verification date for every care field.
@@ -70,7 +70,7 @@ unless the user explicitly adds a cultivated plant to their collection.
 
 - [x] Define one support manifest for cultivated and trail catalog tiers.
 - [x] Validate every accepted scientific name, synonym, and reviewed alias as a release corpus.
-- [x] Require reviewed light and soil-moisture fields for all 83 cultivated entries.
+- [x] Require reviewed light and soil-moisture fields for all 86 cultivated entries.
 - [x] Replay recorded production deserializers for iNaturalist, GBIF, Trefle, Perenual, and Pl@ntNet.
 - [x] Run quota-safe scheduled provider canaries and deduplicate failure alerts.
 - [x] Track sanitized, account-scoped no-result, missing-image, and missing-care gaps locally.
@@ -95,6 +95,8 @@ unless the user explicitly adds a cultivated plant to their collection.
       and correct the installable web app metadata and responsive orientation.
 - [x] Add narrow-screen widget tests for the new tools, collection search, navigation controls, and
       the full care-profile editor.
+- [x] Standardize page hierarchy, authentication, empty/error states, responsive collection grids,
+      and mobile/desktop navigation with reusable layout components.
 
 ## Next — Care that adapts
 

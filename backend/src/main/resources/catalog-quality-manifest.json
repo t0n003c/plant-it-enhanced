@@ -70,6 +70,28 @@
       "requiresImage": true
     },
     {
+      "query": "peppermint",
+      "providerTerm": "Mentha × piperita",
+      "acceptedScientificNames": ["Mentha × piperita"],
+      "requiresImage": true
+    },
+    {
+      "query": "carrot",
+      "providerTerm": "Daucus carota sativus",
+      "acceptedScientificNames": [
+        "Daucus carota sativus",
+        "Daucus carota subsp. sativus",
+        "Daucus carota var. sativa"
+      ],
+      "requiresImage": true
+    },
+    {
+      "query": "russet potato",
+      "providerTerm": "Solanum tuberosum",
+      "acceptedScientificNames": ["Solanum tuberosum"],
+      "requiresImage": true
+    },
+    {
       "query": "white trillium",
       "providerTerm": "Trillium grandiflorum",
       "acceptedScientificNames": ["Trillium grandiflorum"],

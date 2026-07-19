@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:plant_it/app_exception.dart';
+import 'package:plant_it/app_layout.dart';
 import 'package:plant_it/dto/event_dto.dart';
 import 'package:plant_it/environment.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -25,6 +26,7 @@ class RecentEvents extends StatefulWidget {
 class _RecentEventsState extends State<RecentEvents> {
   final int _pageSize = 5;
   bool _isLoading = true;
+  String? _errorMessage;
   List<Widget> _recentEvents = [];
   late final EventsNotifier _eventsNotifier;
 
@@ -43,32 +45,40 @@ class _RecentEventsState extends State<RecentEvents> {
   }
 
   Future<void> _fetchRecentEvents() async {
-    _createDummyEventSkeletons();
-    final response =
-        await widget.env.http.get("diary/entry?pageNo=0&pageSize=$_pageSize");
-    if (response.statusCode == 200) {
+    if (mounted) {
+      setState(() {
+        _errorMessage = null;
+        _createDummyEventSkeletons();
+      });
+    }
+    try {
+      final response =
+          await widget.env.http.get("diary/entry?pageNo=0&pageSize=$_pageSize");
+      if (response.statusCode != 200) {
+        throw AppException('Failed to load events');
+      }
       final responseBody = json.decode(utf8.decode(response.bodyBytes));
       final List<dynamic> entries = responseBody["content"];
-      List<EventCard> newEvents = [];
-      if (entries.isNotEmpty) {
-        newEvents = entries.map((entry) {
-          return EventCard(
-            action: entry["type"],
-            plant: entry["diaryTargetPersonalName"],
-            date: DateTime.parse(entry["date"]),
-            eventDTO: EventDTO.fromJson(entry),
-            env: widget.env,
-          );
-        }).toList();
-      }
+      final List<EventCard> newEvents = entries.map((entry) {
+        return EventCard(
+          action: entry["type"],
+          plant: entry["diaryTargetPersonalName"],
+          date: DateTime.parse(entry["date"]),
+          eventDTO: EventDTO.fromJson(entry),
+          env: widget.env,
+        );
+      }).toList();
+      if (!mounted) return;
+      setState(() => _recentEvents = newEvents);
+    } catch (error, stackTrace) {
+      widget.env.logger.error(error, stackTrace);
       if (!mounted) return;
       setState(() {
-        _recentEvents = newEvents;
-        _isLoading = false;
+        _recentEvents = [];
+        _errorMessage = error.toString();
       });
-    } else {
-      widget.env.logger.error("Failed to load events");
-      throw AppException('Failed to load events');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -99,17 +109,38 @@ class _RecentEventsState extends State<RecentEvents> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 20.0),
-          child: Text(
-            AppLocalizations.of(context).recents,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
+        AppSectionHeader(
+          title: AppLocalizations.of(context).activity,
+          subtitle: AppLocalizations.of(context).recentActivitySubtitle,
         ),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: _recentEvents,
-        )
+        if (_errorMessage != null)
+          Card(
+            child: AppEmptyState(
+              icon: Icons.cloud_off_outlined,
+              title: AppLocalizations.of(context).generalError,
+              action: OutlinedButton.icon(
+                onPressed: _fetchRecentEvents,
+                icon: const Icon(Icons.refresh),
+                label: Text(AppLocalizations.of(context).retry),
+              ),
+            ),
+          )
+        else if (!_isLoading && _recentEvents.isEmpty)
+          Card(
+            child: AppEmptyState(
+              icon: Icons.history_rounded,
+              title: AppLocalizations.of(context).noRecentActivity,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24,
+                vertical: 30,
+              ),
+            ),
+          )
+        else
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: _recentEvents,
+          ),
       ],
     );
   }

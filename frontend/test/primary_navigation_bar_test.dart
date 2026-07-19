@@ -56,6 +56,49 @@ void main() {
     expect(selectedIndex, 3);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('desktop navigation rail keeps all primary areas visible',
+      (tester) async {
+    tester.view.physicalSize = const Size(1280, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    int selectedIndex = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: StatefulBuilder(
+          builder: (context, setState) => Scaffold(
+            body: Row(
+              children: [
+                PrimaryNavigationRail(
+                  selectedIndex: selectedIndex,
+                  onDestinationSelected: (index) {
+                    setState(() => selectedIndex = index);
+                  },
+                ),
+                const Expanded(child: SizedBox()),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(NavigationRail), findsOneWidget);
+    expect(
+        find.byKey(const ValueKey('primary-navigation-rail')), findsOneWidget);
+    for (final label in ['Home', 'Calendar', 'Search', 'Trail', 'Settings']) {
+      expect(find.text(label), findsOneWidget);
+    }
+    await tester.tap(find.text('Settings'));
+    await tester.pump();
+    expect(selectedIndex, 4);
+    expect(tester.takeException(), isNull);
+  });
 }
 
 double _contrastRatio(Color foreground, Color background) {

@@ -23,6 +23,7 @@ class SearchResultPhotoFrame extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ColorScheme colors = Theme.of(context).colorScheme;
     return AspectRatio(
       key: const ValueKey('search-result-photo-frame'),
       aspectRatio: aspectRatio,
@@ -30,7 +31,7 @@ class SearchResultPhotoFrame extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            const ColoredBox(color: Color(0xFF10231C)),
+            ColoredBox(color: colors.surfaceContainerLow),
             Semantics(
               image: true,
               label: semanticLabel,
@@ -43,7 +44,7 @@ class SearchResultPhotoFrame extends StatelessWidget {
               ),
             ),
             if (loading) ...[
-              const ColoredBox(color: Color(0x9930473E)),
+              ColoredBox(color: colors.surfaceContainerHigh.withOpacity(.72)),
               const Align(
                 alignment: Alignment.bottomCenter,
                 child: LinearProgressIndicator(minHeight: 3),
