@@ -58,6 +58,7 @@ class AbstractPlantInfoExtractorStepUnitTests {
 
         final List<BotanicalInfo> result = reviewedCatalog.extractPlants("sunflower", 5);
 
+        Assertions.assertEquals(0, provider.getCalls());
         Assertions.assertEquals(1, result.size());
         Assertions.assertEquals("Helianthus annuus", result.get(0).getSpecies());
         Assertions.assertEquals("https://example.org/sunflower.jpg", result.get(0).getImage().getUrl());
