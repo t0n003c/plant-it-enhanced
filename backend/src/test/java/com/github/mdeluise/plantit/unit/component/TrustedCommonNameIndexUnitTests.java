@@ -110,11 +110,13 @@ class TrustedCommonNameIndexUnitTests {
         Assertions.assertEquals("Cucurbita pepo", pumpkin.getSpecies());
         Assertions.assertEquals("Pumpkin", pumpkin.getSearchMatchedName());
         Assertions.assertNotNull(pumpkin.getImage());
+        Assertions.assertNull(pumpkin.getImage().getId());
         Assertions.assertTrue(pumpkin.getImage().getUrl().contains("101476279/medium.png"));
 
         final BotanicalInfo sunflower = index.search("sunflower", 1).get(0);
         Assertions.assertEquals("Helianthus annuus", sunflower.getSpecies());
         Assertions.assertNotNull(sunflower.getImage());
+        Assertions.assertNull(sunflower.getImage().getId());
         Assertions.assertTrue(sunflower.getImage().getUrl().contains("323768723/medium.jpg"));
     }
 
