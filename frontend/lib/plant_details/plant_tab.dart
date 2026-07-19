@@ -31,6 +31,12 @@ class PlantTab extends StatefulWidget {
 
 class _PlantTabState extends State<PlantTab> {
   late UniqueKey _galleryKey = UniqueKey();
+  late final PhotosNotifier _photosNotifier;
+
+  void _handlePhotosChanged() {
+    if (!mounted) return;
+    setState(() => _galleryKey = UniqueKey());
+  }
 
   Future<bool> _updatePlantAvatarImage(String imageId) async {
     if (imageId != widget.plant.avatarImageId) {
@@ -213,11 +219,14 @@ class _PlantTabState extends State<PlantTab> {
   @override
   void initState() {
     super.initState();
-    Provider.of<PhotosNotifier>(context, listen: false).addListener(() {
-      setState(() {
-        _galleryKey = UniqueKey();
-      });
-    });
+    _photosNotifier = Provider.of<PhotosNotifier>(context, listen: false);
+    _photosNotifier.addListener(_handlePhotosChanged);
+  }
+
+  @override
+  void dispose() {
+    _photosNotifier.removeListener(_handlePhotosChanged);
+    super.dispose();
   }
 
   @override
@@ -259,13 +268,67 @@ class _PlantTabState extends State<PlantTab> {
                           (widget.plant.info.currencySymbol ?? ""))),
               SimpleInfoEntry(
                   title: AppLocalizations.of(context).seller,
-                  value: widget.plant.info.seller.toString()),
+                  value: widget.plant.info.seller),
               SimpleInfoEntry(
                   title: AppLocalizations.of(context).location,
-                  value: widget.plant.info.location.toString()),
+                  value: widget.plant.info.location),
               FullWidthInfoEntry(
                 title: AppLocalizations.of(context).note,
                 value: widget.plant.info.note,
+              ),
+            ],
+          ),
+          InfoGroup(
+            title: AppLocalizations.of(context).personalizedCareProfile,
+            children: [
+              SimpleInfoEntry(
+                title: AppLocalizations.of(context).growingEnvironment,
+                value: _environmentLabel(
+                  context,
+                  widget.plant.info.growingEnvironment,
+                ),
+              ),
+              SimpleInfoEntry(
+                title: AppLocalizations.of(context).observedLight,
+                value: _levelLabel(context, widget.plant.info.lightExposure),
+              ),
+              SimpleInfoEntry(
+                title: AppLocalizations.of(context).nearestWindow,
+                value: _windowLabel(
+                  context,
+                  widget.plant.info.windowDirection,
+                ),
+              ),
+              SimpleInfoEntry(
+                title: AppLocalizations.of(context).potDiameterCm,
+                value: widget.plant.info.potDiameterCm?.toString(),
+              ),
+              SimpleInfoEntry(
+                title: AppLocalizations.of(context).potMaterial,
+                value: _potMaterialLabel(
+                  context,
+                  widget.plant.info.potMaterial,
+                ),
+              ),
+              SimpleInfoEntry(
+                title: AppLocalizations.of(context).hasDrainageHole,
+                value: widget.plant.info.hasDrainage == null
+                    ? null
+                    : widget.plant.info.hasDrainage!
+                        ? AppLocalizations.of(context).yes
+                        : AppLocalizations.of(context).no,
+              ),
+              SimpleInfoEntry(
+                title: AppLocalizations.of(context).soilOrGrowingMedium,
+                value: widget.plant.info.soilType,
+              ),
+              SimpleInfoEntry(
+                title: AppLocalizations.of(context).lastWatered,
+                value: _formatStoredDate(widget.plant.info.lastWateredAt),
+              ),
+              SimpleInfoEntry(
+                title: AppLocalizations.of(context).lastRepotted,
+                value: _formatStoredDate(widget.plant.info.lastRepottedAt),
               ),
             ],
           ),
@@ -285,5 +348,49 @@ class _PlantTabState extends State<PlantTab> {
         ],
       ),
     );
+  }
+
+  String? _environmentLabel(BuildContext context, String? value) {
+    return switch (value) {
+      'INDOOR' => AppLocalizations.of(context).indoors,
+      'OUTDOOR' => AppLocalizations.of(context).outdoors,
+      'GREENHOUSE' => AppLocalizations.of(context).greenhouse,
+      _ => value,
+    };
+  }
+
+  String? _levelLabel(BuildContext context, String? value) {
+    return switch (value) {
+      'LOW' => AppLocalizations.of(context).low,
+      'MEDIUM' => AppLocalizations.of(context).moderate,
+      'HIGH' => AppLocalizations.of(context).high,
+      _ => value,
+    };
+  }
+
+  String? _windowLabel(BuildContext context, String? value) {
+    return switch (value) {
+      'NONE' => AppLocalizations.of(context).none,
+      'N' => AppLocalizations.of(context).north,
+      'E' => AppLocalizations.of(context).east,
+      'S' => AppLocalizations.of(context).south,
+      'W' => AppLocalizations.of(context).west,
+      _ => value,
+    };
+  }
+
+  String? _potMaterialLabel(BuildContext context, String? value) {
+    return switch (value) {
+      'PLASTIC' => AppLocalizations.of(context).plastic,
+      'TERRACOTTA' => AppLocalizations.of(context).terracotta,
+      'GLAZED' => AppLocalizations.of(context).glazedCeramic,
+      'SELF_WATERING' => AppLocalizations.of(context).selfWatering,
+      _ => value,
+    };
+  }
+
+  String? _formatStoredDate(String? value) {
+    final DateTime? date = value == null ? null : DateTime.tryParse(value);
+    return date == null ? null : formatDate(date);
   }
 }

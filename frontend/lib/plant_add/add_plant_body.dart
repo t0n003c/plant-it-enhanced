@@ -3,6 +3,7 @@ import 'package:plant_it/dto/plant_dto.dart';
 import 'package:plant_it/dto/species_dto.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:plant_it/info_entries.dart';
+import 'package:plant_it/plant_care_profile_editor.dart';
 
 class AddPlantBody extends StatefulWidget {
   final PlantDTO toCreate;
@@ -78,103 +79,10 @@ class _AddPlantBodyState extends State<AddPlantBody> {
             onlyNumber: false,
           ),
           const SizedBox(height: 18),
-          ExpansionTile(
-            initiallyExpanded: true,
-            tilePadding: EdgeInsets.zero,
-            childrenPadding: const EdgeInsets.only(bottom: 8),
-            title: Text(
-              AppLocalizations.of(context).personalizedCareProfile,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            subtitle: Text(
-              AppLocalizations.of(context).personalizedCareProfileHint,
-            ),
-            children: [
-              _profileDropdown(
-                label: AppLocalizations.of(context).growingEnvironment,
-                value: widget.toCreate.info.growingEnvironment,
-                options: {
-                  'INDOOR': AppLocalizations.of(context).indoors,
-                  'OUTDOOR': AppLocalizations.of(context).outdoors,
-                  'GREENHOUSE': AppLocalizations.of(context).greenhouse,
-                },
-                onChanged: (value) => setState(
-                  () => widget.toCreate.info.growingEnvironment = value,
-                ),
-              ),
-              _profileDropdown(
-                label: AppLocalizations.of(context).observedLight,
-                value: widget.toCreate.info.lightExposure,
-                options: {
-                  'LOW': AppLocalizations.of(context).low,
-                  'MEDIUM': AppLocalizations.of(context).moderate,
-                  'HIGH': AppLocalizations.of(context).high,
-                },
-                onChanged: (value) => setState(
-                  () => widget.toCreate.info.lightExposure = value,
-                ),
-              ),
-              _profileDropdown(
-                label: AppLocalizations.of(context).nearestWindow,
-                value: widget.toCreate.info.windowDirection,
-                options: {
-                  'NONE': AppLocalizations.of(context).none,
-                  'N': AppLocalizations.of(context).north,
-                  'E': AppLocalizations.of(context).east,
-                  'S': AppLocalizations.of(context).south,
-                  'W': AppLocalizations.of(context).west,
-                },
-                onChanged: (value) =>
-                    widget.toCreate.info.windowDirection = value,
-              ),
-              EditableSimpleInfoEntry(
-                title: AppLocalizations.of(context).potDiameterCm,
-                value: widget.toCreate.info.potDiameterCm?.toString(),
-                onlyNumber: true,
-                onChanged: (value) => setState(() {
-                  widget.toCreate.info.potDiameterCm = double.tryParse(value);
-                }),
-              ),
-              _profileDropdown(
-                label: AppLocalizations.of(context).potMaterial,
-                value: widget.toCreate.info.potMaterial,
-                options: {
-                  'PLASTIC': AppLocalizations.of(context).plastic,
-                  'TERRACOTTA': AppLocalizations.of(context).terracotta,
-                  'GLAZED': AppLocalizations.of(context).glazedCeramic,
-                  'SELF_WATERING': AppLocalizations.of(context).selfWatering,
-                },
-                onChanged: (value) => setState(
-                  () => widget.toCreate.info.potMaterial = value,
-                ),
-              ),
-              SwitchListTile.adaptive(
-                contentPadding: EdgeInsets.zero,
-                title: Text(AppLocalizations.of(context).hasDrainageHole),
-                value: widget.toCreate.info.hasDrainage ?? true,
-                onChanged: (value) => setState(
-                  () => widget.toCreate.info.hasDrainage = value,
-                ),
-              ),
-              EditableSimpleInfoEntry(
-                title: AppLocalizations.of(context).soilOrGrowingMedium,
-                value: widget.toCreate.info.soilType,
-                onChanged: (value) => setState(
-                  () => widget.toCreate.info.soilType = value,
-                ),
-              ),
-              EditableDateInfoEntry(
-                title: AppLocalizations.of(context).lastWatered,
-                emptyHint: AppLocalizations.of(context).noWateringDate,
-                onChange: (date) => widget.toCreate.info.lastWateredAt =
-                    date?.toIso8601String(),
-              ),
-              EditableDateInfoEntry(
-                title: AppLocalizations.of(context).lastRepotted,
-                emptyHint: AppLocalizations.of(context).noRepottingDate,
-                onChange: (date) => widget.toCreate.info.lastRepottedAt =
-                    date?.toIso8601String(),
-              ),
+          PlantCareProfileEditor(
+            info: widget.toCreate.info,
+            onChanged: () => setState(() {}),
+            footer: [
               Card(
                 margin: const EdgeInsets.only(top: 16),
                 color: const Color.fromRGBO(24, 44, 37, 1),
@@ -225,32 +133,6 @@ class _AddPlantBodyState extends State<AddPlantBody> {
             height: 100,
           ),
         ]),
-      ),
-    );
-  }
-
-  Widget _profileDropdown({
-    required String label,
-    required String? value,
-    required Map<String, String> options,
-    required ValueChanged<String?> onChanged,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 14),
-      child: DropdownButtonFormField<String>(
-        value: value,
-        isExpanded: true,
-        decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
-        ),
-        items: options.entries
-            .map((entry) => DropdownMenuItem<String>(
-                  value: entry.key,
-                  child: Text(entry.value),
-                ))
-            .toList(),
-        onChanged: onChanged,
       ),
     );
   }

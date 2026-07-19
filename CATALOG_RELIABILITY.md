@@ -8,7 +8,7 @@ reviewed household-safety profiles remain in `plant-safety-catalog.json`.
 
 ## Support tiers
 
-| Tier | Entries in 0.16.3 | Search contract | Care contract | Image contract |
+| Tier | Entries in 0.17.0 | Search contract | Care contract | Image contract |
 | --- | ---: | --- | --- | --- |
 | Curated cultivated | 83 | Accepted name, reviewed aliases, and synonyms must resolve to one taxon | Reviewed light and soil-moisture fields are required | A provider image is expected and missing results are tracked |
 | North American trail | 90 | Same identity and alias validation, plus trail metadata | Household care is intentionally not required | A provider image is expected and missing results are tracked |

@@ -77,6 +77,21 @@ confidence, and verification date, and users can still edit their own plant deta
 Generalized guidance is a starting point. Check the plant, soil, pot, season, and local conditions
 before watering or changing placement.
 
+## Private care tools
+
+Open **Care tools** from Home, More, a saved plant, or catalog details. The four-step plant-health
+check records optional local reference photos, selected symptoms, observed soil moisture and light,
+airflow, and recent changes. It ranks up to three conservative issue patterns, shows whether each
+pattern is possible or strong, and links to a University Extension source with a next safe
+inspection step. The photos are not uploaded or analyzed, and the result is explicitly not a
+diagnosis or pesticide recommendation.
+
+The light-placement check estimates a broad low, moderate, or high category from direct-light
+duration, window distance, and obstructions. When reviewed species guidance exists, it compares
+the estimate with that requirement and can save the observed category to an owned plant. It never
+claims to measure lux or photosynthetically active radiation. See [Care tools & UI](care-tools.md)
+for privacy, limitations, and the completed UI audit.
+
 ## Reviewed household safety
 
 Plant details show human, cat, and dog statuses separately because one plant can affect each very
@@ -93,8 +108,9 @@ guide. Even a plant listed as non-toxic can cause stomach upset or another react
 
 ## My Green Friends and Today
 
-Owned plants remain separate from catalog species. Add placement, light, pot, drainage, soil,
-recent-care, and approximate-location context to create an initial schedule. The Today view groups
+Owned plants remain separate from catalog species. Add and later edit placement, light, window
+direction, pot, drainage, soil, recent-care, and approximate-location context to create an initial
+schedule. The Today view groups
 due, overdue, snoozed, and upcoming work. Completing a task creates a care event so the plant's
 history remains visible.
 

@@ -21,62 +21,67 @@ class AddCustomCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => goToPageSlidingUp(
-        context,
-        AddSpeciesPage(
-          name: species,
-          env: env,
-          updateSpeciesLocally: updateSpeciesLocally,
+    return Semantics(
+      button: true,
+      label: AppLocalizations.of(context).custom,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(10),
+        onTap: () => goToPageSlidingUp(
+          context,
+          AddSpeciesPage(
+            name: species,
+            env: env,
+            updateSpeciesLocally: updateSpeciesLocally,
+          ),
         ),
-      ),
-      child: Stack(
-        children: [
-          Container(
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * .4,
-              minHeight: MediaQuery.of(context).size.height * .4,
-            ),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: AspectRatio(
-              aspectRatio: 1,
-              child: ClipRRect(
+        child: Stack(
+          children: [
+            Container(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * .4,
+                minHeight: MediaQuery.of(context).size.height * .4,
+              ),
+              decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    ImageFiltered(
-                      imageFilter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                      child: Image.asset(
-                        "assets/images/add-custom.jpg",
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    Center(
-                      child: Text(
-                        AppLocalizations.of(context).custom,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          shadows: [
-                            Shadow(
-                              blurRadius: 10,
-                              color: Colors.black,
-                              offset: Offset(0, 2),
-                            ),
-                          ],
+              ),
+              child: AspectRatio(
+                aspectRatio: 1,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      ImageFiltered(
+                        imageFilter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                        child: Image.asset(
+                          "assets/images/add-custom.jpg",
+                          fit: BoxFit.cover,
                         ),
                       ),
-                    ),
-                  ],
+                      Center(
+                        child: Text(
+                          AppLocalizations.of(context).custom,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            shadows: [
+                              Shadow(
+                                blurRadius: 10,
+                                color: Colors.black,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

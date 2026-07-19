@@ -4,9 +4,10 @@ This roadmap records the product direction for the maintained fork. Each milesto
 self-hosting friendly: optional cloud providers may enrich the experience, but core search, care,
 and backup workflows must continue to work without API keys.
 
-The v0.14 onboarding milestone, v0.15 Trail Mode foundation, and v0.16 catalog-reliability
-foundation are implemented. The next product work adds a privacy-aware trail map and life list,
-then makes care schedules adapt to observed conditions and history. Trail Mode deliberately
+The v0.14 onboarding milestone, v0.15 Trail Mode foundation, v0.16 catalog-reliability foundation,
+and v0.17 care-tools and usability milestone are implemented. The next product work adds a
+privacy-aware trail map and life list, then makes care schedules adapt to observed conditions and
+history. Trail Mode deliberately
 separates a wild observation from an owned plant so a trail find never receives care reminders
 unless the user explicitly adds a cultivated plant to their collection.
 
@@ -78,6 +79,23 @@ unless the user explicitly adds a cultivated plant to their collection.
 - [x] Add separately reviewed human, cat, and dog safety profiles with attributable sources,
       explicit unknown states, and urgent-exposure guidance.
 
+## v0.17 — Care tools and UI reliability
+
+- [x] Add a privacy-first guided health check with optional local reference photos, visible
+      symptoms, soil moisture, light, airflow, recent-care context, and an explicit unsure path.
+- [x] Rank conservative issue patterns, label their strength, link each pattern to University
+      Extension guidance, and offer only a safe next inspection step rather than a diagnosis or
+      pesticide recommendation.
+- [x] Add an honest manual light-placement estimate, compare it with reviewed species guidance,
+      and let users save the broad observed-light category to an owned plant.
+- [x] Make every personalized care field viewable and editable after plant onboarding.
+- [x] Repair collection filtering, empty states, detail-tab state, calendar state, stale listeners,
+      and the previously inert catalog add action.
+- [x] Apply consistent high-contrast Material controls and minimum touch targets across core flows,
+      and correct the installable web app metadata and responsive orientation.
+- [x] Add narrow-screen widget tests for the new tools, collection search, navigation controls, and
+      the full care-profile editor.
+
 ## Next — Care that adapts
 
 - [ ] Expand the reviewed offline care catalog toward 150–200 common plants, with Extension or
@@ -92,16 +110,30 @@ unless the user explicitly adds a cultivated plant to their collection.
 
 - [x] Use a stable, uncropped photo-first search card with identity, match evidence, reviewed safety,
       and a clear next action outside the image.
-- [ ] Add a guided plant-health capture flow for the whole plant, both sides of an affected leaf,
-      stem, and soil instead of treating one ambiguous photo as a diagnosis.
-- [ ] Present likely issue categories, confidence, visible evidence, reviewed lookalikes, and
-      Extension or integrated-pest-management sources before offering treatment steps.
-- [ ] Keep automated health results explicitly provisional; support an **I am not sure** path and
+- [x] Add a guided plant-health check for the whole plant and affected area instead of treating one
+      ambiguous photo as a diagnosis; reference photos stay local and are not analyzed.
+- [ ] Add opt-in, privacy-documented photo analysis for both leaf sides, stem, and soil, while
+      retaining a complete manual fallback and confirmation step.
+- [x] Present likely issue categories, pattern strength, selected evidence, and Extension or
+      integrated-pest-management sources before suggesting a safe inspection step.
+- [x] Keep health results explicitly provisional; support an **I am not sure** path and
       never infer pesticide choice, dose, human safety, pet safety, or edibility from a photo.
-- [ ] Add a camera-assisted light check as a phone-specific estimate, with calibration guidance and
-      a manual fallback; never present an uncalibrated camera reading as a PAR measurement.
-- [ ] Let a confirmed issue create a follow-up journal entry and optional reminder without sending
+- [x] Add a manual light-placement check and never present it as a lux or PAR measurement.
+- [ ] Add an optional calibrated native-device light reading while retaining the manual fallback.
+- [x] Let a selected plant's health result open a follow-up journal entry without sending
+      reference photos to another service.
+- [ ] Let a confirmed issue create an optional reminder without sending
       plant photos to a third party unless the self-hoster enables and documents that provider.
+
+## Next — Personalized discovery
+
+- [ ] Add a private wishlist that keeps catalog plants separate from owned plants and reminders.
+- [ ] Add a smart finder with preference chips for room light, pet/child safety, experience level,
+      available space, indoor/outdoor placement, and desired plant type.
+- [ ] Add source-backed weed and invasive-status guidance by configured region; never infer
+      invasiveness globally from a name or photo.
+- [ ] Add a seasonal care dashboard that explains why a recommendation changed and learns only
+      from the user's self-hosted care history and explicitly enabled local weather data.
 
 ## Next — Self-hosting operations and portability
 

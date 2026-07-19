@@ -59,16 +59,13 @@ class _EventsPageState extends State<EventsPage> {
         child: Column(
           children: [
             FloatingTabBar(
+              selectedIndex: _activeIndex,
               titles: [
                 AppLocalizations.of(context).careTasks,
                 AppLocalizations.of(context).calendar,
                 AppLocalizations.of(context).events,
               ],
-              callbacks: [
-                () => _onTabSelected(0),
-                () => _onTabSelected(1),
-                () => _onTabSelected(2),
-              ],
+              onSelected: _onTabSelected,
             ),
             const SizedBox(height: 20),
             Expanded(

@@ -125,10 +125,10 @@ class SettingsExternalLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => _launchURL(url),
-      child: Container(
-        color: const Color.fromRGBO(24, 44, 37, 1),
+    return Material(
+      color: const Color.fromRGBO(24, 44, 37, 1),
+      child: InkWell(
+        onTap: () => _launchURL(url),
         child: Padding(
           padding: const EdgeInsets.all(13.0),
           child: Row(
@@ -175,7 +175,8 @@ class SettingsHeader extends StatelessWidget {
               AdvancedAvatar(
                 name: username,
                 size: 70,
-                style: const TextStyle(color: Color.fromARGB(255, 156, 192, 172)),
+                style:
+                    const TextStyle(color: Color.fromARGB(255, 156, 192, 172)),
                 decoration: BoxDecoration(
                   color: const Color.fromRGBO(53, 98, 82, 1),
                   borderRadius: BorderRadius.circular(50),
@@ -254,7 +255,7 @@ class LogoutButton extends StatelessWidget {
 
 class SettingsInternalLink extends StatelessWidget {
   final String title;
-  final Function onClick;
+  final VoidCallback onClick;
 
   const SettingsInternalLink({
     super.key,
@@ -264,10 +265,10 @@ class SettingsInternalLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => onClick(),
-      child: Container(
-        color: const Color.fromRGBO(24, 44, 37, 1),
+    return Material(
+      color: const Color.fromRGBO(24, 44, 37, 1),
+      child: InkWell(
+        onTap: onClick,
         child: Padding(
           padding: const EdgeInsets.all(13.0),
           child: Row(

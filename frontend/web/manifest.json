@@ -3,10 +3,10 @@
     "short_name": "Plant-it",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#hexcode",
-    "theme_color": "#hexcode",
-    "description": "Plant-it is a self-hosted gardening companion app.",
-    "orientation": "portrait-primary",
+    "background_color": "#061913",
+    "theme_color": "#6DD075",
+    "description": "A private, self-hosted plant care and trail companion.",
+    "orientation": "any",
     "prefer_related_applications": false,
     "icons": [
         {

@@ -110,7 +110,8 @@ class _GalleryImageState extends State<GalleryImage> {
 
 // build image with number for other images
   Widget _buildImageNumbers(int index) {
-    return GestureDetector(
+    return InkWell(
+      borderRadius: BorderRadius.circular(widget.imageRadius),
       onTap: () {
         _openImageFullScreen(index);
       },

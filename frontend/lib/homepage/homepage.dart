@@ -3,6 +3,7 @@ import 'package:plant_it/environment.dart';
 import 'package:plant_it/homepage/homepage_header.dart';
 import 'package:plant_it/homepage/plant_list.dart';
 import 'package:plant_it/event/recent_events.dart';
+import 'package:plant_it/homepage/care_tools_card.dart';
 
 class HomePage extends StatelessWidget {
   final Environment env;
@@ -21,6 +22,7 @@ class HomePage extends StatelessWidget {
           HomePageHeader(
             username: env.credentials.username,
           ),
+          HomeCareToolsCard(env: env),
           PlantList(
             env: env,
           ),

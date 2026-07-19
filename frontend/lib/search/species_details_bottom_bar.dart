@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:plant_it/app_exception.dart';
 import 'package:plant_it/app_http_client.dart';
+import 'package:plant_it/care/care_tools_page.dart';
 import 'package:plant_it/dto/species_dto.dart';
 import 'package:plant_it/environment.dart';
 import 'package:plant_it/plant_add/add_plant_page.dart';
@@ -86,8 +87,21 @@ class SpeciesDetailsBottomActionBar extends StatelessWidget {
       child: BottomAppBar(
           color: const Color.fromRGBO(24, 44, 37, 1),
           child: Row(children: [
-            ElevatedButton(
-              onPressed: () {},
+            ElevatedButton.icon(
+              onPressed: () => Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AddPlantPage(
+                    env: env,
+                    species: species,
+                    identificationImage: identificationImage,
+                  ),
+                ),
+              ).then((speciesCreated) {
+                if (speciesCreated != null) {
+                  updateSpeciesLocally(speciesCreated);
+                }
+              }),
               style: ElevatedButton.styleFrom(
                 padding:
                     const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
@@ -95,43 +109,29 @@ class SpeciesDetailsBottomActionBar extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8.0),
                 ),
               ),
-              child: GestureDetector(
-                onTap: () => Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => AddPlantPage(
-                      env: env,
-                      species: species,
-                      identificationImage: identificationImage,
-                    ),
-                  ),
-                ).then((speciesCreated) {
-                  if (speciesCreated != null) {
-                    updateSpeciesLocally(speciesCreated);
-                  }
-                }),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.add_circle_outline,
-                      size: 24,
-                      color: Color.fromARGB(255, 24, 24, 24),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      AppLocalizations.of(context).addPlant,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Color.fromARGB(255, 24, 24, 24),
-                      ),
-                    ),
-                  ],
+              icon: const Icon(Icons.add_circle_outline, size: 24),
+              label: Text(
+                AppLocalizations.of(context).addPlant,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
             const Spacer(),
+            IconButton(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => CareToolsPage(
+                    env: env,
+                    species: species,
+                  ),
+                ),
+              ),
+              icon: const Icon(Icons.health_and_safety_outlined),
+              color: const Color.fromARGB(255, 156, 192, 172),
+              tooltip: AppLocalizations.of(context).careTools,
+            ),
             IconButton(
               onPressed: () async {
                 final updated =

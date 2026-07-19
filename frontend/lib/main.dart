@@ -141,17 +141,25 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   Locale? _updatedLocale;
+  late final LocaleProvider _localeProvider;
 
   @override
   void initState() {
     super.initState();
-    Provider.of<LocaleProvider>(context, listen: false).addListener(() async {
-      final prefs = await SharedPreferences.getInstance();
-      if (prefs.containsKey('language_code')) {
-        _updatedLocale = Locale(
-            prefs.getString('language_code')!, prefs.getString('country_code'));
-      }
-    });
+    _updatedLocale = widget.prefSavedLocale;
+    _localeProvider = Provider.of<LocaleProvider>(context, listen: false);
+    _localeProvider.addListener(_handleLocaleChanged);
+  }
+
+  void _handleLocaleChanged() {
+    if (!mounted) return;
+    setState(() => _updatedLocale = _localeProvider.locale);
+  }
+
+  @override
+  void dispose() {
+    _localeProvider.removeListener(_handleLocaleChanged);
+    super.dispose();
   }
 
   @override
@@ -162,7 +170,7 @@ class _MyAppState extends State<MyApp> {
       title: 'Plant-it',
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      locale: _updatedLocale ?? widget.prefSavedLocale ?? localeProvider.locale,
+      locale: _updatedLocale ?? localeProvider.locale,
       theme: theme,
       home: widget.isLoggedIn
           ? SplashPage(env: widget.env)

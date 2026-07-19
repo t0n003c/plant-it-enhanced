@@ -4,6 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:plant_it/app_exception.dart';
+import 'package:plant_it/care/care_tools_page.dart';
 import 'package:plant_it/change_notifiers.dart';
 import 'package:plant_it/commons.dart';
 import 'package:plant_it/dto/plant_dto.dart';
@@ -119,6 +120,19 @@ class PlantDetailsBottomActionBar extends StatelessWidget {
               icon: const Icon(Icons.calendar_month_outlined),
               color: const Color.fromARGB(255, 156, 192, 172),
               tooltip: AppLocalizations.of(context).addEvents,
+            ),
+            IconButton(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => CareToolsPage(
+                    env: env,
+                    plant: plant,
+                  ),
+                ),
+              ),
+              icon: const Icon(Icons.health_and_safety_outlined),
+              color: const Color.fromARGB(255, 156, 192, 172),
+              tooltip: AppLocalizations.of(context).careTools,
             ),
             IconButton(
               onPressed: () async {

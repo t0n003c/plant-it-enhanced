@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:plant_it/app_exception.dart';
+import 'package:plant_it/care/care_tools_page.dart';
 import 'package:plant_it/deployment_build_info.dart';
 import 'package:plant_it/environment.dart';
 import 'package:plant_it/logger/logger.dart' as my_logger;
@@ -42,6 +43,7 @@ class _MorePageState extends State<MorePage> {
   bool _appVersionLoading = true;
   bool _ntfyVisible = false;
   bool _gotifyVisible = false;
+  late final NotifyConfNotifier _notifyConfNotifier;
 
   void _fetchAndSetStats() async {
     try {
@@ -104,6 +106,7 @@ class _MorePageState extends State<MorePage> {
 
   void _fetchAndSetAppVersion() async {
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    if (!mounted) return;
     _appVersion = packageInfo.version;
     setState(() {
       _appVersionLoading = false;
@@ -120,6 +123,7 @@ class _MorePageState extends State<MorePage> {
   }
 
   void _setNotificationServiceSettingVisibility() {
+    if (!mounted) return;
     setState(() {
       _ntfyVisible = _isNotificationDispatcherActiveAndEnabled("NTFY");
       _gotifyVisible = _isNotificationDispatcherActiveAndEnabled("GOTIFY");
@@ -130,11 +134,18 @@ class _MorePageState extends State<MorePage> {
   void initState() {
     super.initState();
     _setNotificationServiceSettingVisibility();
-    Provider.of<NotifyConfNotifier>(context, listen: false).addListener(() {
-      _setNotificationServiceSettingVisibility();
-    });
+    _notifyConfNotifier =
+        Provider.of<NotifyConfNotifier>(context, listen: false);
+    _notifyConfNotifier.addListener(_setNotificationServiceSettingVisibility);
     _fetchAndSetStats();
     _fetchAndSetAppVersion();
+  }
+
+  @override
+  void dispose() {
+    _notifyConfNotifier
+        .removeListener(_setNotificationServiceSettingVisibility);
+    super.dispose();
   }
 
   @override
@@ -193,6 +204,20 @@ class _MorePageState extends State<MorePage> {
           SettingsSection(
             title: AppLocalizations.of(context).stats,
             children: _buildStatsList(),
+          ),
+          SettingsSection(
+            title: AppLocalizations.of(context).careTools,
+            children: [
+              SettingsInternalLink(
+                title: AppLocalizations.of(context).openCareTools,
+                onClick: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CareToolsPage(env: widget.env),
+                  ),
+                ),
+              ),
+            ],
           ),
           SettingsSection(
             title: AppLocalizations.of(context).server,

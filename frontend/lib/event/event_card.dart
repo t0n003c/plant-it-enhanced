@@ -61,7 +61,8 @@ class EventCard extends StatelessWidget {
       actionIcon = typeIcons[action]!;
     }
 
-    return GestureDetector(
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
       onTap: () => goToPageSlidingUp(
           context, EditEventPage(env: env, eventDTO: eventDTO)),
       child: Padding(
