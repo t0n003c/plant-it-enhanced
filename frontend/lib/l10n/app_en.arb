@@ -176,6 +176,28 @@
     }
   },
   "safetyDisclaimer": "Reference guidance only—not medical or veterinary advice, and not an edibility guide. Even plants listed as non-toxic can cause stomach upset or other reactions.",
+  "catalogVariant": "Result group",
+  "benefitsAtHome": "Food and medicine notes",
+  "humanBenefits": "For people",
+  "petBenefits": "For pets",
+  "benefitUnknownDescription": "No reviewed food, enrichment, or traditional-use notes are available for this exact plant yet.",
+  "foodBenefitCategory": "Food",
+  "enrichmentBenefitCategory": "Enrichment",
+  "medicineBenefitCategory": "Medicine",
+  "benefitSources": "Reviewed sources",
+  "benefitReviewedFor": "Notes matched to {taxon}",
+  "@benefitReviewedFor": {
+    "placeholders": {
+      "taxon": {"type": "String"}
+    }
+  },
+  "benefitChecked": "Notes checked {date}",
+  "@benefitChecked": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "benefitDisclaimer": "Informational reference only—not medical, veterinary, dietary, or edibility advice. Ask a qualified professional about your specific situation.",
   "refreshCareGuide": "Refresh care guide",
   "careGuideUpdated": "Care guide updated",
   "careDataProvidedByMultiple": "Multiple sources",

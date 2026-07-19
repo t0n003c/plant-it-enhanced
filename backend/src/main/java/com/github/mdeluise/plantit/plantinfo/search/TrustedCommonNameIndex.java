@@ -132,8 +132,11 @@ public class TrustedCommonNameIndex {
         final BotanicalInfo result = new BotanicalInfo();
         result.setSpecies(entry.scientificName);
         result.setGenus(entry.scientificName.split(" ")[0]);
+        result.setCatalogVariant(entry.catalogVariant);
         result.setCreator(BotanicalInfoCreator.TRUSTED_NAME_INDEX);
-        result.setExternalId("trusted-name:" + PlantNameNormalizer.normalize(entry.scientificName));
+        result.setExternalId("trusted-name:" + PlantNameNormalizer.normalize(entry.scientificName) +
+                             (entry.catalogVariant == null ? "" : ":" +
+                                 PlantNameNormalizer.normalize(entry.catalogVariant)));
         result.setSynonyms(new LinkedHashSet<>(entry.scientificSynonyms));
         result.setCatalogTags(new LinkedHashSet<>(entry.catalogTags));
         for (String commonName : entry.commonNames) {
@@ -217,6 +220,7 @@ public class TrustedCommonNameIndex {
 
     private static final class TrustedNameEntry {
         private String scientificName;
+        private String catalogVariant;
         private List<String> scientificSynonyms = new ArrayList<>();
         private List<String> commonNames = new ArrayList<>();
         private List<String> catalogTags = new ArrayList<>();

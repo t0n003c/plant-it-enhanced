@@ -38,6 +38,18 @@ class BotanicalInfoCatalogMergerUnitTests {
 
 
     @Test
+    @DisplayName("Should keep distinct reviewed everyday-name variants separate")
+    void shouldNotMergeDistinctCatalogVariants() {
+        final BotanicalInfo bellPepper = createTaxon("", "Capsicum annuum");
+        bellPepper.setCatalogVariant("Bell pepper");
+        final BotanicalInfo thaiChili = createTaxon("", "Capsicum annuum");
+        thaiChili.setCatalogVariant("Thai chili");
+
+        Assertions.assertFalse(BotanicalInfoCatalogMerger.describesSameTaxon(bellPepper, thaiChili));
+    }
+
+
+    @Test
     @DisplayName("Should merge provider aliases while preserving existing care values")
     void shouldMergeProviderRecordsSafely() {
         final BotanicalInfo target = createTaxon("11041822", "Sansevieria trifasciata");

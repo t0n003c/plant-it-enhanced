@@ -118,6 +118,12 @@
       "sourceReference": "https://plants.ces.ncsu.edu/plants/capsicum-annuum/"
     },
     {
+      "scientificNames": ["Avena sativa"],
+      "light": 9,
+      "soilHumidity": 7,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/avena-sativa/"
+    },
+    {
       "scientificNames": ["Cucumis sativus"],
       "light": 9,
       "soilHumidity": 7,

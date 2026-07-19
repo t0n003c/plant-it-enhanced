@@ -84,6 +84,8 @@ public class BotanicalInfo implements Serializable, ImageTarget {
     private String searchMatchedName;
     @Transient
     private Set<String> catalogTags = new LinkedHashSet<>();
+    @Transient
+    private String catalogVariant;
 
 
     public Long getId() {
@@ -296,6 +298,16 @@ public class BotanicalInfo implements Serializable, ImageTarget {
 
     public void setCatalogTags(Set<String> catalogTags) {
         this.catalogTags = catalogTags == null ? new LinkedHashSet<>() : catalogTags;
+    }
+
+
+    public String getCatalogVariant() {
+        return catalogVariant;
+    }
+
+
+    public void setCatalogVariant(String catalogVariant) {
+        this.catalogVariant = catalogVariant;
     }
 
 

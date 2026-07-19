@@ -38,7 +38,9 @@ class SpeciesDTO {
   double? searchMatchConfidence;
   String? searchMatchedName;
   List<String> catalogTags;
+  String? catalogVariant;
   PlantSafetyInfoDTO safety;
+  PlantBenefitInfoDTO benefits;
 
   SpeciesDTO({
     this.id,
@@ -78,7 +80,9 @@ class SpeciesDTO {
     this.searchMatchConfidence,
     this.searchMatchedName,
     this.catalogTags = const [],
+    this.catalogVariant,
     this.safety = const PlantSafetyInfoDTO.unknown(),
+    this.benefits = const PlantBenefitInfoDTO.unknown(),
   });
 
   factory SpeciesDTO.fromJson(Map<String, dynamic> json) {
@@ -147,8 +151,12 @@ class SpeciesDTO {
       catalogTags: (json['catalogTags'] as List<dynamic>? ?? [])
           .map((value) => value.toString())
           .toList(),
+      catalogVariant: json['catalogVariant'] as String?,
       safety: PlantSafetyInfoDTO.fromJson(
         json['safety'] as Map<String, dynamic>?,
+      ),
+      benefits: PlantBenefitInfoDTO.fromJson(
+        json['benefits'] as Map<String, dynamic>?,
       ),
     );
   }
@@ -201,7 +209,9 @@ class SpeciesDTO {
       if (establishmentMeans != null) 'establishmentMeans': establishmentMeans,
       if (establishmentPlace != null) 'establishmentPlace': establishmentPlace,
       'catalogTags': catalogTags,
+      if (catalogVariant != null) 'catalogVariant': catalogVariant,
       'safety': safety.toMap(),
+      'benefits': benefits.toMap(),
     };
   }
 
@@ -346,6 +356,109 @@ class PlantSafetyInfoDTO {
       humanStatus == 'HIGHLY_TOXIC' ||
       catStatus == 'HIGHLY_TOXIC' ||
       dogStatus == 'HIGHLY_TOXIC';
+}
+
+class PlantBenefitInfoDTO {
+  final List<PlantBenefitEntryDTO> entries;
+  final List<PlantBenefitSourceDTO> sources;
+  final DateTime? lastVerifiedAt;
+  final bool reviewed;
+  final String? matchedTaxon;
+
+  const PlantBenefitInfoDTO({
+    this.entries = const [],
+    this.sources = const [],
+    this.lastVerifiedAt,
+    required this.reviewed,
+    this.matchedTaxon,
+  });
+
+  const PlantBenefitInfoDTO.unknown()
+      : entries = const [],
+        sources = const [],
+        lastVerifiedAt = null,
+        reviewed = false,
+        matchedTaxon = null;
+
+  factory PlantBenefitInfoDTO.fromJson(Map<String, dynamic>? json) {
+    if (json == null) return const PlantBenefitInfoDTO.unknown();
+    return PlantBenefitInfoDTO(
+      entries: (json['entries'] as List<dynamic>? ?? [])
+          .map((value) => PlantBenefitEntryDTO.fromJson(
+                value as Map<String, dynamic>,
+              ))
+          .toList(),
+      sources: (json['sources'] as List<dynamic>? ?? [])
+          .map((value) => PlantBenefitSourceDTO.fromJson(
+                value as Map<String, dynamic>,
+              ))
+          .toList(),
+      lastVerifiedAt: json['lastVerifiedAt'] == null
+          ? null
+          : DateTime.parse(json['lastVerifiedAt'] as String),
+      reviewed: json['reviewed'] as bool? ?? false,
+      matchedTaxon: json['matchedTaxon'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toMap() => {
+        'entries': entries.map((entry) => entry.toMap()).toList(),
+        'sources': sources.map((source) => source.toMap()).toList(),
+        if (lastVerifiedAt != null)
+          'lastVerifiedAt': lastVerifiedAt!.toIso8601String(),
+        'reviewed': reviewed,
+        if (matchedTaxon != null) 'matchedTaxon': matchedTaxon,
+      };
+}
+
+class PlantBenefitEntryDTO {
+  final String audience;
+  final String category;
+  final String title;
+  final String summary;
+  final String? caution;
+
+  const PlantBenefitEntryDTO({
+    required this.audience,
+    required this.category,
+    required this.title,
+    required this.summary,
+    this.caution,
+  });
+
+  factory PlantBenefitEntryDTO.fromJson(Map<String, dynamic> json) {
+    return PlantBenefitEntryDTO(
+      audience: json['audience'] as String? ?? 'UNKNOWN',
+      category: json['category'] as String? ?? 'OTHER',
+      title: json['title'] as String? ?? '',
+      summary: json['summary'] as String? ?? '',
+      caution: json['caution'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toMap() => {
+        'audience': audience,
+        'category': category,
+        'title': title,
+        'summary': summary,
+        if (caution != null) 'caution': caution,
+      };
+}
+
+class PlantBenefitSourceDTO {
+  final String name;
+  final String url;
+
+  const PlantBenefitSourceDTO({required this.name, required this.url});
+
+  factory PlantBenefitSourceDTO.fromJson(Map<String, dynamic> json) {
+    return PlantBenefitSourceDTO(
+      name: json['name'] as String? ?? '',
+      url: json['url'] as String? ?? '',
+    );
+  }
+
+  Map<String, dynamic> toMap() => {'name': name, 'url': url};
 }
 
 class PlantSafetySourceDTO {

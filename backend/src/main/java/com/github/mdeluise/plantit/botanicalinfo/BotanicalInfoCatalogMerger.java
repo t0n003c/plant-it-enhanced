@@ -43,17 +43,21 @@ public final class BotanicalInfoCatalogMerger {
     public static boolean describesSameTaxon(BotanicalInfo left, BotanicalInfo right) {
         prepareCanonicalIdentity(left);
         prepareCanonicalIdentity(right);
+        final String leftVariant = clean(left.getCatalogVariant());
+        final String rightVariant = clean(right.getCatalogVariant());
+        final boolean variantsCompatible = leftVariant == null || rightVariant == null ||
+                                                leftVariant.equalsIgnoreCase(rightVariant);
         final String leftKey = clean(left.getCanonicalTaxonKey());
         final String rightKey = clean(right.getCanonicalTaxonKey());
-        if (leftKey != null && rightKey != null) {
+        if (variantsCompatible && leftKey != null && rightKey != null) {
             return leftKey.equals(rightKey);
         }
-        if (hasSharedProviderReference(left, right)) {
+        if (variantsCompatible && hasSharedProviderReference(left, right)) {
             return true;
         }
         final String leftSpecies = PlantNameNormalizer.normalize(left.getSpecies());
         final String rightSpecies = PlantNameNormalizer.normalize(right.getSpecies());
-        return !leftSpecies.isBlank() && leftSpecies.equals(rightSpecies);
+        return variantsCompatible && !leftSpecies.isBlank() && leftSpecies.equals(rightSpecies);
     }
 
 

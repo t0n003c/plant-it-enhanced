@@ -67,6 +67,7 @@ void main() {
       'establishmentMeans': 'native',
       'establishmentPlace': 'United States',
       'catalogTags': ['NORTH_AMERICAN_TRAIL'],
+      'catalogVariant': 'Indoor plant',
       'safety': {
         'humanStatus': 'UNKNOWN',
         'catStatus': 'HIGHLY_TOXIC',
@@ -83,6 +84,23 @@ void main() {
         'reviewed': true,
         'matchedTaxon': 'Lilium',
       },
+      'benefits': {
+        'entries': [
+          {
+            'audience': 'HUMAN',
+            'category': 'FOOD',
+            'title': 'Food note',
+            'summary': 'A reviewed food note.',
+            'caution': 'Use caution.',
+          }
+        ],
+        'sources': [
+          {'name': 'Example source', 'url': 'https://example.org/source'}
+        ],
+        'lastVerifiedAt': '2026-07-19T00:00:00Z',
+        'reviewed': true,
+        'matchedTaxon': 'Dracaena trifasciata',
+      },
     });
 
     expect(species.synonyms, ['Sansevieria trifasciata', 'snake plant']);
@@ -91,6 +109,7 @@ void main() {
     expect(species.externalReferences['GBIF'], '11041822');
     expect(species.canonicalTaxonKey, '11041822');
     expect(species.catalogTags, ['NORTH_AMERICAN_TRAIL']);
+    expect(species.catalogVariant, 'Indoor plant');
     expect(species.imageFallbackUrl, 'https://example.org/square.jpg');
     expect(species.imageSource, 'INATURALIST');
     expect(species.imageLicenseCode, 'cc-by');
@@ -108,6 +127,9 @@ void main() {
     expect(species.safety.hazardousParts, ['Pollen', 'Vase water']);
     expect(species.safety.sources.single.name, 'ASPCA Animal Poison Control');
     expect(species.safety.matchedTaxon, 'Lilium');
+    expect(species.benefits.reviewed, isTrue);
+    expect(species.benefits.entries.single.category, 'FOOD');
+    expect(species.benefits.sources.single.name, 'Example source');
     expect(
         species.preferredCommonNameFor('es', region: 'MX'), 'Lengua de suegra');
     expect(species.preferredCommonNameFor('en', region: 'US'), 'Snake Plant');
@@ -118,6 +140,7 @@ void main() {
         'https://www.inaturalist.org/photos/12345');
     expect(species.toMap()['contextualIdentificationScore'], 0.94);
     expect(species.toMap()['safety']['catStatus'], 'HIGHLY_TOXIC');
+    expect(species.toMap()['benefits']['entries'].single['title'], 'Food note');
     expect(
       species.toMap()['identificationEvidence'],
       [
@@ -152,13 +175,13 @@ void main() {
       'preferredCommonName': 'Bell pepper',
       'commonNames': [
         {
-          'name': 'Bell pepper',
+          'name': 'Thai chili',
           'language': 'en',
           'preferred': true,
           'source': 'TRUSTED_NAME_INDEX',
         },
         {
-          'name': 'Thai chili',
+          'name': 'Bell pepper',
           'language': 'en',
           'preferred': false,
           'source': 'TRUSTED_NAME_INDEX',
@@ -177,8 +200,7 @@ void main() {
     expect(pepper.searchDisplayCommonNameFor('en', region: 'US'), 'Thai chili');
 
     pepper.searchMatchReason = 'SCIENTIFIC_NAME';
-    expect(
-        pepper.searchDisplayCommonNameFor('en', region: 'US'), 'Bell pepper');
+    expect(pepper.searchDisplayCommonNameFor('en', region: 'US'), 'Thai chili');
   });
 
   test('uses explicit unknown safety when an older server omits it', () {
