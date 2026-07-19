@@ -87,6 +87,11 @@ public abstract class AbstractPlantInfoExtractorStep implements PlantInfoExtract
 
 
     private boolean shouldQueryNext(Set<BotanicalInfo> result, int size, String searchTerm) {
+        if (result.stream().anyMatch(botanicalInfo ->
+            PlantSearchScorer.isStrongMatch(searchTerm, botanicalInfo) &&
+                BotanicalInfoCatalogMerger.hasUsableImage(botanicalInfo))) {
+            return false;
+        }
         return next != null && (result.size() < size || result.stream().anyMatch(
             botanicalInfo -> !BotanicalInfoCatalogMerger.hasUsableImage(botanicalInfo)) ||
                    result.stream().noneMatch(botanicalInfo -> PlantSearchScorer.isStrongMatch(
