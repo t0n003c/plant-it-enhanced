@@ -44,6 +44,27 @@ class AbstractPlantInfoExtractorStepUnitTests {
 
 
     @Test
+    @DisplayName("Should collapse related provider taxa around an exact reviewed common name")
+    void shouldCollapseRelatedProviderTaxaAroundExactReviewedName() {
+        final StubExtractor reviewedCatalog = new StubExtractor(
+            createPlant("Helianthus annuus", "Sunflower", "https://example.org/sunflower.jpg"));
+        final StubExtractor provider = new StubExtractor(
+            createPlant("Helianthus annuus", "common sunflower", null),
+            createPlant("Helianthus argophyllus", "silverleaf sunflower", null),
+            createPlant("Helianthus maximiliani", "Maximilian sunflower", null),
+            createPlant("Helianthus tuberosus", "Jerusalem artichoke", null),
+            createPlant("Helianthus petiolaris", "prairie sunflower", null));
+        reviewedCatalog.setNext(provider);
+
+        final List<BotanicalInfo> result = reviewedCatalog.extractPlants("sunflower", 5);
+
+        Assertions.assertEquals(1, result.size());
+        Assertions.assertEquals("Helianthus annuus", result.get(0).getSpecies());
+        Assertions.assertEquals("https://example.org/sunflower.jpg", result.get(0).getImage().getUrl());
+    }
+
+
+    @Test
     @DisplayName("Should rank an exact downstream result and remove unrelated typo coincidences")
     void shouldPreferAnExactDownstreamResult() {
         final StubExtractor fuzzyCatalog = new StubExtractor(
