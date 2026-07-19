@@ -36,8 +36,15 @@ public abstract class AbstractPlantInfoExtractorStep implements PlantInfoExtract
             next.extractPlants(partialPlantScientificName, size, locale, region)
                 .forEach(candidate -> addOrMerge(result, candidate));
         }
-        final boolean hasStrongMatch = result.stream().anyMatch(candidate ->
-            PlantSearchScorer.isStrongMatch(partialPlantScientificName, candidate));
+        final List<BotanicalInfo> strongMatches = result.stream()
+                                                         .filter(candidate -> PlantSearchScorer.isStrongMatch(
+                                                             partialPlantScientificName, candidate))
+                                                         .toList();
+        if (!strongMatches.isEmpty()) {
+            result.removeIf(candidate -> strongMatches.stream().noneMatch(strongMatch ->
+                BotanicalInfoCatalogMerger.describesSameTaxon(strongMatch, candidate)));
+        }
+        final boolean hasStrongMatch = !strongMatches.isEmpty();
         return result.stream()
                      .filter(candidate -> !hasStrongMatch || PlantSearchScorer.evaluate(
                          partialPlantScientificName, candidate).reason() != PlantSearchMatchReason.COMMON_NAME_TYPO)
