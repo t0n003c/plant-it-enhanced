@@ -2,8 +2,8 @@ apiVersion: v2
 name: plant-it-enhanced
 description: Self-hosted gardening and private field-journal companion
 type: application
-version: 0.16.0
-appVersion: "0.16.0"
+version: 0.16.1
+appVersion: "0.16.1"
 icon: https://github.com/t0n003c/plant-it-enhanced/blob/main/images/plant-it-logo.png?raw=true
 keywords:
   - plants

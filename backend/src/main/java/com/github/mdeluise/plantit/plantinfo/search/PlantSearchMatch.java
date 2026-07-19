@@ -1,6 +1,6 @@
 package com.github.mdeluise.plantit.plantinfo.search;
 
-public record PlantSearchMatch(int score, double confidence, PlantSearchMatchReason reason) {
+public record PlantSearchMatch(int score, double confidence, PlantSearchMatchReason reason, String matchedName) {
     private static final double MINIMUM_RELEVANCE = 0.50;
 
 

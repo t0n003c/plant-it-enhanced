@@ -98,6 +98,8 @@ public class BotanicalInfoDTO {
     private String searchMatchReason;
     @Schema(description = "Search relevance confidence from zero to one.", accessMode = Schema.AccessMode.READ_ONLY)
     private Double searchMatchConfidence;
+    @Schema(description = "Plant name that best matched the search query.", accessMode = Schema.AccessMode.READ_ONLY)
+    private String searchMatchedName;
     @Schema(description = "Reviewed catalog collections containing this plant.",
             accessMode = Schema.AccessMode.READ_ONLY)
     private Set<String> catalogTags = new LinkedHashSet<>();
@@ -450,6 +452,16 @@ public class BotanicalInfoDTO {
 
     public void setSearchMatchConfidence(Double searchMatchConfidence) {
         this.searchMatchConfidence = searchMatchConfidence;
+    }
+
+
+    public String getSearchMatchedName() {
+        return searchMatchedName;
+    }
+
+
+    public void setSearchMatchedName(String searchMatchedName) {
+        this.searchMatchedName = searchMatchedName;
     }
 
 

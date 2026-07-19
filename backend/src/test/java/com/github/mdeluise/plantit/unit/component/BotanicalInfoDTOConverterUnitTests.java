@@ -37,6 +37,24 @@ class BotanicalInfoDTOConverterUnitTests {
     }
 
 
+    @Test
+    @DisplayName("Should expose the plant name that matched the search")
+    void shouldExposeMatchedSearchName() {
+        final BotanicalInfo botanicalInfo = new BotanicalInfo();
+        botanicalInfo.setSpecies("Capsicum annuum");
+        botanicalInfo.setCreator(BotanicalInfoCreator.TRUSTED_NAME_INDEX);
+        botanicalInfo.setSearchMatchReason("EXACT_COMMON_NAME");
+        botanicalInfo.setSearchMatchConfidence(1.0);
+        botanicalInfo.setSearchMatchedName("Thai pepper");
+
+        final BotanicalInfoDTO dto = createConverter().convertToDTO(botanicalInfo);
+
+        Assertions.assertEquals("EXACT_COMMON_NAME", dto.getSearchMatchReason());
+        Assertions.assertEquals(1.0, dto.getSearchMatchConfidence());
+        Assertions.assertEquals("Thai pepper", dto.getSearchMatchedName());
+    }
+
+
     private BotanicalInfoDTOConverter createConverter() {
         final ModelMapper modelMapper = new ModelMapper();
         return new BotanicalInfoDTOConverter(modelMapper, new PlantCareInfoDTOConverter(modelMapper));

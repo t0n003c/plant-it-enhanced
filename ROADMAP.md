@@ -74,6 +74,7 @@ unless the user explicitly adds a cultivated plant to their collection.
 - [x] Run quota-safe scheduled provider canaries and deduplicate failure alerts.
 - [x] Track sanitized, account-scoped no-result, missing-image, and missing-care gaps locally.
 - [x] Expose tier coverage and recent gaps in a high-contrast mobile Catalog Health screen.
+- [x] Preserve the query-matched everyday name and keep search responsive during provider work.
 
 ## Next — Care that adapts
 

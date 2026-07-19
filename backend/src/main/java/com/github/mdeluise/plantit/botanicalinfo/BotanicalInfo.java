@@ -81,6 +81,8 @@ public class BotanicalInfo implements Serializable, ImageTarget {
     @Transient
     private Double searchMatchConfidence;
     @Transient
+    private String searchMatchedName;
+    @Transient
     private Set<String> catalogTags = new LinkedHashSet<>();
 
 
@@ -274,6 +276,16 @@ public class BotanicalInfo implements Serializable, ImageTarget {
 
     public void setSearchMatchConfidence(Double searchMatchConfidence) {
         this.searchMatchConfidence = searchMatchConfidence;
+    }
+
+
+    public String getSearchMatchedName() {
+        return searchMatchedName;
+    }
+
+
+    public void setSearchMatchedName(String searchMatchedName) {
+        this.searchMatchedName = searchMatchedName;
     }
 
 

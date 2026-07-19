@@ -77,7 +77,7 @@ class _TemplatePageState extends State<TemplatePage> {
     return switch (index) {
       0 => HomePage(env: _env),
       1 => EventsPage(env: _env),
-      2 => SeachPage(env: _env),
+      2 => SearchPage(env: _env),
       3 => ObservationJournalPage(env: _env),
       4 => MorePage(env: _env),
       _ => throw RangeError.index(index, _pages),

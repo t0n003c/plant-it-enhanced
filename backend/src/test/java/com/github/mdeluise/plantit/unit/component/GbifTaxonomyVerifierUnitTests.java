@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfo;
@@ -63,6 +64,31 @@ class GbifTaxonomyVerifierUnitTests {
         Assertions.assertEquals("11041822", result.getExternalReferences().get("GBIF"));
         Assertions.assertEquals("11041822", result.getCanonicalTaxonKey());
         Assertions.assertNotNull(result.getLastVerifiedAt());
+    }
+
+
+    @Test
+    @DisplayName("Should reuse a recent verification for the same scientific name")
+    void shouldReuseRecentVerification() {
+        final AtomicInteger requestCount = new AtomicInteger();
+        server.createContext("/v2/species/match", exchange -> {
+            requestCount.incrementAndGet();
+            respond(exchange, MATCH_RESPONSE);
+        });
+        server.start();
+        final GbifTaxonomyVerifier verifier = createVerifier();
+        final BotanicalInfo first = new BotanicalInfo();
+        first.setSpecies("Sansevieria trifasciata");
+        final BotanicalInfo second = new BotanicalInfo();
+        second.setSpecies("Sansevieria trifasciata");
+
+        verifier.verify(first);
+        verifier.verify(second);
+
+        Assertions.assertEquals(1, requestCount.get());
+        Assertions.assertEquals("Dracaena trifasciata", first.getSpecies());
+        Assertions.assertEquals("Dracaena trifasciata", second.getSpecies());
+        Assertions.assertEquals(first.getLastVerifiedAt(), second.getLastVerifiedAt());
     }
 
 

@@ -36,6 +36,7 @@ class SpeciesDTO {
   String? establishmentPlace;
   String? searchMatchReason;
   double? searchMatchConfidence;
+  String? searchMatchedName;
   List<String> catalogTags;
 
   SpeciesDTO({
@@ -74,6 +75,7 @@ class SpeciesDTO {
     this.establishmentPlace,
     this.searchMatchReason,
     this.searchMatchConfidence,
+    this.searchMatchedName,
     this.catalogTags = const [],
   });
 
@@ -139,6 +141,7 @@ class SpeciesDTO {
       searchMatchReason: json['searchMatchReason'],
       searchMatchConfidence:
           (json['searchMatchConfidence'] as num?)?.toDouble(),
+      searchMatchedName: json['searchMatchedName'] as String?,
       catalogTags: (json['catalogTags'] as List<dynamic>? ?? [])
           .map((value) => value.toString())
           .toList(),
@@ -235,6 +238,27 @@ class SpeciesDTO {
     }
     return findName((name) => name.preferred)?.name.trim() ??
         findName((name) => true)?.name.trim();
+  }
+
+  String? searchDisplayCommonNameFor(String language, {String? region}) {
+    final String? matchedName = searchMatchedName?.trim();
+    if (matchedName != null &&
+        matchedName.isNotEmpty &&
+        _matchedByCommonName()) {
+      return matchedName;
+    }
+    return preferredCommonNameFor(language, region: region);
+  }
+
+  bool _matchedByCommonName() {
+    return switch (searchMatchReason) {
+      'EXACT_COMMON_NAME' ||
+      'COMMON_NAME_PREFIX' ||
+      'COMMON_NAME_KEYWORDS' ||
+      'COMMON_NAME_TYPO' =>
+        true,
+      _ => false,
+    };
   }
 }
 

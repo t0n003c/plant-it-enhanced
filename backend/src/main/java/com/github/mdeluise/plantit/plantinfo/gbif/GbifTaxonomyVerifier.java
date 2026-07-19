@@ -9,11 +9,14 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfo;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoCreator;
 import com.github.mdeluise.plantit.plantinfo.config.GbifProperties;
 import com.github.mdeluise.plantit.plantinfo.config.PlantSearchProperties;
+import com.github.mdeluise.plantit.plantinfo.search.PlantNameNormalizer;
 import com.github.mdeluise.plantit.systeminfo.ProviderStatusRegistry;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -32,12 +35,17 @@ public class GbifTaxonomyVerifier {
     private static final int HTTP_SERVER_ERROR_MIN = 500;
     private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(4);
     private static final Duration RETRY_DELAY = Duration.ofMinutes(1);
+    private static final Duration VERIFICATION_CACHE_TTL = Duration.ofHours(24);
+    private static final int MAX_VERIFICATION_CACHE_ENTRIES = 512;
+    private static final int VERIFICATION_CACHE_INITIAL_CAPACITY = 32;
     private final HttpClient client;
     private final String baseEndpoint;
     private final String userAgent;
     private final int minimumConfidence;
     private volatile Instant unavailableUntil = Instant.EPOCH;
     private final ProviderStatusRegistry providerStatusRegistry;
+    private final Map<String, CachedVerification> verificationCache =
+        new LinkedHashMap<>(VERIFICATION_CACHE_INITIAL_CAPACITY, 0.75F, true);
     private final Logger logger = LoggerFactory.getLogger(GbifTaxonomyVerifier.class);
 
 
@@ -59,7 +67,18 @@ public class GbifTaxonomyVerifier {
     }
 
 
+    @SuppressWarnings("ReturnCount")
     public BotanicalInfo verify(BotanicalInfo candidate) {
+        final String cacheKey = PlantNameNormalizer.normalize(candidate.getSpecies());
+        final CachedVerification cachedVerification = readCachedVerification(cacheKey);
+        if (cachedVerification != null) {
+            applyVerification(
+                candidate,
+                JsonParser.parseString(cachedVerification.responseBody()).getAsJsonObject(),
+                cachedVerification.verifiedAt()
+            );
+            return candidate;
+        }
         if (Instant.now().isBefore(unavailableUntil)) {
             return candidate;
         }
@@ -88,7 +107,10 @@ public class GbifTaxonomyVerifier {
             }
             providerStatusRegistry.recordSuccess("GBIF", response.statusCode(), quotaRemaining(response));
             unavailableUntil = Instant.EPOCH;
-            applyVerification(candidate, JsonParser.parseString(response.body()).getAsJsonObject());
+            final JsonObject responseBody = JsonParser.parseString(response.body()).getAsJsonObject();
+            final Instant verifiedAt = Instant.now();
+            applyVerification(candidate, responseBody, verifiedAt);
+            writeCachedVerification(cacheKey, response.body(), verifiedAt);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             markUnavailable();
@@ -108,7 +130,7 @@ public class GbifTaxonomyVerifier {
     }
 
 
-    private void applyVerification(BotanicalInfo candidate, JsonObject response) {
+    private void applyVerification(BotanicalInfo candidate, JsonObject response, Instant verifiedAt) {
         final JsonObject diagnostics = getObject(response, "diagnostics");
         if (diagnostics == null || readInt(diagnostics, "confidence") < minimumConfidence) {
             return;
@@ -131,7 +153,46 @@ public class GbifTaxonomyVerifier {
             candidate.setCanonicalTaxonKey(gbifKey);
         }
         applyClassification(candidate, response.get("classification"));
-        candidate.setLastVerifiedAt(Instant.now());
+        candidate.setLastVerifiedAt(verifiedAt);
+    }
+
+
+    @SuppressWarnings("ReturnCount")
+    private CachedVerification readCachedVerification(String key) {
+        if (key.isBlank()) {
+            return null;
+        }
+        synchronized (verificationCache) {
+            final CachedVerification cached = verificationCache.get(key);
+            if (cached == null) {
+                return null;
+            }
+            if (!Instant.now().isBefore(cached.expiresAt())) {
+                verificationCache.remove(key);
+                return null;
+            }
+            return cached;
+        }
+    }
+
+
+    private void writeCachedVerification(String key, String responseBody, Instant verifiedAt) {
+        if (key.isBlank()) {
+            return;
+        }
+        synchronized (verificationCache) {
+            if (!verificationCache.containsKey(key) &&
+                    verificationCache.size() >= MAX_VERIFICATION_CACHE_ENTRIES) {
+                final var oldestKey = verificationCache.keySet().iterator();
+                if (oldestKey.hasNext()) {
+                    verificationCache.remove(oldestKey.next());
+                }
+            }
+            verificationCache.put(
+                key,
+                new CachedVerification(responseBody, verifiedAt, verifiedAt.plus(VERIFICATION_CACHE_TTL))
+            );
+        }
     }
 
 
@@ -173,5 +234,9 @@ public class GbifTaxonomyVerifier {
 
     private String quotaRemaining(HttpResponse<?> response) {
         return response.headers().firstValue("x-ratelimit-remaining").orElse(null);
+    }
+
+
+    private record CachedVerification(String responseBody, Instant verifiedAt, Instant expiresAt) {
     }
 }

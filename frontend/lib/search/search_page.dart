@@ -11,26 +11,25 @@ import 'package:plant_it/search/photo_source_sheet.dart';
 import 'package:plant_it/search/plant_search_repository.dart';
 import 'package:plant_it/search/search_result.dart';
 
-class SeachPage extends StatefulWidget {
+class SearchPage extends StatefulWidget {
   final Environment env;
-  const SeachPage({
+  const SearchPage({
     super.key,
     required this.env,
   });
 
   @override
-  State<SeachPage> createState() => _SeachPageState();
+  State<SearchPage> createState() => _SearchPageState();
 }
 
-class _SeachPageState extends State<SeachPage> {
-  static const Duration _searchDelay = Duration(milliseconds: 1100);
+class _SearchPageState extends State<SearchPage> {
+  static const Duration _searchDelay = Duration(milliseconds: 400);
   static const int _minimumSearchLength = 2;
   final TextEditingController _searchController = TextEditingController();
-  final controller = PageController(viewportFraction: .8, keepPage: true);
   late final PlantSearchRepository _repository;
   List<SpeciesDTO> _result = [];
   Timer? _debounce;
-  bool _loading = true;
+  bool _loading = false;
   String? _errorMessage;
   int _requestSequence = 0;
   XFile? _identificationImage;
@@ -39,8 +38,7 @@ class _SeachPageState extends State<SeachPage> {
   Future<void> _fetchAndSetResult(String searchTerm) async {
     final String normalizedTerm = searchTerm.trim();
     final int requestId = ++_requestSequence;
-    if (normalizedTerm.isNotEmpty &&
-        normalizedTerm.length < _minimumSearchLength) {
+    if (normalizedTerm.length < _minimumSearchLength) {
       setState(() {
         _result = [];
         _loading = false;
@@ -62,21 +60,59 @@ class _SeachPageState extends State<SeachPage> {
       if (!mounted || requestId != _requestSequence) return;
       setState(() {
         _result = result;
+        _loading = false;
       });
     } catch (e, st) {
       if (!mounted || requestId != _requestSequence) return;
       widget.env.logger.error(e, st);
       setState(() {
         _result = [];
+        _loading = false;
         _errorMessage = e.toString().replaceFirst("Exception: ", "");
       });
-    } finally {
-      if (mounted && requestId == _requestSequence) {
-        setState(() {
-          _loading = false;
-        });
-      }
     }
+  }
+
+  void _handleSearchChanged(String value) {
+    _debounce?.cancel();
+    _requestSequence++;
+    final String normalizedTerm = value.trim();
+    setState(() {
+      _identificationMode = false;
+      _identificationImage = null;
+      _errorMessage = null;
+      _loading = normalizedTerm.length >= _minimumSearchLength;
+      if (normalizedTerm.length < _minimumSearchLength) {
+        _result = [];
+      }
+    });
+    if (normalizedTerm.length < _minimumSearchLength) return;
+    _debounce = Timer(_searchDelay, () {
+      _fetchAndSetResult(normalizedTerm);
+    });
+  }
+
+  void _submitSearch(String value) {
+    _debounce?.cancel();
+    final String normalizedTerm = value.trim();
+    if (normalizedTerm.length < _minimumSearchLength) {
+      _handleSearchChanged(normalizedTerm);
+      return;
+    }
+    _fetchAndSetResult(normalizedTerm);
+  }
+
+  void _clearSearch() {
+    _debounce?.cancel();
+    _requestSequence++;
+    _searchController.clear();
+    setState(() {
+      _result = [];
+      _loading = false;
+      _errorMessage = null;
+      _identificationMode = false;
+      _identificationImage = null;
+    });
   }
 
   Future<void> _startGuidedIdentification(ImageSource source) async {
@@ -163,133 +199,201 @@ class _SeachPageState extends State<SeachPage> {
   void initState() {
     super.initState();
     _repository = PlantSearchRepository(widget.env.http);
-    _fetchAndSetResult("");
   }
 
   @override
   void dispose() {
     _debounce?.cancel();
     _searchController.dispose();
-    controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      physics: ClampingScrollPhysics(),
-      child: Center(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _searchController,
-                      decoration: InputDecoration(
-                        hintText:
-                            AppLocalizations.of(context).searchNewGreenFriends,
-                        prefixIcon: const Icon(Icons.search_outlined),
-                        suffixIcon: _searchController.text.isNotEmpty
-                            ? GestureDetector(
-                                onTap: () {
-                                  _debounce?.cancel();
-                                  _searchController.clear();
-                                  setState(() {
-                                    _identificationMode = false;
-                                    _identificationImage = null;
-                                  });
-                                  _fetchAndSetResult("");
-                                },
-                                child: const Icon(Icons.close_outlined),
-                              )
-                            : null,
-                        border: const OutlineInputBorder(),
-                      ),
-                      onChanged: (value) {
-                        _requestSequence++;
-                        setState(() {
-                          _identificationMode = false;
-                          _identificationImage = null;
-                        });
-                        if (_debounce?.isActive ?? false) _debounce!.cancel();
-                        _debounce = Timer(_searchDelay, () {
-                          _fetchAndSetResult(value);
-                        });
-                      },
+    final String normalizedTerm = _searchController.text.trim();
+    final bool showSearchPrompt = !_identificationMode &&
+        normalizedTerm.length < _minimumSearchLength &&
+        !_loading;
+    final bool showNoResults = !_identificationMode &&
+        normalizedTerm.length >= _minimumSearchLength &&
+        !_loading &&
+        _errorMessage == null &&
+        _result.isEmpty;
+    final bool showCustomCard = !_identificationMode &&
+        normalizedTerm.length >= _minimumSearchLength &&
+        !_loading &&
+        _errorMessage == null;
+    final int cardCount = _result.length + (showCustomCard ? 1 : 0);
+
+    return CustomScrollView(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      physics: const ClampingScrollPhysics(),
+      slivers: [
+        const SliverToBoxAdapter(child: SizedBox(height: 16)),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    key: const ValueKey('plant-search-field'),
+                    controller: _searchController,
+                    textInputAction: TextInputAction.search,
+                    decoration: InputDecoration(
+                      hintText:
+                          AppLocalizations.of(context).searchNewGreenFriends,
+                      prefixIcon: const Icon(Icons.search_outlined),
+                      suffixIcon: normalizedTerm.isNotEmpty
+                          ? IconButton(
+                              key: const ValueKey('clear-plant-search'),
+                              onPressed: _clearSearch,
+                              tooltip: MaterialLocalizations.of(context)
+                                  .closeButtonTooltip,
+                              icon: const Icon(Icons.close_outlined),
+                            )
+                          : null,
+                      border: const OutlineInputBorder(),
                     ),
+                    onChanged: _handleSearchChanged,
+                    onSubmitted: _submitSearch,
                   ),
-                  const SizedBox(width: 8),
-                  IconButton.filled(
-                    onPressed: _loading ? null : _showPhotoOptions,
-                    tooltip: AppLocalizations.of(context).identifyByPhoto,
-                    icon: const Icon(Icons.camera_alt_outlined),
+                ),
+                const SizedBox(width: 8),
+                IconButton.filled(
+                  key: const ValueKey('identify-plant-by-photo'),
+                  onPressed: _showPhotoOptions,
+                  tooltip: AppLocalizations.of(context).identifyByPhoto,
+                  icon: const Icon(Icons.camera_alt_outlined),
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (_loading)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const LinearProgressIndicator(minHeight: 3),
+                  const SizedBox(height: 8),
+                  Text(
+                    _identificationMode
+                        ? AppLocalizations.of(context).identifyingPlant
+                        : AppLocalizations.of(context)
+                            .searchingForPlant(normalizedTerm),
+                    key: const ValueKey('plant-search-progress-label'),
+                    style: const TextStyle(color: Colors.white70),
                   ),
                 ],
               ),
             ),
-            if (_identificationMode && !_loading && _errorMessage == null)
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                child: Text(
-                  AppLocalizations.of(context).identificationCandidates,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.grey),
-                ),
+          ),
+        if (_identificationMode && !_loading && _errorMessage == null)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              child: Text(
+                AppLocalizations.of(context).identificationCandidates,
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.grey),
               ),
-            if (_loading)
-              const CircularProgressIndicator()
-            else if (_errorMessage != null)
-              Padding(
-                padding: const EdgeInsets.all(35),
-                child: Text(
-                  _errorMessage!,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
-                ),
-              )
-            else
-              Padding(
-                padding: const EdgeInsets.all(35),
-                child: Column(
-                  children: [
-                    ..._result.map(
-                      (r) => Column(
-                        children: [
-                          SearchResultCard(
-                            species: r,
-                            env: widget.env,
-                            result: _result,
-                            identificationImage: _identificationMode
-                                ? _identificationImage
-                                : null,
-                            updateSpeciesLocally: (s) =>
-                                _fetchAndSetResult(_searchController.text),
-                          ),
-                          SizedBox(
-                            height: 20,
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (!_identificationMode)
-                      AddCustomCard(
+            ),
+          ),
+        if (_errorMessage != null)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Text(
+                _errorMessage!,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
+            ),
+          ),
+        if (showSearchPrompt)
+          SliverToBoxAdapter(
+            child: _SearchMessage(
+              icon: Icons.local_florist_outlined,
+              message: AppLocalizations.of(context).plantSearchStartHint,
+            ),
+          ),
+        if (showNoResults)
+          SliverToBoxAdapter(
+            child: _SearchMessage(
+              icon: Icons.search_off_outlined,
+              message: AppLocalizations.of(context)
+                  .noPlantSearchResults(normalizedTerm),
+            ),
+          ),
+        if (_errorMessage == null && cardCount > 0)
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  if (index == _result.length) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 20),
+                      child: AddCustomCard(
+                        key: const ValueKey('add-custom-plant-result'),
                         env: widget.env,
-                        species: _searchController.text,
+                        species: normalizedTerm,
                         updateSpeciesLocally: (s) =>
                             _fetchAndSetResult(_searchController.text),
                       ),
-                  ],
-                ),
+                    );
+                  }
+                  final SpeciesDTO species = _result[index];
+                  final String resultKey = species.canonicalTaxonKey ??
+                      species.externalId ??
+                      species.scientificName;
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    child: SearchResultCard(
+                      key: ValueKey('plant-search-result-$resultKey'),
+                      species: species,
+                      env: widget.env,
+                      result: _result,
+                      identificationImage:
+                          _identificationMode ? _identificationImage : null,
+                      updateSpeciesLocally: (s) =>
+                          _fetchAndSetResult(_searchController.text),
+                    ),
+                  );
+                },
+                childCount: cardCount,
               ),
-            const SizedBox(height: 100),
-          ],
-        ),
+            ),
+          ),
+        const SliverToBoxAdapter(child: SizedBox(height: 100)),
+      ],
+    );
+  }
+}
+
+class _SearchMessage extends StatelessWidget {
+  final IconData icon;
+  final String message;
+
+  const _SearchMessage({required this.icon, required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 36),
+      child: Column(
+        children: [
+          Icon(icon, size: 40, color: const Color(0xFF9BE7A1)),
+          const SizedBox(height: 12),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+        ],
       ),
     );
   }
