@@ -82,7 +82,7 @@ available. Plant-it retains the provider's source page, license code, and attrib
 smaller square thumbnail if the preferred medium image cannot be loaded. Existing local and
 user-selected images always take precedence.
 
-The reviewed offline index contains 177 taxa and 859 accepted scientific-name, synonym,
+The reviewed offline index contains 177 taxa and 863 accepted scientific-name, synonym,
 and everyday-name test queries and works without an API key. The cultivated tier contains 87 plants
 with reviewed light and soil-moisture guidance; the trail tier contains 90 North American plants
 whose household-care fields are intentionally not required. The web app sends its current language
@@ -100,7 +100,7 @@ One versioned manifest defines the support policy for every reviewed entry. Rele
 the complete local name corpus, enforce unique exact identities and complete cultivated-care
 requirements, and replay recorded response contracts for each external provider. A weekly,
 rate-limited GitHub audit checks all 177 reviewed plants against live iNaturalist image and GBIF
-taxonomy endpoints; 15 stable manifest canaries provide a faster representative set. Repository
+taxonomy endpoints; 17 stable manifest canaries provide a faster representative set. Repository
 secrets can also verify Trefle and Pl@ntNet.
 
 When an authenticated search still returns nothing, lacks a top-result image, or produces no care

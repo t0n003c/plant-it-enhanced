@@ -353,7 +353,24 @@
     {
       "scientificName": "Cucurbita pepo",
       "scientificSynonyms": [],
-      "commonNames": ["Zucchini", "courgette", "summer squash", "field pumpkin"]
+      "commonNames": [
+        "Zucchini",
+        "courgette",
+        "summer squash",
+        "Pumpkin",
+        "pumpkin plant",
+        "sugar pumpkin",
+        "jack-o'-lantern pumpkin",
+        "field pumpkin"
+      ],
+      "image": {
+        "url": "https://inaturalist-open-data.s3.amazonaws.com/photos/101476279/medium.png",
+        "fallbackUrl": "https://inaturalist-open-data.s3.amazonaws.com/photos/101476279/square.png",
+        "source": "INATURALIST",
+        "sourceUrl": "https://www.inaturalist.org/photos/101476279",
+        "licenseCode": "cc-by-nc",
+        "attribution": "(c) psullivan22, some rights reserved (CC BY-NC), uploaded by psullivan22"
+      }
     },
     {
       "scientificName": "Fragaria ananassa",
@@ -363,7 +380,15 @@
     {
       "scientificName": "Helianthus annuus",
       "scientificSynonyms": [],
-      "commonNames": ["Sunflower", "common sunflower", "annual sunflower", "Kansas sunflower"]
+      "commonNames": ["Sunflower", "common sunflower", "annual sunflower", "Kansas sunflower"],
+      "image": {
+        "url": "https://inaturalist-open-data.s3.amazonaws.com/photos/323768723/medium.jpg",
+        "fallbackUrl": "https://inaturalist-open-data.s3.amazonaws.com/photos/323768723/square.jpg",
+        "source": "INATURALIST",
+        "sourceUrl": "https://www.inaturalist.org/photos/323768723",
+        "licenseCode": "cc-by-nc",
+        "attribution": "(c) Emily Scherer, some rights reserved (CC BY-NC), uploaded by Emily Scherer"
+      }
     },
     {
       "scientificName": "Lavandula angustifolia",

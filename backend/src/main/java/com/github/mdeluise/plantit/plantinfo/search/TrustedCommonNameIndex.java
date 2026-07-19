@@ -14,6 +14,7 @@ import java.util.Set;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalCommonName;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfo;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoCreator;
+import com.github.mdeluise.plantit.image.BotanicalInfoImage;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -141,6 +142,16 @@ public class TrustedCommonNameIndex {
                 BotanicalInfoCreator.TRUSTED_NAME_INDEX
             ));
         }
+        if (entry.image != null && entry.image.url != null && !entry.image.url.isBlank()) {
+            final BotanicalInfoImage image = new BotanicalInfoImage();
+            image.setUrl(entry.image.url);
+            image.setFallbackUrl(entry.image.fallbackUrl);
+            image.setSource(entry.image.source);
+            image.setSourceUrl(entry.image.sourceUrl);
+            image.setLicenseCode(entry.image.licenseCode);
+            image.setAttribution(entry.image.attribution);
+            result.setImage(image);
+        }
         return result;
     }
 
@@ -205,5 +216,16 @@ public class TrustedCommonNameIndex {
         private List<String> scientificSynonyms = new ArrayList<>();
         private List<String> commonNames = new ArrayList<>();
         private List<String> catalogTags = new ArrayList<>();
+        private TrustedNameImage image;
+    }
+
+
+    private static final class TrustedNameImage {
+        private String url;
+        private String fallbackUrl;
+        private String source;
+        private String sourceUrl;
+        private String licenseCode;
+        private String attribution;
     }
 }

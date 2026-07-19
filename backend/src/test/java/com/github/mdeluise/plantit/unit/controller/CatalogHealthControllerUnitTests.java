@@ -24,7 +24,7 @@ class CatalogHealthControllerUnitTests {
             1,
             Instant.parse("2026-07-18T00:00:00Z"),
             true,
-            new CatalogTotals(177, 859, 87, 15, 11),
+            new CatalogTotals(177, 863, 87, 17, 11),
             List.of(),
             0,
             Map.of(),

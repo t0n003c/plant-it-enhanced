@@ -96,7 +96,26 @@ class TrustedCommonNameIndexUnitTests {
             "Daucus carota sativus", index.resolveProviderSearchTerm("garden carrot"));
         Assertions.assertEquals("Solanum tuberosum", index.resolveProviderSearchTerm("russet potato"));
         Assertions.assertEquals("Solanum melongena", index.resolveProviderSearchTerm("eggplant"));
+        Assertions.assertEquals("Cucurbita pepo", index.resolveProviderSearchTerm("pumpkin"));
         Assertions.assertEquals("ging", index.resolveProviderSearchTerm("ging"));
+    }
+
+
+    @Test
+    @DisplayName("Should provide deterministic common garden identities and photo fallbacks")
+    void shouldProvideCommonGardenCoverage() {
+        final TrustedCommonNameIndex index = createIndex();
+
+        final BotanicalInfo pumpkin = index.search("pumpkin", 1).get(0);
+        Assertions.assertEquals("Cucurbita pepo", pumpkin.getSpecies());
+        Assertions.assertEquals("Pumpkin", pumpkin.getSearchMatchedName());
+        Assertions.assertNotNull(pumpkin.getImage());
+        Assertions.assertTrue(pumpkin.getImage().getUrl().contains("101476279/medium.png"));
+
+        final BotanicalInfo sunflower = index.search("sunflower", 1).get(0);
+        Assertions.assertEquals("Helianthus annuus", sunflower.getSpecies());
+        Assertions.assertNotNull(sunflower.getImage());
+        Assertions.assertTrue(sunflower.getImage().getUrl().contains("323768723/medium.jpg"));
     }
 
 
