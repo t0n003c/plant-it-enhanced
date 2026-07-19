@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet id="createCatalogGapObservations" author="t0n003c">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="catalog_gap_observations"/>
+            </not>
+        </preConditions>
+        <createTable tableName="catalog_gap_observations">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="owner_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="issue_type" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="subject_key" type="varchar(160)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="display_subject" type="varchar(160)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="scientific_name" type="varchar(255)"/>
+            <column name="occurrence_count" type="int" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="first_seen_at" type="datetime(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_seen_at" type="datetime(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="active" type="boolean" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="resolved_at" type="datetime(6)"/>
+        </createTable>
+        <addUniqueConstraint
+                tableName="catalog_gap_observations"
+                columnNames="owner_id,issue_type,subject_key"
+                constraintName="uk_catalog_gap_owner_type_subject"/>
+        <createIndex tableName="catalog_gap_observations" indexName="idx_catalog_gap_owner_active_seen">
+            <column name="owner_id"/>
+            <column name="active"/>
+            <column name="last_seen_at"/>
+        </createIndex>
+        <addForeignKeyConstraint
+                baseTableName="catalog_gap_observations"
+                baseColumnNames="owner_id"
+                referencedTableName="application_users"
+                referencedColumnNames="id"
+                constraintName="fk_catalog_gap_owner"
+                onDelete="CASCADE"/>
+    </changeSet>
+
+</databaseChangeLog>

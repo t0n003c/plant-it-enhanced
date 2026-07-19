@@ -304,7 +304,7 @@
       "sourceReference": "https://plants.ces.ncsu.edu/plants/schefflera-arboricola/"
     },
     {
-      "scientificNames": ["Dracaena reflexa var. angustifolia", "Dracaena marginata"],
+      "scientificNames": ["Dracaena reflexa angustifolia", "Dracaena reflexa var. angustifolia", "Dracaena marginata"],
       "light": 6,
       "soilHumidity": 4,
       "sourceReference": "https://plants.ces.ncsu.edu/plants/dracaena-marginata/"
@@ -316,7 +316,7 @@
       "sourceReference": "https://plants.ces.ncsu.edu/plants/musa-acuminata/"
     },
     {
-      "scientificNames": ["Citrus limon", "Citrus x limon"],
+      "scientificNames": ["Citrus limon", "Citrus x limon", "Citrus × limon"],
       "light": 9,
       "soilHumidity": 6,
       "sourceReference": "https://plants.ces.ncsu.edu/plants/citrus-limon/"
@@ -388,6 +388,13 @@
       "sourceReference": "https://plants.ces.ncsu.edu/plants/coriandrum-sativum/"
     },
     {
+      "scientificNames": ["Zingiber officinale"],
+      "light": 5,
+      "humidity": 8,
+      "soilHumidity": 7,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/zingiber-officinale/"
+    },
+    {
       "scientificNames": ["Allium schoenoprasum"],
       "light": 8,
       "soilHumidity": 5,
@@ -418,19 +425,19 @@
       "sourceReference": "https://plants.ces.ncsu.edu/plants/anethum-graveolens/"
     },
     {
-      "scientificNames": ["Petunia x atkinsiana", "Petunia × hybrida"],
+      "scientificNames": ["Petunia atkinsiana", "Petunia x atkinsiana", "Petunia × atkinsiana", "Petunia × hybrida"],
       "light": 9,
       "soilHumidity": 6,
       "sourceReference": "https://plants.ces.ncsu.edu/plants/petunia/"
     },
     {
-      "scientificNames": ["Pelargonium x hortorum", "Pelargonium × hortorum"],
+      "scientificNames": ["Pelargonium hybridum", "Pelargonium × hybridum", "Pelargonium hortorum", "Pelargonium x hortorum", "Pelargonium × hortorum"],
       "light": 8,
       "soilHumidity": 5,
       "sourceReference": "https://plants.ces.ncsu.edu/plants/pelargonium-x-hortorum/"
     },
     {
-      "scientificNames": ["Viola x wittrockiana", "Viola × wittrockiana"],
+      "scientificNames": ["Viola wittrockiana", "Viola x wittrockiana", "Viola × wittrockiana"],
       "light": 7,
       "soilHumidity": 6,
       "sourceReference": "https://plants.ces.ncsu.edu/plants/viola-x-wittrockiana/"
@@ -442,7 +449,7 @@
       "sourceReference": "https://plants.ces.ncsu.edu/plants/impatiens-walleriana/"
     },
     {
-      "scientificNames": ["Chrysanthemum x morifolium", "Chrysanthemum × morifolium"],
+      "scientificNames": ["Chrysanthemum morifolium", "Chrysanthemum x morifolium", "Chrysanthemum × morifolium"],
       "light": 9,
       "soilHumidity": 6,
       "sourceReference": "https://plants.ces.ncsu.edu/plants/chrysanthemum-x-morifolium/"

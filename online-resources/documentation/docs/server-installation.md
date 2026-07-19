@@ -100,6 +100,11 @@ EXPECTED_REVISION=$(git -C source rev-parse HEAD)
   https://plants.example.com "$EXPECTED_REVISION"
 ```
 
+After signing in, open **More → Catalog health**. Release 0.16.0 should report 172 reviewed plants,
+82 curated care profiles, 10 live canaries, and no release-policy issue. A search that returns no
+result, lacks a top-result image, or has no structured care will appear there only for the signed-in
+account and will resolve after a later successful request.
+
 The verifier checks that `/` is Plant-it rather than the Nginx Proxy Manager default site, `/api/`
 reaches Spring Boot, the expected image revision is running, Flutter's mutable JavaScript is not
 cached stale, and `/update.html` is available. Omit the second argument when the stack contains only
@@ -377,9 +382,10 @@ That page unregisters only Flutter's service worker and app-shell caches; it doe
 cookies, local storage, IndexedDB, accounts, plants, photos, reminders, or unsynchronized Trail
 Journal drafts. A private window is also a useful non-destructive check.
 
-Database migrations are additive. The v0.14 and v0.15 migrations add catalog provenance, care
-context, field observations, named hikes, and idempotent synchronization references without
-deleting existing users, plants, care history, reminders, diaries, or photos.
+Database migrations are additive. The v0.14 through v0.16 migrations add catalog provenance, care
+context, field observations, named hikes, idempotent synchronization references, and private
+catalog-gap observations without deleting existing users, plants, care history, reminders,
+diaries, or photos.
 
 See [Backup and restore](https://github.com/t0n003c/plant-it-enhanced/blob/main/BACKUP_AND_RESTORE.md)
 for retention and restore verification.

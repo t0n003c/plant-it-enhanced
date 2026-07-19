@@ -426,6 +426,45 @@
   "quotaRemaining": "Quota remaining",
   "publicOutboundIp": "Public outbound IP",
   "diagnosticsIpHint": "Set PUBLIC_OUTBOUND_IP in the server environment to display the address used for provider allowlists.",
+  "catalogHealth": "Catalog health",
+  "catalogHealthy": "The reviewed catalog is healthy",
+  "catalogNeedsAttention": "The catalog has quality gaps that need attention",
+  "reviewedPlants": "Reviewed plants",
+  "reviewedPlantNames": "Tested names and aliases",
+  "curatedCareProfiles": "Care profiles",
+  "providerCanaries": "Live provider canaries",
+  "coverageByTier": "Coverage by support level",
+  "cultivatedCatalog": "Cultivated plants",
+  "trailCatalog": "North American trail plants",
+  "searchCoverage": "Search coverage",
+  "careCoverage": "Structured care coverage",
+  "imagesMonitoredAtRuntime": "{count} plants require an image and are monitored when searched",
+  "@imagesMonitoredAtRuntime": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "82"
+      }
+    }
+  },
+  "recentCatalogGaps": "Recent local quality gaps",
+  "noCatalogGaps": "No unresolved search, image, or care gaps have been observed for this account.",
+  "copyCatalogReport": "Copy sanitized catalog report",
+  "catalogReportCopied": "Sanitized catalog report copied",
+  "catalogHealthPrivacy": "Quality gaps are stored only in your self-hosted database, separated by account, and are never sent to Plant-it or GitHub.",
+  "catalogPolicyIssues": "Release policy issues",
+  "missingSearchResult": "No search result",
+  "missingCatalogImage": "Top result had no image",
+  "missingCatalogCare": "No structured care guide",
+  "observedTimes": "observed {count} times",
+  "@observedTimes": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "notifications": "Notifications",
   "changeServer": "Change server",
   "serverUpdated": "Server successfully updated",

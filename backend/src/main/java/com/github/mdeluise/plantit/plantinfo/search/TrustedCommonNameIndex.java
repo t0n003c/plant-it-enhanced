@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalCommonName;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfo;
@@ -67,10 +68,23 @@ public class TrustedCommonNameIndex {
     public List<TrustedNameExample> qualityExamples() {
         final List<TrustedNameExample> result = new ArrayList<>();
         entries.forEach(entry -> {
+            result.add(new TrustedNameExample(entry.scientificName, entry.scientificName));
             entry.commonNames.forEach(name -> result.add(new TrustedNameExample(name, entry.scientificName)));
             entry.scientificSynonyms.forEach(name -> result.add(new TrustedNameExample(name, entry.scientificName)));
         });
         return List.copyOf(result);
+    }
+
+
+    public List<CatalogEntry> catalogEntries() {
+        return entries.stream()
+                      .map(entry -> new CatalogEntry(
+                          entry.scientificName,
+                          List.copyOf(entry.scientificSynonyms),
+                          List.copyOf(entry.commonNames),
+                          Set.copyOf(entry.catalogTags)
+                      ))
+                      .toList();
     }
 
 
@@ -157,19 +171,29 @@ public class TrustedCommonNameIndex {
             entry.scientificSynonyms = entry.scientificSynonyms == null
                                            ? new ArrayList<>() : entry.scientificSynonyms;
             entry.catalogTags = entry.catalogTags == null ? new ArrayList<>() : entry.catalogTags;
-            for (String commonName : entry.commonNames) {
-                final String normalizedName = PlantNameNormalizer.normalize(commonName);
-                final String previousOwner = ownersByName.putIfAbsent(normalizedName, entry.scientificName);
-                if (normalizedName.isBlank() || previousOwner != null &&
-                        !previousOwner.equalsIgnoreCase(entry.scientificName)) {
-                    throw new IllegalStateException("Ambiguous trusted common name: " + commonName);
-                }
-            }
+            registerName(ownersByName, entry.scientificName, entry.scientificName);
+            entry.scientificSynonyms.forEach(name -> registerName(ownersByName, name, entry.scientificName));
+            entry.commonNames.forEach(name -> registerName(ownersByName, name, entry.scientificName));
+        }
+    }
+
+
+    private void registerName(Map<String, String> ownersByName, String name, String scientificName) {
+        final String normalizedName = PlantNameNormalizer.normalize(name);
+        final String previousOwner = ownersByName.putIfAbsent(normalizedName, scientificName);
+        if (normalizedName.isBlank() || previousOwner != null &&
+                !previousOwner.equalsIgnoreCase(scientificName)) {
+            throw new IllegalStateException("Ambiguous trusted plant name: " + name);
         }
     }
 
 
     public record TrustedNameExample(String query, String scientificName) {
+    }
+
+
+    public record CatalogEntry(String scientificName, List<String> scientificSynonyms,
+                               List<String> commonNames, Set<String> catalogTags) {
     }
 
 

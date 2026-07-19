@@ -8,6 +8,7 @@ online-resources/**/resources
 online-resources/documentation/venv
 
 frontend/untranslated.txt
+catalog-canary-report.json
 
 # Local deployment data and secrets
 .env

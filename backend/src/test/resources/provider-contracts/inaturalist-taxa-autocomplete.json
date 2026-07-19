@@ -1,0 +1,33 @@
+{
+  "total_results": 2,
+  "page": 1,
+  "per_page": 10,
+  "results": [
+    {
+      "id": 67710,
+      "name": "Sansevieria trifasciata",
+      "rank": "species",
+      "iconic_taxon_name": "Plantae",
+      "preferred_common_name": "Snake Plant",
+      "matched_term": "Snake Plant",
+      "observations_count": 10000,
+      "default_photo": {
+        "id": 12345,
+        "license_code": "cc-by",
+        "attribution": "(c) Example Photographer, CC BY",
+        "url": "https://static.inaturalist.org/photos/12345/square.jpeg",
+        "square_url": "https://static.inaturalist.org/photos/12345/square.jpeg",
+        "medium_url": "https://static.inaturalist.org/photos/12345/medium.jpeg"
+      }
+    },
+    {
+      "id": 99999,
+      "name": "Dracaena trifasciata",
+      "rank": "species",
+      "iconic_taxon_name": "Plantae",
+      "preferred_common_name": "Mother-in-Law's Tongue",
+      "matched_term": "Snake Plant",
+      "observations_count": 20000
+    }
+  ]
+}

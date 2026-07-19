@@ -82,10 +82,10 @@ public final class PlantSearchScorer {
 
 
     private static PlantSearchMatch better(PlantSearchMatch left, PlantSearchMatch right) {
-        if (right.score() > left.score()) {
+        if (right.confidence() > left.confidence()) {
             return right;
         }
-        if (right.score() == left.score() && right.confidence() > left.confidence()) {
+        if (right.confidence() == left.confidence() && right.score() > left.score()) {
             return right;
         }
         return left;

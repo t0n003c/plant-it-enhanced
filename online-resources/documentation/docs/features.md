@@ -11,6 +11,24 @@ When configured, iNaturalist expands common-name discovery, GBIF verifies accept
 FloraCodex provides a final fallback. Provider records that resolve to the same accepted taxon are
 merged instead of creating duplicate species.
 
+### Catalog quality coverage
+
+The reviewed index is released as two explicit support tiers: 82 cultivated plants and 90 North
+American trail plants. More than 800 accepted-name, synonym, and everyday-name queries are tested
+together. Cultivated entries must also have reviewed light and
+soil-moisture guidance; household care is intentionally not required for wild trail entries.
+
+Open **More → Catalog health** to see the current corpus totals, care coverage, representative
+provider-canary count, and recent gaps observed by your account. Plant-it stores only a sanitized
+query or scientific name for a no-result, missing-image, or missing-care event. The record stays in
+your self-hosted database and resolves automatically when a later request succeeds. It does not
+contain photos, notes, coordinates, API credentials, or provider response bodies.
+
+External photos are attributed live resources rather than bundled assets. A weekly, rate-limited
+audit checks all 172 reviewed identities for an expected iNaturalist image and accepted GBIF
+taxonomy, while actual searches record local image gaps. Catalog Health therefore describes images
+as runtime-monitored rather than promising that every external photo is permanently available.
+
 ## Photo identification
 
 The search camera guides you through a whole-plant view and optional leaf and flower close-ups.
@@ -36,7 +54,8 @@ iNaturalist supplies it for the configured place. See [Trail field guide](trail-
 
 Pl@ntNet is optional. A missing, exhausted, or rejected API key does not disable ordinary search.
 The authenticated **More → System diagnostics** page reports whether the integration is configured
-and records recent provider responses.
+and records recent provider responses. **More → Catalog health** separately reports reviewed
+coverage and account-local search, image, and care gaps.
 
 ## Source-aware care guides
 
@@ -101,7 +120,7 @@ backup until synchronization succeeds.
 Location is always opt-in. Browser geolocation normally requires HTTPS or localhost; photos, notes,
 and identification still work when location is denied. Exact coordinates and original photos stay
 inside the authenticated self-hosted account. Sharing preferences are recorded for future export,
-but v0.15 does not publish observations.
+but Plant-it does not publish observations.
 
 Trail tags, contextual ranking, and contact-hazard warnings are informational. Visual and
 contextual scores are shown separately; no candidate is presented as certain. Region, season,
@@ -123,7 +142,8 @@ previews and saved species images.
 
 The repository includes verified scripts for database and upload backups, checksum validation,
 retention, and restore checks. Diagnostics report the application version, MySQL and Redis status,
-provider configuration, and recent provider failures without exposing credentials.
+provider configuration, recent provider failures, reviewed catalog coverage, and account-local
+quality gaps without exposing credentials.
 
 See [Server installation](server-installation.md) and the repository's
 [backup guide](https://github.com/t0n003c/plant-it-enhanced/blob/main/BACKUP_AND_RESTORE.md).

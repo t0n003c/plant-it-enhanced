@@ -27,24 +27,8 @@ import org.springframework.mock.web.MockMultipartFile;
 
 @DisplayName("Unit tests for Pl@ntNet photo identification")
 class PlantIdentificationServiceUnitTests {
-    private static final String IDENTIFICATION_RESPONSE = """
-        {
-          "version": "2026-01-01 (8.0)",
-          "results": [
-            {
-              "score": 0.94,
-              "species": {
-                "scientificNameWithoutAuthor": "Monstera deliciosa",
-                "genus": {"scientificNameWithoutAuthor": "Monstera"},
-                "family": {"scientificNameWithoutAuthor": "Araceae"},
-                "commonNames": ["Swiss cheese plant"]
-              },
-              "gbif": {"id": "2877284"},
-              "powo": {"id": "87469-1"}
-            }
-          ]
-        }
-        """;
+    private static final String IDENTIFICATION_RESPONSE =
+        ProviderContractFixtures.load("plantnet-identify.json");
     private HttpServer server;
     private String serverUrl;
 

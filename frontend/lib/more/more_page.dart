@@ -10,6 +10,7 @@ import 'package:plant_it/more/change_language_page.dart';
 import 'package:plant_it/more/change_notifications.dart';
 import 'package:plant_it/more/change_password_page.dart';
 import 'package:plant_it/more/change_server_page.dart';
+import 'package:plant_it/more/catalog_health_page.dart';
 import 'package:plant_it/more/edit_profile.dart';
 import 'package:plant_it/more/gotify_settings.dart';
 import 'package:plant_it/more/ntfy_settings.dart';
@@ -224,6 +225,17 @@ class _MorePageState extends State<MorePage> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => SystemDiagnosticsPage(
+                      env: widget.env,
+                    ),
+                  ),
+                ),
+              ),
+              SettingsInternalLink(
+                title: AppLocalizations.of(context).catalogHealth,
+                onClick: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CatalogHealthPage(
                       env: widget.env,
                     ),
                   ),

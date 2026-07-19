@@ -4,6 +4,8 @@ import com.github.mdeluise.plantit.botanicalinfo.BotanicalCommonName;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfo;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoCreator;
 import com.github.mdeluise.plantit.plantinfo.search.PlantNameNormalizer;
+import com.github.mdeluise.plantit.plantinfo.search.PlantSearchMatch;
+import com.github.mdeluise.plantit.plantinfo.search.PlantSearchMatchReason;
 import com.github.mdeluise.plantit.plantinfo.search.PlantSearchScorer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -11,6 +13,19 @@ import org.junit.jupiter.api.Test;
 
 @DisplayName("Unit tests for common-name normalization and ranking")
 class PlantSearchScorerUnitTests {
+
+    @Test
+    @DisplayName("Should keep an exact accepted name ahead of a low-confidence synonym prefix")
+    void shouldPreferExactAcceptedScientificName() {
+        final BotanicalInfo bigBluestem = createPlant("Andropogon gerardi", "Big bluestem");
+        bigBluestem.getSynonyms().add("Andropogon gerardii");
+
+        final PlantSearchMatch match = PlantSearchScorer.evaluate("Andropogon gerardi", bigBluestem);
+
+        Assertions.assertEquals(PlantSearchMatchReason.SCIENTIFIC_NAME, match.reason());
+        Assertions.assertEquals(0.96, match.confidence());
+        Assertions.assertTrue(match.isRelevant());
+    }
 
     @Test
     @DisplayName("Should normalize punctuation, whitespace, case, and accents")

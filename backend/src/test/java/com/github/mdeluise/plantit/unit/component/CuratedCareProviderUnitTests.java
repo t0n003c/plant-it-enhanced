@@ -27,12 +27,22 @@ class CuratedCareProviderUnitTests {
     void shouldCoverReportedPlants() {
         final List<String> reportedPlants = List.of(
             "Monstera deliciosa", "Zea mays", "Helianthus annuus", "Lavandula angustifolia", "Rosa",
-            "Fragaria ananassa", "Brassica oleracea");
+            "Fragaria ananassa", "Brassica oleracea", "Zingiber officinale");
 
         for (String scientificName : reportedPlants) {
             Assertions.assertTrue(provider.fetch(scientificName).isPresent(), scientificName);
         }
         Assertions.assertTrue(provider.fetch("Rosa rubiginosa").isPresent());
+    }
+
+
+    @Test
+    @DisplayName("Should expose deterministic catalog field coverage")
+    void shouldExposeFieldCoverage() {
+        Assertions.assertEquals(82, provider.profileCount());
+        Assertions.assertTrue(provider.availableFields("Zingiber officinale").containsAll(
+            List.of("light", "humidity", "soilHumidity")));
+        Assertions.assertTrue(provider.availableFields("unknown").isEmpty());
     }
 
 

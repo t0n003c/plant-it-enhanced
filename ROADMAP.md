@@ -4,17 +4,17 @@ This roadmap records the product direction for the maintained fork. Each milesto
 self-hosting friendly: optional cloud providers may enrich the experience, but core search, care,
 and backup workflows must continue to work without API keys.
 
-The v0.14 onboarding milestone and the contextual-identification and field-safety work of v0.15
-Trail Mode are implemented. The next work adds scalable journal queries, maps, a life list, and
-portable observations. Trail Mode deliberately separates a wild observation from an owned
-plant so a trail find never receives care reminders unless the user explicitly adds a cultivated
-plant to their collection.
+The v0.14 onboarding milestone, v0.15 Trail Mode foundation, and v0.16 catalog-reliability
+foundation are implemented. The next product work adds a privacy-aware trail map and life list,
+then makes care schedules adapt to observed conditions and history. Trail Mode deliberately
+separates a wild observation from an owned plant so a trail find never receives care reminders
+unless the user explicitly adds a cultivated plant to their collection.
 
 ## v0.14 — Trustworthy plant onboarding
 
 - [x] Rank everyday common names ahead of misleading partial matches.
 - [x] Explain why each search result matched and show a confidence level.
-- [x] Maintain an offline trusted-name index and a 200+ query regression corpus.
+- [x] Maintain an offline trusted-name index and an 800+ query regression corpus.
 - [x] Add a tagged 90-species North American hiking starter set with contact-hazard warnings.
 - [x] Merge care data field by field instead of stopping at the first provider.
 - [x] Retain source, source reference, confidence, and verification date for every care field.
@@ -65,7 +65,17 @@ plant to their collection.
 - [ ] Export observations and photos as JSON, CSV, and GeoJSON with private or obscured locations.
 - [ ] Add optional, review-before-publish iNaturalist integration; never publish automatically.
 
-## v0.16 — Care that adapts
+## v0.16 — Catalog reliability and care foundation
+
+- [x] Define one support manifest for cultivated and trail catalog tiers.
+- [x] Validate every accepted scientific name, synonym, and reviewed alias as a release corpus.
+- [x] Require reviewed light and soil-moisture fields for all 82 cultivated entries.
+- [x] Replay recorded production deserializers for iNaturalist, GBIF, Trefle, Perenual, and Pl@ntNet.
+- [x] Run quota-safe scheduled provider canaries and deduplicate failure alerts.
+- [x] Track sanitized, account-scoped no-result, missing-image, and missing-care gaps locally.
+- [x] Expose tier coverage and recent gaps in a high-contrast mobile Catalog Health screen.
+
+## Next — Care that adapts
 
 - [ ] Expand the reviewed offline care catalog toward 150–200 common plants, with Extension or
       similarly authoritative references for each profile.
@@ -75,7 +85,7 @@ plant to their collection.
       dependency.
 - [x] Add clear confidence and safety language anywhere care data is approximate or inferred.
 
-## v0.17 — Self-hosting operations
+## Next — Self-hosting operations and portability
 
 - [x] Add an authenticated diagnostics screen for database, cache, provider configuration,
       provider status, version, and recent upstream failures.

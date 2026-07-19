@@ -94,3 +94,19 @@ Example:
 
 When you can not find a method with a specific exception, use the method
 `assertThatThrownBy()`.
+
+## Catalog reliability tests
+
+Catalog changes must be tested as a corpus, not only with the plant that exposed a bug.
+
+- `CatalogQualityManifestUnitTests` assigns every reviewed plant to exactly one support tier.
+- `TrustedCommonNameIndexUnitTests` searches every accepted scientific name, synonym, and reviewed
+  everyday alias and rejects cross-taxon exact-name collisions while loading the index.
+- `CatalogHealthServiceUnitTests` enforces required care fields across the complete cultivated tier.
+- Provider unit tests load sanitized response snapshots from
+  `src/test/resources/provider-contracts`; do not replace them with simplified DTO-shaped JSON.
+- `../scripts/catalog-canary.sh` is the separate live-provider check. Unit tests must remain
+  deterministic and must not require network access or API credentials.
+
+See [`../CATALOG_RELIABILITY.md`](../CATALOG_RELIABILITY.md) for support tiers and the maintainer
+workflow.

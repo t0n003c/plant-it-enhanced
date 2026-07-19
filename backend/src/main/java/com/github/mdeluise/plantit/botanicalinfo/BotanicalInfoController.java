@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.github.mdeluise.plantit.catalog.CatalogGapService;
 import com.github.mdeluise.plantit.common.MessageResponse;
 import com.github.mdeluise.plantit.plantinfo.PlantInfoExtractorFacade;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,15 +29,18 @@ public class BotanicalInfoController {
     private final BotanicalInfoDTOConverter botanicalInfoDtoConverter;
     private final BotanicalInfoService botanicalInfoService;
     private final PlantInfoExtractorFacade plantInfoExtractorFacade;
+    private final CatalogGapService catalogGapService;
 
 
     @Autowired
     public BotanicalInfoController(BotanicalInfoDTOConverter botanicalInfoDtoConverter,
                                    BotanicalInfoService botanicalInfoService,
-                                   PlantInfoExtractorFacade plantInfoExtractorFacade) {
+                                   PlantInfoExtractorFacade plantInfoExtractorFacade,
+                                   CatalogGapService catalogGapService) {
         this.botanicalInfoDtoConverter = botanicalInfoDtoConverter;
         this.botanicalInfoService = botanicalInfoService;
         this.plantInfoExtractorFacade = plantInfoExtractorFacade;
+        this.catalogGapService = catalogGapService;
     }
 
 
@@ -61,6 +65,7 @@ public class BotanicalInfoController {
         @PathVariable String partialScientificName) {
         final Collection<BotanicalInfo> result = plantInfoExtractorFacade.extractPlants(
             partialScientificName, size);
+        catalogGapService.observeSearch(partialScientificName, result);
         final List<BotanicalInfoDTO> convertedResult =
             result.stream().map(botanicalInfoDtoConverter::convertToDTO).collect(Collectors.toList());
         return ResponseEntity.ok(convertedResult);
@@ -78,6 +83,7 @@ public class BotanicalInfoController {
         @RequestParam(required = false) String locale,
         @RequestParam(required = false) String region) {
         final Collection<BotanicalInfo> result = plantInfoExtractorFacade.extractPlants(q, size, locale, region);
+        catalogGapService.observeSearch(q, result);
         final List<BotanicalInfoDTO> convertedResult =
             result.stream().map(botanicalInfoDtoConverter::convertToDTO).collect(Collectors.toList());
         return ResponseEntity.ok(convertedResult);

@@ -17,12 +17,12 @@ import org.springframework.core.io.ClassPathResource;
 class TrustedCommonNameIndexUnitTests {
 
     @Test
-    @DisplayName("Should keep at least 625 trusted name queries mapped to the expected taxon")
+    @DisplayName("Should keep at least 800 trusted name queries mapped to the expected taxon")
     void shouldPassLargeTrustedNameCorpus() {
         final TrustedCommonNameIndex index = createIndex();
         final List<TrustedCommonNameIndex.TrustedNameExample> examples = index.qualityExamples();
 
-        Assertions.assertTrue(examples.size() >= 625, "The trusted-name corpus must not shrink below 625");
+        Assertions.assertTrue(examples.size() >= 800, "The trusted-name corpus must not shrink below 800");
         for (TrustedCommonNameIndex.TrustedNameExample example : examples) {
             final List<BotanicalInfo> result = index.search(example.query(), 1);
             Assertions.assertFalse(result.isEmpty(), "No trusted result for " + example.query());
@@ -53,7 +53,7 @@ class TrustedCommonNameIndexUnitTests {
             Map.entry("Douglas fir", "Pseudotsuga menziesii"),
             Map.entry("coast redwood", "Sequoia sempervirens"),
             Map.entry("California poppy", "Eschscholzia californica"),
-            Map.entry("arrowleaf balsamroot", "Balsamorhiza sagittata"),
+            Map.entry("arrowleaf balsamroot", "Wyethia sagittata"),
             Map.entry("bog blueberry", "Vaccinium uliginosum")
         );
 
@@ -91,6 +91,19 @@ class TrustedCommonNameIndexUnitTests {
         Assertions.assertEquals("Brassica oleracea", index.resolveProviderSearchTerm("kale"));
         Assertions.assertEquals("Capsicum annuum", index.resolveProviderSearchTerm("Thai pepper"));
         Assertions.assertEquals("ging", index.resolveProviderSearchTerm("ging"));
+    }
+
+
+    @Test
+    @DisplayName("Should search every reviewed accepted scientific name directly")
+    void shouldSearchAcceptedScientificNames() {
+        final TrustedCommonNameIndex index = createIndex();
+        final BotanicalInfo bigBluestem = index.search("big bluestem", 1).get(0);
+
+        Assertions.assertEquals("Andropogon gerardi", bigBluestem.getSpecies());
+        Assertions.assertTrue(PlantSearchScorer.score("Andropogon gerardi", bigBluestem) > 0);
+        Assertions.assertEquals(
+            "Andropogon gerardi", index.search("Andropogon gerardi", 1).get(0).getSpecies());
     }
 
 
