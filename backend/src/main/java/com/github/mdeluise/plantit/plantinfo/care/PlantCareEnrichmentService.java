@@ -42,7 +42,8 @@ public class PlantCareEnrichmentService {
     }
 
 
-    @Cacheable(cacheNames = "plant-care-preview-v2", key = "#scientificName.toLowerCase()",
+    @Cacheable(cacheNames = "plant-care-preview-v2",
+               key = "{@buildInfoService.get().revision(), #scientificName.toLowerCase()}",
                unless = "#result.isAllNull()")
     public PlantCareInfo preview(String scientificName) {
         return findCare(scientificName, new PlantCareInfo()).orElseGet(PlantCareInfo::new);

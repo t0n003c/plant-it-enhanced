@@ -320,13 +320,18 @@ docker compose exec -T db sh -c \
   'MYSQL_PWD="$MYSQL_PASSWORD" exec mysqldump --no-tablespaces -u"$MYSQL_USER" "$MYSQL_DATABASE"' \
   > "backups/plant-it-$(date +%Y%m%d-%H%M%S).sql"
 
-docker compose pull server
-docker compose up -d --no-deps --force-recreate server
-docker compose ps
-docker compose logs --since=5m server
+./source/scripts/deploy-nas.sh "$PWD" https://plants.example.com
 ```
 
-Verify the public hostname after the server is healthy:
+The deploy helper pulls the current `latest` image, force-recreates only the server, waits for it
+to start, reads the revision label from the running image, and verifies the public hostname. Omit
+the hostname for a local-only deployment check. It fails if the stack configuration is invalid,
+the image has no source revision, or the public endpoint is still serving another revision.
+
+Search and care cache keys include the running build revision, so deploying a new image bypasses
+stale results automatically without a manual Redis flush.
+
+The verifier can also be run separately against an already-running deployment:
 
 ```bash
 ./scripts/verify-deployment.sh https://plants.example.com
