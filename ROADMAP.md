@@ -88,6 +88,21 @@ unless the user explicitly adds a cultivated plant to their collection.
       dependency.
 - [x] Add clear confidence and safety language anywhere care data is approximate or inferred.
 
+## Next — Camera-guided plant health and discovery
+
+- [x] Use a stable, uncropped photo-first search card with identity, match evidence, reviewed safety,
+      and a clear next action outside the image.
+- [ ] Add a guided plant-health capture flow for the whole plant, both sides of an affected leaf,
+      stem, and soil instead of treating one ambiguous photo as a diagnosis.
+- [ ] Present likely issue categories, confidence, visible evidence, reviewed lookalikes, and
+      Extension or integrated-pest-management sources before offering treatment steps.
+- [ ] Keep automated health results explicitly provisional; support an **I am not sure** path and
+      never infer pesticide choice, dose, human safety, pet safety, or edibility from a photo.
+- [ ] Add a camera-assisted light check as a phone-specific estimate, with calibration guidance and
+      a manual fallback; never present an uncalibrated camera reading as a PAR measurement.
+- [ ] Let a confirmed issue create a follow-up journal entry and optional reminder without sending
+      plant photos to a third party unless the self-hoster enables and documents that provider.
+
 ## Next — Self-hosting operations and portability
 
 - [x] Add an authenticated diagnostics screen for database, cache, provider configuration,
