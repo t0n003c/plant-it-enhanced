@@ -82,8 +82,8 @@ available. Plant-it retains the provider's source page, license code, and attrib
 smaller square thumbnail if the preferred medium image cannot be loaded. Existing local and
 user-selected images always take precedence.
 
-The reviewed offline index contains 176 taxa and 853 accepted scientific-name, synonym,
-and everyday-name test queries and works without an API key. The cultivated tier contains 86 plants
+The reviewed offline index contains 177 taxa and 859 accepted scientific-name, synonym,
+and everyday-name test queries and works without an API key. The cultivated tier contains 87 plants
 with reviewed light and soil-moisture guidance; the trail tier contains 90 North American plants
 whose household-care fields are intentionally not required. The web app sends its current language
 and region with each search. Exact everyday-name matches stay visible on the result card even when
@@ -99,8 +99,8 @@ to use Redis.
 One versioned manifest defines the support policy for every reviewed entry. Release tests search
 the complete local name corpus, enforce unique exact identities and complete cultivated-care
 requirements, and replay recorded response contracts for each external provider. A weekly,
-rate-limited GitHub audit checks all 176 reviewed plants against live iNaturalist image and GBIF
-taxonomy endpoints; 14 stable manifest canaries provide a faster representative set. Repository
+rate-limited GitHub audit checks all 177 reviewed plants against live iNaturalist image and GBIF
+taxonomy endpoints; 15 stable manifest canaries provide a faster representative set. Repository
 secrets can also verify Trefle and Pl@ntNet.
 
 When an authenticated search still returns nothing, lacks a top-result image, or produces no care
@@ -216,7 +216,7 @@ lookup with `IDENTIFICATION_CONTEXT_ENABLED=false`. Keep `INATURALIST_PLACE_ID` 
 `PLANT_SEARCH_REGION`; the example place ID `1` is the United States.
 
 Plant-it combines Trefle, its bundled Extension-sourced catalog, and optional Perenual field by
-field. A lower-priority source fills only missing values. The bundled catalog covers 86 frequently
+field. A lower-priority source fills only missing values. The bundled catalog covers 87 frequently
 grown plant profiles, including common scientific synonyms, and requires no API key. Exact
 scientific-name matching prevents care from being attached to the wrong species. Each stored care
 field retains its source, reference, confidence, and verification time and can still be edited

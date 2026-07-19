@@ -21,7 +21,7 @@ class CatalogQualityManifestUnitTests {
 
         Assertions.assertEquals(1, manifest.getSchemaVersion());
         Assertions.assertEquals(2, manifest.getTiers().size());
-        Assertions.assertEquals(14, manifest.getLiveCanaries().size());
+        Assertions.assertEquals(15, manifest.getLiveCanaries().size());
         index.catalogEntries().forEach(entry -> Assertions.assertNotNull(
             manifest.policyFor(entry.catalogTags())));
     }

@@ -23,8 +23,8 @@ merged instead of creating duplicate species.
 
 ### Catalog quality coverage
 
-The reviewed index is released as two explicit support tiers: 86 cultivated plants and 90 North
-American trail plants. All 853 accepted-name, synonym, and everyday-name queries are tested
+The reviewed index is released as two explicit support tiers: 87 cultivated plants and 90 North
+American trail plants. All 859 accepted-name, synonym, and everyday-name queries are tested
 together. Cultivated entries must also have reviewed light and
 soil-moisture guidance; household care is intentionally not required for wild trail entries.
 
@@ -35,7 +35,7 @@ your self-hosted database and resolves automatically when a later request succee
 contain photos, notes, coordinates, API credentials, or provider response bodies.
 
 External photos are attributed live resources rather than bundled assets. A weekly, rate-limited
-audit checks all 176 reviewed identities for an expected iNaturalist image and accepted GBIF
+audit checks all 177 reviewed identities for an expected iNaturalist image and accepted GBIF
 taxonomy, while actual searches record local image gaps. Catalog Health therefore describes images
 as runtime-monitored rather than promising that every external photo is permanently available.
 

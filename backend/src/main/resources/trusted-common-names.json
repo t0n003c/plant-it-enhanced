@@ -291,6 +291,11 @@
       "commonNames": ["Tomato", "tomato plant", "garden tomato", "cherry tomato"]
     },
     {
+      "scientificName": "Solanum melongena",
+      "scientificSynonyms": [],
+      "commonNames": ["Eggplant", "aubergine", "eggplant plant", "garden eggplant", "brinjal"]
+    },
+    {
       "scientificName": "Solanum tuberosum",
       "scientificSynonyms": [],
       "commonNames": [

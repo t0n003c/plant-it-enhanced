@@ -92,6 +92,12 @@
       "requiresImage": true
     },
     {
+      "query": "eggplant",
+      "providerTerm": "Solanum melongena",
+      "acceptedScientificNames": ["Solanum melongena"],
+      "requiresImage": true
+    },
+    {
       "query": "white trillium",
       "providerTerm": "Trillium grandiflorum",
       "acceptedScientificNames": ["Trillium grandiflorum"],

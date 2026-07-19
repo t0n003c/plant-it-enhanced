@@ -95,6 +95,7 @@ class TrustedCommonNameIndexUnitTests {
         Assertions.assertEquals(
             "Daucus carota sativus", index.resolveProviderSearchTerm("garden carrot"));
         Assertions.assertEquals("Solanum tuberosum", index.resolveProviderSearchTerm("russet potato"));
+        Assertions.assertEquals("Solanum melongena", index.resolveProviderSearchTerm("eggplant"));
         Assertions.assertEquals("ging", index.resolveProviderSearchTerm("ging"));
     }
 

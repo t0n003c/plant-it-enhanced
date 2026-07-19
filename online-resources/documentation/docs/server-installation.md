@@ -100,8 +100,8 @@ EXPECTED_REVISION=$(git -C source rev-parse HEAD)
   https://plants.example.com "$EXPECTED_REVISION"
 ```
 
-After signing in, open **More → Catalog health**. Release 0.17.1 should report 176 reviewed plants,
-86 curated care profiles, 14 live canaries, and no release-policy issue. A search that returns no
+After signing in, open **More → Catalog health**. Release 0.17.1 should report 177 reviewed plants,
+87 curated care profiles, 15 live canaries, and no release-policy issue. A search that returns no
 result, lacks a top-result image, or has no structured care will appear there only for the signed-in
 account and will resolve after a later successful request.
 
