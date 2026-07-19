@@ -10,6 +10,7 @@ import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoController;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoDTO;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoDTOConverter;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoService;
+import com.github.mdeluise.plantit.catalog.CatalogGapService;
 import com.github.mdeluise.plantit.common.MessageResponse;
 import com.github.mdeluise.plantit.exception.ResourceNotFoundException;
 import com.github.mdeluise.plantit.exception.UnauthorizedException;
@@ -34,6 +35,8 @@ class BotanicalInfoControllerUnitTests {
     private BotanicalInfoService botanicalInfoService;
     @Mock
     private PlantInfoExtractorFacade plantInfoExtractorFacade;
+    @Mock
+    private CatalogGapService catalogGapService;
     @InjectMocks
     private BotanicalInfoController botanicalInfoController;
 
@@ -122,6 +125,7 @@ class BotanicalInfoControllerUnitTests {
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Assertions.assertEquals(List.of(dto), response.getBody());
+        Mockito.verify(catalogGapService).observeSearch("snake plant", List.of(botanicalInfo));
     }
 
 

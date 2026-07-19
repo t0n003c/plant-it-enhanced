@@ -2,8 +2,8 @@
 
 Plant-it Enhanced includes a portable full-stack backup helper. It captures the MySQL database,
 uploaded images, image metadata, user accounts, plant profiles, reminders, diaries, synchronized
-hike sessions, and synchronized field observations. API keys and passwords are intentionally not
-copied into the archive; keep `.env` in your password manager.
+hike sessions, synchronized field observations, and account-scoped catalog gap history. API keys
+and passwords are intentionally not copied into the archive; keep `.env` in your password manager.
 
 Pending offline field drafts live in the browser or mobile device until they synchronize. They are
 not part of a server backup. Open **Trail Journal** and confirm that no draft is pending or failed
@@ -48,5 +48,5 @@ DATA_DIRECTORY="$PWD/data" \
 
 Test a restore periodically on a disposable stack. An untested archive is only a hopeful backup.
 
-After a restore, sign in and verify **My Green Friends**, **Today**, and **Trail Journal**, then check
-that uploaded plant and observation photos open normally.
+After a restore, sign in and verify **My Green Friends**, **Today**, **Trail Journal**, and
+**More → Catalog health**, then check that uploaded plant and observation photos open normally.

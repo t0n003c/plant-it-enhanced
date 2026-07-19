@@ -7,10 +7,12 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoCreator;
 import com.github.mdeluise.plantit.botanicalinfo.care.PlantCareInfo;
@@ -28,6 +30,7 @@ public class CuratedCareProvider {
     private static final int SCALE_MAXIMUM = 10;
     private final Map<String, CatalogProfile> profilesByScientificName;
     private final Instant verifiedAt;
+    private final int profileCount;
 
 
     @Autowired
@@ -35,6 +38,7 @@ public class CuratedCareProvider {
         final LoadedCatalog catalog = load(catalogResource);
         profilesByScientificName = catalog.profiles();
         verifiedAt = catalog.verifiedAt();
+        profileCount = catalog.profileCount();
     }
 
 
@@ -47,6 +51,34 @@ public class CuratedCareProvider {
             }
         }
         return result;
+    }
+
+
+    public int profileCount() {
+        return profileCount;
+    }
+
+
+    public Set<String> availableFields(String scientificName) {
+        if (scientificName == null || scientificName.isBlank()) {
+            return Set.of();
+        }
+        final CatalogProfile profile = profilesByScientificName.get(normalize(scientificName));
+        if (profile == null) {
+            return Set.of();
+        }
+        final Set<String> fields = new LinkedHashSet<>();
+        addField(fields, PlantCareInfo.LIGHT_FIELD, profile.light);
+        addField(fields, PlantCareInfo.HUMIDITY_FIELD, profile.humidity);
+        addField(fields, PlantCareInfo.SOIL_HUMIDITY_FIELD, profile.soilHumidity);
+        return Set.copyOf(fields);
+    }
+
+
+    private void addField(Set<String> fields, String name, Object value) {
+        if (value != null) {
+            fields.add(name);
+        }
     }
 
 
@@ -68,7 +100,8 @@ public class CuratedCareProvider {
                     }
                 }
             }
-            return new LoadedCatalog(Collections.unmodifiableMap(profiles), catalogVerifiedAt);
+            return new LoadedCatalog(
+                Collections.unmodifiableMap(profiles), catalogVerifiedAt, catalog.profiles.size());
         } catch (IOException | JsonParseException exception) {
             throw new IllegalStateException("Unable to load the curated plant-care catalog", exception);
         }
@@ -134,6 +167,6 @@ public class CuratedCareProvider {
     }
 
 
-    private record LoadedCatalog(Map<String, CatalogProfile> profiles, Instant verifiedAt) {
+    private record LoadedCatalog(Map<String, CatalogProfile> profiles, Instant verifiedAt, int profileCount) {
     }
 }

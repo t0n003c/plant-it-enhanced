@@ -1,0 +1,20 @@
+{
+  "results": [
+    {
+      "id": 126509,
+      "name": "Dracaena reflexa angustifolia",
+      "rank": "variety",
+      "iconic_taxon_name": "Plantae",
+      "preferred_common_name": "Madagascar Dragon-tree",
+      "matched_term": "Dracaena marginata",
+      "observations_count": 5387,
+      "default_photo": {
+        "id": 85543245,
+        "license_code": "cc-by-nc",
+        "attribution": "(c) melibees, some rights reserved (CC BY-NC)",
+        "square_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/85543245/square.jpg",
+        "medium_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/85543245/medium.jpg"
+      }
+    }
+  ]
+}

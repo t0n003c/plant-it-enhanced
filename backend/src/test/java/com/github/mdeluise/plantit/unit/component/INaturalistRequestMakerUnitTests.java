@@ -26,52 +26,14 @@ import org.mockito.Mockito;
 
 @DisplayName("Unit tests for iNaturalist common-name search")
 class INaturalistRequestMakerUnitTests {
-    private static final String AUTOCOMPLETE_RESPONSE = """
-        {
-          "results": [
-            {
-              "id": 67710,
-              "name": "Sansevieria trifasciata",
-              "rank": "species",
-              "iconic_taxon_name": "Plantae",
-              "preferred_common_name": "Snake Plant",
-              "matched_term": "Snake Plant",
-              "observations_count": 10000,
-              "default_photo": {
-                "id": 12345,
-                "license_code": "cc-by",
-                "attribution": "(c) Example Photographer, CC BY",
-                "url": "https://static.inaturalist.org/photos/12345/square.jpeg",
-                "square_url": "https://static.inaturalist.org/photos/12345/square.jpeg",
-                "medium_url": "https://static.inaturalist.org/photos/12345/medium.jpeg"
-              }
-            },
-            {
-              "id": 99999,
-              "name": "Dracaena trifasciata",
-              "rank": "species",
-              "iconic_taxon_name": "Plantae",
-              "preferred_common_name": "Mother-in-Law's Tongue",
-              "matched_term": "Snake Plant",
-              "observations_count": 20000
-            }
-          ]
-        }
-        """;
-    private static final String GBIF_RESPONSE = """
-        {
-          "acceptedUsage": {
-            "key": "11041822",
-            "canonicalName": "Dracaena trifasciata",
-            "rank": "SPECIES"
-          },
-          "classification": [
-            {"rank": "FAMILY", "name": "Asparagaceae"},
-            {"rank": "GENUS", "name": "Dracaena"}
-          ],
-          "diagnostics": {"confidence": 100}
-        }
-        """;
+    private static final String AUTOCOMPLETE_RESPONSE =
+        ProviderContractFixtures.load("inaturalist-taxa-autocomplete.json");
+    private static final String GBIF_RESPONSE =
+        ProviderContractFixtures.load("gbif-species-match.json");
+    private static final String VARIETY_RESPONSE =
+        ProviderContractFixtures.load("inaturalist-variety-autocomplete.json");
+    private static final String GBIF_VARIETY_RESPONSE =
+        ProviderContractFixtures.load("gbif-variety-match.json");
     private HttpServer server;
     private String serverUrl;
 
@@ -104,7 +66,7 @@ class INaturalistRequestMakerUnitTests {
         final List<BotanicalInfo> results = requestMaker.search("snake plant", 5);
 
         Assertions.assertTrue(naturalistQuery.get().contains("q=snake+plant"));
-        Assertions.assertTrue(naturalistQuery.get().contains("rank=species,hybrid"));
+        Assertions.assertTrue(naturalistQuery.get().contains("rank=species,hybrid,subspecies,variety"));
         Assertions.assertTrue(naturalistQuery.get().contains("locale=en"));
         Assertions.assertTrue(naturalistQuery.get().contains("preferred_place_id=1"));
         Assertions.assertEquals(1, results.size());
@@ -162,7 +124,7 @@ class INaturalistRequestMakerUnitTests {
 
         final List<BotanicalInfo> results = createRequestMaker().search("strawberry", 5);
 
-        Assertions.assertTrue(naturalistQuery.get().contains("rank=species,hybrid"));
+        Assertions.assertTrue(naturalistQuery.get().contains("rank=species,hybrid,subspecies,variety"));
         Assertions.assertEquals(5, results.size());
         final BotanicalInfo result = results.get(0);
         Assertions.assertEquals("Fragaria ananassa", result.getSpecies());
@@ -229,6 +191,28 @@ class INaturalistRequestMakerUnitTests {
         Assertions.assertTrue(results.get(0).getSynonyms().contains("ginger root"));
         Assertions.assertEquals("https://static.inaturalist.org/photos/247973845/medium.jpeg",
                                 results.get(0).getImage().getUrl());
+    }
+
+
+    @Test
+    @DisplayName("Should include an attributed infraspecific plant image")
+    void shouldIncludeVarietyImages() {
+        server.createContext("/v1/taxa/autocomplete", exchange -> respond(exchange, VARIETY_RESPONSE));
+        server.createContext("/v2/species/match", exchange -> respond(exchange, GBIF_VARIETY_RESPONSE));
+        server.start();
+        final TrustedCommonNameIndex trustedCommonNameIndex = Mockito.mock(TrustedCommonNameIndex.class);
+        Mockito.when(trustedCommonNameIndex.resolveProviderSearchTerm("Madagascar dragon tree"))
+               .thenReturn("Dracaena reflexa angustifolia");
+
+        final List<BotanicalInfo> results = createRequestMaker(trustedCommonNameIndex).search(
+            "Madagascar dragon tree", 5);
+
+        Assertions.assertEquals(1, results.size());
+        Assertions.assertEquals("Dracaena reflexa angustifolia", results.get(0).getSpecies());
+        Assertions.assertEquals(
+            "https://inaturalist-open-data.s3.amazonaws.com/photos/85543245/medium.jpg",
+            results.get(0).getImage().getUrl()
+        );
     }
 
 

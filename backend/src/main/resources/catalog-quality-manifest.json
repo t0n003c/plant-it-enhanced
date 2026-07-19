@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "tiers": [
+    {
+      "name": "CURATED_CULTIVATED",
+      "excludeTags": ["NORTH_AMERICAN_TRAIL"],
+      "requiresImage": true,
+      "requiredCareFields": ["light", "soilHumidity"]
+    },
+    {
+      "name": "NORTH_AMERICAN_TRAIL",
+      "includeTags": ["NORTH_AMERICAN_TRAIL"],
+      "requiresImage": true,
+      "requiredCareFields": []
+    }
+  ],
+  "liveCanaries": [
+    {
+      "query": "monstera",
+      "providerTerm": "Monstera deliciosa",
+      "acceptedScientificNames": ["Monstera deliciosa"],
+      "requiresImage": true
+    },
+    {
+      "query": "aloe vera",
+      "providerTerm": "Aloe vera",
+      "acceptedScientificNames": ["Aloe vera"],
+      "requiresImage": true
+    },
+    {
+      "query": "kale",
+      "providerTerm": "Brassica oleracea",
+      "acceptedScientificNames": ["Brassica oleracea"],
+      "requiresImage": true
+    },
+    {
+      "query": "thai pepper",
+      "providerTerm": "Capsicum annuum",
+      "acceptedScientificNames": ["Capsicum annuum"],
+      "requiresImage": true
+    },
+    {
+      "query": "cilantro",
+      "providerTerm": "Coriandrum sativum",
+      "acceptedScientificNames": ["Coriandrum sativum"],
+      "requiresImage": true
+    },
+    {
+      "query": "ginger root",
+      "providerTerm": "Zingiber officinale",
+      "acceptedScientificNames": ["Zingiber officinale"],
+      "requiresImage": true
+    },
+    {
+      "query": "strawberry",
+      "providerTerm": "Fragaria ananassa",
+      "acceptedScientificNames": ["Fragaria ananassa", "Fragaria × ananassa", "Fragaria x ananassa"],
+      "requiresImage": true
+    },
+    {
+      "query": "rose",
+      "providerTerm": "Rosa chinensis",
+      "acceptedScientificNames": ["Rosa chinensis"],
+      "requiresImage": true
+    },
+    {
+      "query": "white trillium",
+      "providerTerm": "Trillium grandiflorum",
+      "acceptedScientificNames": ["Trillium grandiflorum"],
+      "requiresImage": true
+    },
+    {
+      "query": "poison ivy",
+      "providerTerm": "Toxicodendron radicans",
+      "acceptedScientificNames": ["Toxicodendron radicans"],
+      "requiresImage": true
+    }
+  ]
+}

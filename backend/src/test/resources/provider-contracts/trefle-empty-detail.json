@@ -1,0 +1,13 @@
+{
+  "data": {
+    "main_species": {
+      "growth": {
+        "light": null,
+        "atmospheric_humidity": null,
+        "soil_humidity": null,
+        "minimum_temperature": {"deg_c": null},
+        "maximum_temperature": {"deg_c": null}
+      }
+    }
+  }
+}

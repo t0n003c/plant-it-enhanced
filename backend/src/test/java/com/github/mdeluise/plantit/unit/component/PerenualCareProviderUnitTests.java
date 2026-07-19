@@ -20,22 +20,10 @@ import org.mockito.Mockito;
 
 @DisplayName("Unit tests for Perenual care enrichment")
 class PerenualCareProviderUnitTests {
-    private static final String SEARCH_RESPONSE = """
-        {
-          "data": [
-            {"id": 158, "scientific_name": ["Monstera adansonii"]},
-            {"id": 155, "scientific_name": ["Monstera deliciosa"]}
-          ]
-        }
-        """;
-    private static final String DETAIL_RESPONSE = """
-        {
-          "id": 155,
-          "scientific_name": ["Monstera deliciosa"],
-          "watering": "average",
-          "sunlight": ["part_shade", "bright indirect light"]
-        }
-        """;
+    private static final String SEARCH_RESPONSE =
+        ProviderContractFixtures.load("perenual-species-search.json");
+    private static final String DETAIL_RESPONSE =
+        ProviderContractFixtures.load("perenual-species-detail.json");
     private HttpServer server;
     private String serverUrl;
 

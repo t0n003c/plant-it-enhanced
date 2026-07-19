@@ -31,6 +31,7 @@ Plant-it helps you remember the last time you did a treatment of your plants, wh
 ## Features highlight
 * Add existing plants or user created plants to your collection
 * Search a reviewed offline index by everyday common names, aliases, reordered words, and minor typos
+* Inspect catalog coverage and locally observed search, image, and care gaps from the app
 * Recognize an offline starter set of 90 North American trail plants, including wildflowers,
   prairie plants, ferns, shrubs, trees, and several contact hazards
 * Keep a private, chronological hiking journal with multi-photo observations, optional GPS, trail
@@ -69,11 +70,30 @@ available. Plant-it retains the provider's source page, license code, and attrib
 smaller square thumbnail if the preferred medium image cannot be loaded. Existing local and
 user-selected images always take precedence.
 
-The reviewed offline index contains 170 taxa and more than 600 everyday-name and synonym examples and
-works without an API key. The web app sends its current language and region with each search.
+The reviewed offline index contains 172 taxa and more than 800 accepted scientific-name, synonym,
+and everyday-name test queries and works without an API key. The cultivated tier contains 82 plants
+with reviewed light and soil-moisture guidance; the trail tier contains 90 North American plants
+whose household-care fields are intentionally not required. The web app sends its current language
+and region with each search.
 `PLANT_SEARCH_LOCALE` and `PLANT_SEARCH_REGION` are fallbacks for older clients. Outbound
 iNaturalist traffic is also throttled with a small interactive burst; repeated searches continue
 to use Redis.
+
+### Catalog reliability
+
+One versioned manifest defines the support policy for every reviewed entry. Release tests search
+the complete local name corpus, enforce unique exact identities and complete cultivated-care
+requirements, and replay recorded response contracts for each external provider. A weekly,
+rate-limited GitHub audit checks all 172 reviewed plants against live iNaturalist image and GBIF
+taxonomy endpoints; 10 stable manifest canaries provide a faster representative set. Repository
+secrets can also verify Trefle and Pl@ntNet.
+
+When an authenticated search still returns nothing, lacks a top-result image, or produces no care
+guide, Plant-it records only the sanitized query or scientific name in that account's self-hosted
+database. A later successful request resolves the gap automatically. Open **More → Catalog health**
+to inspect tier coverage and recent gaps or copy a credential-free report for an issue. These local
+observations are never uploaded automatically. See [Catalog reliability](CATALOG_RELIABILITY.md)
+for the support contract and maintenance commands.
 
 ### Trail plant coverage
 
@@ -124,7 +144,7 @@ is represented once while its retry draft is pending.
 
 Location is always opt-in. Exact coordinates and photo metadata remain in the authenticated,
 self-hosted account, and the initial sharing preference is **Private**. Obscured and open settings
-are recorded for future exports, but v0.15 does not publish observations. Browser location access
+are recorded for future exports, but Plant-it does not publish observations. Browser location access
 requires an HTTPS deployment (or localhost); photos, notes, and identification continue to work
 when location is unavailable or denied. Offline drafts are isolated by server and username. If a
 browser or device refuses durable storage, Plant-it says so and does not claim that an in-memory

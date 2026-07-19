@@ -151,8 +151,8 @@
       "commonNames": ["Dwarf umbrella tree", "umbrella plant", "Hawaiian elf", "dwarf schefflera"]
     },
     {
-      "scientificName": "Dracaena reflexa var. angustifolia",
-      "scientificSynonyms": ["Dracaena marginata"],
+      "scientificName": "Dracaena reflexa angustifolia",
+      "scientificSynonyms": ["Dracaena reflexa var. angustifolia", "Dracaena marginata"],
       "commonNames": ["Madagascar dragon tree", "red-edged dracaena", "dragon blood tree", "marginata"]
     },
     {
@@ -162,7 +162,7 @@
     },
     {
       "scientificName": "Citrus limon",
-      "scientificSynonyms": ["Citrus x limon"],
+      "scientificSynonyms": ["Citrus x limon", "Citrus × limon"],
       "commonNames": ["Lemon tree", "lemon plant", "common lemon", "citrus lemon"]
     },
     {
@@ -324,8 +324,8 @@
       "commonNames": ["Zucchini", "courgette", "summer squash", "field pumpkin"]
     },
     {
-      "scientificName": "Fragaria x ananassa",
-      "scientificSynonyms": ["Fragaria × ananassa"],
+      "scientificName": "Fragaria ananassa",
+      "scientificSynonyms": ["Fragaria x ananassa", "Fragaria × ananassa"],
       "commonNames": ["Strawberry", "garden strawberry", "cultivated strawberry", "pineapple strawberry"]
     },
     {
@@ -349,18 +349,18 @@
       "commonNames": ["Marigold", "African marigold", "Aztec marigold", "big marigold"]
     },
     {
-      "scientificName": "Petunia x atkinsiana",
-      "scientificSynonyms": ["Petunia × hybrida"],
+      "scientificName": "Petunia atkinsiana",
+      "scientificSynonyms": ["Petunia x atkinsiana", "Petunia × atkinsiana", "Petunia × hybrida"],
       "commonNames": ["Petunia", "garden petunia", "hybrid petunia", "bedding petunia"]
     },
     {
-      "scientificName": "Pelargonium x hortorum",
-      "scientificSynonyms": ["Pelargonium × hortorum"],
+      "scientificName": "Pelargonium hybridum",
+      "scientificSynonyms": ["Pelargonium × hybridum", "Pelargonium hortorum", "Pelargonium x hortorum", "Pelargonium × hortorum"],
       "commonNames": ["Geranium", "garden geranium", "zonal geranium", "bedding geranium"]
     },
     {
-      "scientificName": "Viola x wittrockiana",
-      "scientificSynonyms": ["Viola × wittrockiana"],
+      "scientificName": "Viola wittrockiana",
+      "scientificSynonyms": ["Viola x wittrockiana", "Viola × wittrockiana"],
       "commonNames": ["Pansy", "garden pansy", "hybrid pansy", "viola pansy"]
     },
     {
@@ -369,8 +369,8 @@
       "commonNames": ["Impatiens", "busy Lizzie", "patient Lucy", "sultana flower"]
     },
     {
-      "scientificName": "Chrysanthemum x morifolium",
-      "scientificSynonyms": ["Chrysanthemum × morifolium"],
+      "scientificName": "Chrysanthemum morifolium",
+      "scientificSynonyms": ["Chrysanthemum x morifolium", "Chrysanthemum × morifolium"],
       "commonNames": ["Chrysanthemum", "garden mum", "florist's daisy", "hardy mum"]
     },
     {
@@ -887,8 +887,8 @@
       "catalogTags": ["NORTH_AMERICAN_TRAIL"]
     },
     {
-      "scientificName": "Balsamorhiza sagittata",
-      "scientificSynonyms": [],
+      "scientificName": "Wyethia sagittata",
+      "scientificSynonyms": ["Balsamorhiza sagittata"],
       "commonNames": ["Arrowleaf balsamroot", "arrow-leaved balsamroot", "Oregon sunflower"],
       "catalogTags": ["NORTH_AMERICAN_TRAIL"]
     },

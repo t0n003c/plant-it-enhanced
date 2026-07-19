@@ -1,0 +1,8 @@
+{
+  "data": [
+    {"scientific_name": "Monstera deliciosa", "slug": "monstera-deliciosa"},
+    {"scientific_name": "Zea mays", "slug": "zea-mays"}
+  ],
+  "links": {"self": "/api/v1/plants/search?q=monstera"},
+  "meta": {"total": 2}
+}

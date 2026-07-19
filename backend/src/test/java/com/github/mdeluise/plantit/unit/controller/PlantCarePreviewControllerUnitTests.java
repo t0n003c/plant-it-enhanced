@@ -3,6 +3,7 @@ package com.github.mdeluise.plantit.unit.controller;
 import com.github.mdeluise.plantit.botanicalinfo.care.PlantCareInfo;
 import com.github.mdeluise.plantit.botanicalinfo.care.PlantCareInfoDTO;
 import com.github.mdeluise.plantit.botanicalinfo.care.PlantCareInfoDTOConverter;
+import com.github.mdeluise.plantit.catalog.CatalogGapService;
 import com.github.mdeluise.plantit.plantinfo.care.PlantCareEnrichmentService;
 import com.github.mdeluise.plantit.plantinfo.care.PlantCarePreviewController;
 import org.junit.jupiter.api.Assertions;
@@ -23,6 +24,8 @@ class PlantCarePreviewControllerUnitTests {
     private PlantCareEnrichmentService enrichmentService;
     @Mock
     private PlantCareInfoDTOConverter plantCareInfoDTOConverter;
+    @Mock
+    private CatalogGapService catalogGapService;
     @InjectMocks
     private PlantCarePreviewController controller;
 
@@ -39,5 +42,6 @@ class PlantCarePreviewControllerUnitTests {
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Assertions.assertSame(careInfoDTO, response.getBody());
+        Mockito.verify(catalogGapService).observeCare("Monstera deliciosa", careInfo);
     }
 }

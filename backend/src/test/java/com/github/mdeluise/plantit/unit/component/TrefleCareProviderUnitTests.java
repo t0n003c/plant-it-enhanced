@@ -20,46 +20,9 @@ import org.mockito.Mockito;
 
 @DisplayName("Unit tests for Trefle care enrichment")
 class TrefleCareProviderUnitTests {
-    private static final String SEARCH_RESPONSE = """
-        {
-          "data": [
-            {"scientific_name":"Monstera deliciosa","slug":"monstera-deliciosa"},
-            {"scientific_name":"Zea mays","slug":"zea-mays"}
-          ]
-        }
-        """;
-    private static final String DETAIL_RESPONSE = """
-        {
-          "data": {
-            "main_species": {
-              "growth": {
-                "light": 7,
-                "atmospheric_humidity": 6,
-                "soil_humidity": 5,
-                "ph_minimum": 5.5,
-                "ph_maximum": 7.0,
-                "minimum_temperature": {"deg_c": 10.0},
-                "maximum_temperature": {"deg_c": 30.0}
-              }
-            }
-          }
-        }
-        """;
-    private static final String EMPTY_DETAIL_RESPONSE = """
-        {
-          "data": {
-            "main_species": {
-              "growth": {
-                "light": null,
-                "atmospheric_humidity": null,
-                "soil_humidity": null,
-                "minimum_temperature": {"deg_c": null},
-                "maximum_temperature": {"deg_c": null}
-              }
-            }
-          }
-        }
-        """;
+    private static final String SEARCH_RESPONSE = ProviderContractFixtures.load("trefle-plant-search.json");
+    private static final String DETAIL_RESPONSE = ProviderContractFixtures.load("trefle-plant-detail.json");
+    private static final String EMPTY_DETAIL_RESPONSE = ProviderContractFixtures.load("trefle-empty-detail.json");
     private HttpServer server;
     private String serverUrl;
 

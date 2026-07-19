@@ -10,6 +10,7 @@ private hiking journal in one AMD64/ARM64 container image.
 
 - Search common names, aliases, scientific names, and minor misspellings.
 - Use a bundled plant and care catalog without any cloud API key.
+- Inspect whole-catalog coverage and private, locally observed quality gaps.
 - Optionally identify a plant from guided whole-plant, leaf, and flower photos.
 - Optionally select a closer regional flora from a coarsened, opt-in field location.
 - Compare attributable trail lookalikes and source-backed habitat/elevation evidence.

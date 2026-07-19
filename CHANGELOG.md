@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.16.0 - 2026-07-18 - Catalog reliability
+
+- Define one versioned catalog-quality manifest with separate support requirements for 82
+  cultivated plants and 90 North American trail plants.
+- Validate every accepted scientific name, synonym, and reviewed everyday alias as one corpus,
+  preventing one-off search fixes and cross-taxon exact-name collisions.
+- Prefer match confidence before provider-specific score when merging candidates, fixing accepted
+  scientific names that could lose to a weaker synonym prefix.
+- Expand attributed image discovery to active subspecies and varieties, and reconcile provider
+  hybrid notation plus current GBIF accepted identities across the complete catalog.
+- Require the full cultivated tier to have reviewed light and soil-moisture guidance, and add the
+  missing Extension-sourced ginger profile for complete 82-of-82 coverage.
+- Record sanitized, account-scoped no-result, missing-image, and missing-care gaps in the local
+  database, automatically resolving a gap when a later request succeeds.
+- Add **More → Catalog health** with tier coverage, corpus totals, recent local gaps, and a
+  copyable report that contains no credentials or private observation coordinates.
+- Replace hand-written provider samples with recorded contract fixtures for iNaturalist, GBIF,
+  Trefle, Perenual, and Pl@ntNet response decoding.
+- Add a weekly, rate-limited external audit for all 172 reviewed plants plus 10 fast representative
+  canaries; optional repository secrets also verify Trefle and Pl@ntNet credentials.
+- Add an additive catalog-gap migration, invalidate pre-release search caches, and document the
+  quality policy, privacy boundary, maintenance workflow, and NAS upgrade checks.
+
 ## 0.15.7 - 2026-07-18 - Single-destination reverse proxy
 
 - Proxy `/api/` from the bundled frontend on port `3000` to the backend on port `8080`, allowing

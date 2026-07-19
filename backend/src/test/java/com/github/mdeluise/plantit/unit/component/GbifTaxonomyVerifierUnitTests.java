@@ -21,25 +21,7 @@ import org.mockito.Mockito;
 
 @DisplayName("Unit tests for GBIF taxonomy verification")
 class GbifTaxonomyVerifierUnitTests {
-    private static final String MATCH_RESPONSE = """
-        {
-          "usage": {
-            "key": "11041822",
-            "canonicalName": "Sansevieria trifasciata",
-            "rank": "SPECIES"
-          },
-          "acceptedUsage": {
-            "key": "11041822",
-            "canonicalName": "Dracaena trifasciata",
-            "rank": "SPECIES"
-          },
-          "classification": [
-            {"rank": "FAMILY", "name": "Asparagaceae"},
-            {"rank": "GENUS", "name": "Dracaena"}
-          ],
-          "diagnostics": {"confidence": 100}
-        }
-        """;
+    private static final String MATCH_RESPONSE = ProviderContractFixtures.load("gbif-species-match.json");
     private HttpServer server;
     private String serverUrl;
 

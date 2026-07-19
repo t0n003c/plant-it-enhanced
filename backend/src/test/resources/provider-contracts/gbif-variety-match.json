@@ -1,0 +1,16 @@
+{
+  "usage": {
+    "key": "5304437",
+    "canonicalName": "Dracaena reflexa angustifolia",
+    "rank": "VARIETY",
+    "status": "ACCEPTED"
+  },
+  "classification": [
+    {"rank": "FAMILY", "name": "Asparagaceae"},
+    {"rank": "GENUS", "name": "Dracaena"}
+  ],
+  "diagnostics": {
+    "confidence": 100,
+    "matchType": "EXACT"
+  }
+}

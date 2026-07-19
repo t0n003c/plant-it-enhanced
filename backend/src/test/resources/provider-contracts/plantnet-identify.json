@@ -1,0 +1,26 @@
+{
+  "query": {
+    "project": "all",
+    "images": ["monstera.jpg"],
+    "organs": ["auto"]
+  },
+  "predictedOrgans": [{"image": "monstera.jpg", "filename": "monstera.jpg", "organ": "leaf", "score": 0.88}],
+  "bestMatch": "Monstera deliciosa",
+  "version": "2026-01-08 (8.0)",
+  "remainingIdentificationRequests": 499,
+  "results": [
+    {
+      "score": 0.94,
+      "species": {
+        "scientificNameWithoutAuthor": "Monstera deliciosa",
+        "scientificNameAuthorship": "Liebm.",
+        "scientificName": "Monstera deliciosa Liebm.",
+        "genus": {"scientificNameWithoutAuthor": "Monstera"},
+        "family": {"scientificNameWithoutAuthor": "Araceae"},
+        "commonNames": ["Swiss cheese plant"]
+      },
+      "gbif": {"id": "2877284"},
+      "powo": {"id": "87469-1"}
+    }
+  ]
+}

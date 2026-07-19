@@ -1,0 +1,15 @@
+{
+  "data": {
+    "main_species": {
+      "growth": {
+        "light": 7,
+        "atmospheric_humidity": 6,
+        "soil_humidity": 5,
+        "ph_minimum": 5.5,
+        "ph_maximum": 7.0,
+        "minimum_temperature": {"deg_c": 10.0},
+        "maximum_temperature": {"deg_c": 30.0}
+      }
+    }
+  }
+}

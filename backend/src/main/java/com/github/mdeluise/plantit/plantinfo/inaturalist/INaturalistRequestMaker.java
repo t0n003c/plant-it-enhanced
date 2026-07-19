@@ -102,7 +102,8 @@ public class INaturalistRequestMaker {
                                             Math.max(MINIMUM_CANDIDATES, size * CANDIDATE_MULTIPLIER));
         final String encodedSearchTerm = URLEncoder.encode(providerSearchTerm, StandardCharsets.UTF_8);
         String url = String.format(
-            "%s/v1/taxa/autocomplete?q=%s&rank=species,hybrid&taxon_id=%s&is_active=true&per_page=%s&locale=%s",
+            "%s/v1/taxa/autocomplete?q=%s&rank=species,hybrid,subspecies,variety&taxon_id=%s" +
+                "&is_active=true&per_page=%s&locale=%s",
             baseEndpoint, encodedSearchTerm, PLANTAE_TAXON_ID, candidateCount,
             URLEncoder.encode(effectiveLocale, StandardCharsets.UTF_8)
         );
@@ -202,7 +203,8 @@ public class INaturalistRequestMaker {
 
 
     private boolean isSupportedRank(String rank) {
-        return "species".equalsIgnoreCase(rank) || "hybrid".equalsIgnoreCase(rank);
+        return "species".equalsIgnoreCase(rank) || "hybrid".equalsIgnoreCase(rank) ||
+                   "subspecies".equalsIgnoreCase(rank) || "variety".equalsIgnoreCase(rank);
     }
 
 
