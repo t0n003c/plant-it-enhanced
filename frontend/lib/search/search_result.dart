@@ -43,7 +43,7 @@ class _SearchResultCardState extends State<SearchResultCard> {
 
   Widget _buildPlantLabels(BuildContext context) {
     final Locale locale = Localizations.localeOf(context);
-    final String? commonName = widget.species.preferredCommonNameFor(
+    final String? commonName = widget.species.searchDisplayCommonNameFor(
       locale.languageCode,
       region: locale.countryCode,
     );
@@ -158,22 +158,34 @@ class _SearchResultCardState extends State<SearchResultCard> {
         "Key": widget.env.http.key!,
       },
       imageRenderMethodForWeb: ImageRenderMethodForWeb.HttpGet,
-      placeholder: (context, url) => Skeletonizer(
-        effect: skeletonizerEffect,
-        enabled: true,
-        child: Container(
-          constraints: BoxConstraints(
-            minHeight: MediaQuery.of(context).size.height * .4,
-            maxWidth: MediaQuery.of(context).size.height * .4,
-          ),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            image: const DecorationImage(
-              image: AssetImage("assets/images/no-image.png"),
-              fit: BoxFit.cover,
+      fadeInDuration: const Duration(milliseconds: 180),
+      fadeOutDuration: const Duration(milliseconds: 80),
+      placeholder: (context, url) => Stack(
+        children: [
+          Skeletonizer(
+            effect: skeletonizerEffect,
+            enabled: true,
+            child: Container(
+              constraints: BoxConstraints(
+                minHeight: MediaQuery.of(context).size.height * .4,
+                maxWidth: MediaQuery.of(context).size.height * .4,
+              ),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                image: const DecorationImage(
+                  image: AssetImage("assets/images/no-image.png"),
+                  fit: BoxFit.cover,
+                ),
+              ),
             ),
           ),
-        ),
+          Positioned(
+            bottom: 10,
+            left: 10,
+            right: 10,
+            child: _buildPlantLabels(context),
+          ),
+        ],
       ),
       errorWidget: (context, url, error) {
         return GestureDetector(
@@ -216,6 +228,7 @@ class _SearchResultCardState extends State<SearchResultCard> {
               Positioned(
                 bottom: 10,
                 left: 10,
+                right: 10,
                 child: _buildPlantLabels(context),
               ),
             ],
@@ -289,6 +302,7 @@ class _SearchResultCardState extends State<SearchResultCard> {
               Positioned(
                 bottom: 10,
                 left: 10,
+                right: 10,
                 child: _buildPlantLabels(context),
               ),
             ],

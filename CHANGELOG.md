@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.16.1 - 2026-07-18 - Query-aware, responsive search
+
+- Preserve the exact common name that matched each result, so searches for `Thai chili` or
+  `Thai pepper` display that everyday name while retaining `Capsicum annuum` as the scientific
+  identity instead of relabeling the result as bell pepper.
+- Reduce the search debounce from 1.1 seconds to 400 milliseconds, support immediate keyboard
+  submission, and reset short or cleared queries without an unnecessary network request.
+- Replace the disruptive full-result spinner with compact progress feedback while keeping existing
+  result layout stable, and render plant labels while remote photos are still loading.
+- Remove the arbitrary provider request when opening Search, add useful initial and empty-result
+  states, lazily build result cards with stable identities, and tighten mobile padding.
+- Cache successful GBIF verification responses for 24 hours in a bounded 512-entry server cache,
+  avoiding duplicate taxonomy calls for the same scientific name without storing user data.
+- Invalidate earlier search-response caches, add narrow-screen interaction regressions, and release
+  the backend, web app, and Helm metadata as 0.16.1.
+
 ## 0.16.0 - 2026-07-18 - Catalog reliability
 
 - Define one versioned catalog-quality manifest with separate support requirements for 82

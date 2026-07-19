@@ -39,6 +39,8 @@ Plant-it helps you remember the last time you did a treatment of your plants, wh
 * Save finds offline, group them into named hikes, and retry interrupted synchronization without
   duplicating observations or photos
 * See why a search result matched and its match confidence
+* Keep the searched everyday name visible for multi-purpose species, such as Thai chili versus
+  bell pepper, while preserving the shared scientific identity
 * See attributable iNaturalist photos for image-less search results without replacing your own photos
 * Take guided whole-plant, leaf, and flower photos, compare the top matches, and add the plant
 * Optionally use a coarsened field location to select a closer Pl@ntNet regional flora while exact
@@ -74,7 +76,10 @@ The reviewed offline index contains 172 taxa and more than 800 accepted scientif
 and everyday-name test queries and works without an API key. The cultivated tier contains 82 plants
 with reviewed light and soil-moisture guidance; the trail tier contains 90 North American plants
 whose household-care fields are intentionally not required. The web app sends its current language
-and region with each search.
+and region with each search. Exact everyday-name matches stay visible on the result card even when
+several cultivated forms share one scientific species. Search starts after a short 400 ms pause,
+can be submitted immediately from the keyboard, and keeps compact progress feedback visible without
+replacing the result layout.
 `PLANT_SEARCH_LOCALE` and `PLANT_SEARCH_REGION` are fallbacks for older clients. Outbound
 iNaturalist traffic is also throttled with a small interactive burst; repeated searches continue
 to use Redis.

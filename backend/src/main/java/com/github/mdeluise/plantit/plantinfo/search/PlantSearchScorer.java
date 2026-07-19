@@ -78,6 +78,7 @@ public final class PlantSearchScorer {
         final PlantSearchMatch match = evaluate(query, botanicalInfo);
         botanicalInfo.setSearchMatchReason(match.reason().name());
         botanicalInfo.setSearchMatchConfidence(match.confidence());
+        botanicalInfo.setSearchMatchedName(match.matchedName());
     }
 
 
@@ -136,7 +137,7 @@ public final class PlantSearchScorer {
             reason = exactReason == PlantSearchMatchReason.EXACT_COMMON_NAME
                          ? PlantSearchMatchReason.COMMON_NAME_TYPO : exactReason;
         }
-        return new PlantSearchMatch(Math.max(0, base + bonus), confidence, reason);
+        return new PlantSearchMatch(Math.max(0, base + bonus), confidence, reason, candidate);
     }
 
 
@@ -147,7 +148,7 @@ public final class PlantSearchScorer {
 
 
     private static PlantSearchMatch noMatch() {
-        return new PlantSearchMatch(0, 0, PlantSearchMatchReason.NONE);
+        return new PlantSearchMatch(0, 0, PlantSearchMatchReason.NONE, null);
     }
 
 

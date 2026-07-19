@@ -288,6 +288,20 @@
   "numberOfEvents": "Number of events",
   "searchInYourPlants": "Search in your plants",
   "searchNewGreenFriends": "Search houseplants, garden plants, and trail finds",
+  "plantSearchStartHint": "Type at least 2 characters. Everyday names such as “Thai chili” work too.",
+  "searchingForPlant": "Searching for “{query}”…",
+  "@searchingForPlant": {
+    "placeholders": {
+      "query": {"type": "String"}
+    }
+  },
+  "noPlantSearchResults": "No catalog result was found for “{query}”.",
+  "@noPlantSearchResults": {
+    "placeholders": {
+      "query": {"type": "String"}
+    }
+  },
+  "identifyingPlant": "Analyzing your plant photos…",
   "trailPlant": "North American trail plant",
   "avoidPlantContact": "Avoid contact · verify independently",
   "identifyByPhoto": "Identify by photo",

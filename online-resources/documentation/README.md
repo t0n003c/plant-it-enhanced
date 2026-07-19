@@ -26,5 +26,5 @@ Publishing is for repository maintainers:
 mike deploy -b static-doc --alias-type redirect <version> latest
 ```
 
-Replace `<version>` with the application documentation version, such as `0.16.0`. Do not publish
+Replace `<version>` with the application documentation version, such as `0.16.1`. Do not publish
 documentation for a release until its container image is available from GHCR.

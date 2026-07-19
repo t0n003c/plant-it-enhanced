@@ -12,7 +12,7 @@ void main() {
   test('decodes plant search results and sends locale context', () async {
     final _StubHttpClient client = _StubHttpClient(
       http.Response(
-        '[{"id":1,"scientificName":"Monstera deliciosa","synonyms":[],"commonNames":[],"externalReferences":{},"plantCareInfo":{},"creator":"INATURALIST","catalogTags":[]}]',
+        '[{"id":1,"scientificName":"Monstera deliciosa","synonyms":[],"commonNames":[],"externalReferences":{},"plantCareInfo":{},"creator":"INATURALIST","searchMatchReason":"EXACT_COMMON_NAME","searchMatchedName":"Monstera","catalogTags":[]}]',
         200,
       ),
     );
@@ -26,6 +26,7 @@ void main() {
 
     expect(result, hasLength(1));
     expect(result.single.scientificName, 'Monstera deliciosa');
+    expect(result.single.searchMatchedName, 'Monstera');
     expect(client.lastUrl, contains('q=monstera'));
     expect(client.lastUrl, contains('locale=en'));
     expect(client.lastUrl, contains('region=US'));

@@ -95,6 +95,21 @@ class TrustedCommonNameIndexUnitTests {
 
 
     @Test
+    @DisplayName("Should distinguish the matched pepper name from the species default name")
+    void shouldPreserveMatchedPepperName() {
+        final TrustedCommonNameIndex index = createIndex();
+
+        final BotanicalInfo thaiChili = index.search("thai chili", 1).get(0);
+        final BotanicalInfo thaiPepper = index.search("thai pepper", 1).get(0);
+
+        Assertions.assertEquals("Capsicum annuum", thaiChili.getSpecies());
+        Assertions.assertEquals("Bell pepper", thaiChili.getPreferredCommonName());
+        Assertions.assertEquals("Thai chili", thaiChili.getSearchMatchedName());
+        Assertions.assertEquals("Thai pepper", thaiPepper.getSearchMatchedName());
+    }
+
+
+    @Test
     @DisplayName("Should search every reviewed accepted scientific name directly")
     void shouldSearchAcceptedScientificNames() {
         final TrustedCommonNameIndex index = createIndex();

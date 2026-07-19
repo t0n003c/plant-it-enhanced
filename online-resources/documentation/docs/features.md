@@ -5,7 +5,13 @@
 Search uses familiar names first while preserving accepted scientific identity underneath. The
 bundled reviewed index handles aliases, reordered words, minor spelling mistakes, and a 90-species
 North American trail starter set. Results explain why they matched and show confidence instead of
-presenting a weak match as fact.
+presenting a weak match as fact. The matched everyday name remains the visible title when one
+species has several familiar cultivated forms—for example, `Thai chili` remains `Thai chili` while
+the scientific identity stays `Capsicum annuum`.
+
+Search waits only briefly while someone types, submits immediately from the keyboard, and shows
+compact progress without replacing already rendered cards. Opening Search no longer starts an
+arbitrary provider request, and plant names remain visible while remote photos load.
 
 When configured, iNaturalist expands common-name discovery, GBIF verifies accepted taxonomy, and
 FloraCodex provides a final fallback. Provider records that resolve to the same accepted taxon are

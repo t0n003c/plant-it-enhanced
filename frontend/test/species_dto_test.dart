@@ -122,4 +122,39 @@ void main() {
       ],
     );
   });
+
+  test('uses the common name that matched the current search', () {
+    final SpeciesDTO pepper = SpeciesDTO.fromJson({
+      'scientificName': 'Capsicum annuum',
+      'preferredCommonName': 'Bell pepper',
+      'commonNames': [
+        {
+          'name': 'Bell pepper',
+          'language': 'en',
+          'preferred': true,
+          'source': 'TRUSTED_NAME_INDEX',
+        },
+        {
+          'name': 'Thai chili',
+          'language': 'en',
+          'preferred': false,
+          'source': 'TRUSTED_NAME_INDEX',
+        },
+      ],
+      'externalReferences': <String, String>{},
+      'plantCareInfo': <String, dynamic>{},
+      'creator': 'TRUSTED_NAME_INDEX',
+      'searchMatchReason': 'EXACT_COMMON_NAME',
+      'searchMatchConfidence': 1.0,
+      'searchMatchedName': 'Thai chili',
+      'catalogTags': <String>[],
+    });
+
+    expect(pepper.searchMatchedName, 'Thai chili');
+    expect(pepper.searchDisplayCommonNameFor('en', region: 'US'), 'Thai chili');
+
+    pepper.searchMatchReason = 'SCIENTIFIC_NAME';
+    expect(
+        pepper.searchDisplayCommonNameFor('en', region: 'US'), 'Bell pepper');
+  });
 }

@@ -52,6 +52,7 @@ public class BotanicalInfoDTOConverter extends AbstractDTOConverter<BotanicalInf
         result.setLastVerifiedAt(data.getLastVerifiedAt());
         result.setSearchMatchReason(data.getSearchMatchReason());
         result.setSearchMatchConfidence(data.getSearchMatchConfidence());
+        result.setSearchMatchedName(data.getSearchMatchedName());
         result.setCatalogTags(data.getCatalogTags() == null
                                   ? new LinkedHashSet<>() : new LinkedHashSet<>(data.getCatalogTags()));
         applyImage(data.getImage(), result);
