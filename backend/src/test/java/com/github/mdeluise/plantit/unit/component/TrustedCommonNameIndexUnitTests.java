@@ -90,7 +90,19 @@ class TrustedCommonNameIndexUnitTests {
         Assertions.assertEquals("Zingiber officinale", index.resolveProviderSearchTerm("ginger-root"));
         Assertions.assertEquals("Brassica oleracea", index.resolveProviderSearchTerm("kale"));
         Assertions.assertEquals("Capsicum annuum", index.resolveProviderSearchTerm("Thai pepper"));
+        Assertions.assertEquals("Lilium", index.resolveProviderSearchTerm("lily"));
         Assertions.assertEquals("ging", index.resolveProviderSearchTerm("ging"));
+    }
+
+
+    @Test
+    @DisplayName("Should rank a reviewed true-lily genus above plants that only contain lily in their name")
+    void shouldRankTrueLilyFirst() {
+        final BotanicalInfo lily = createIndex().search("lily", 5).get(0);
+
+        Assertions.assertEquals("Lilium", lily.getSpecies());
+        Assertions.assertEquals("Lily", lily.getSearchMatchedName());
+        Assertions.assertEquals("EXACT_COMMON_NAME", lily.getSearchMatchReason());
     }
 
 

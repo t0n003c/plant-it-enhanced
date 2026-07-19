@@ -1,0 +1,163 @@
+{
+  "verifiedAt": "2026-07-18T00:00:00Z",
+  "profiles": [
+    {
+      "taxonScopes": ["Lilium"],
+      "humanStatus": "UNKNOWN",
+      "catStatus": "HIGHLY_TOXIC",
+      "dogStatus": "NON_TOXIC",
+      "summary": "True lilies are an emergency-level hazard for cats. Even small exposure to leaves, flowers, pollen, or vase water can cause severe kidney injury. The ASPCA lists Lilium species as non-toxic to dogs, but plant material can still cause stomach upset.",
+      "hazardousParts": ["All plant parts", "Pollen", "Vase water"],
+      "sources": [
+        {
+          "name": "ASPCA Animal Poison Control",
+          "url": "https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/lily"
+        },
+        {
+          "name": "ASPCA lily safety guide",
+          "url": "https://www.aspca.org/news/which-lilies-are-toxic-pets"
+        }
+      ]
+    },
+    {
+      "taxonScopes": ["Hemerocallis"],
+      "humanStatus": "UNKNOWN",
+      "catStatus": "HIGHLY_TOXIC",
+      "dogStatus": "NON_TOXIC",
+      "summary": "Daylilies can cause severe kidney injury and death in cats. The ASPCA lists daylilies as non-toxic to dogs, although eating any plant material may still cause stomach upset.",
+      "hazardousParts": ["All plant parts", "Pollen", "Vase water"],
+      "sources": [
+        {
+          "name": "ASPCA Animal Poison Control",
+          "url": "https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/orange-day-lily"
+        }
+      ]
+    },
+    {
+      "taxonScopes": ["Spathiphyllum"],
+      "humanStatus": "TOXIC",
+      "catStatus": "TOXIC",
+      "dogStatus": "TOXIC",
+      "summary": "Peace lilies contain insoluble calcium oxalate crystals. Chewing the plant can cause intense mouth irritation, drooling, vomiting, and difficulty swallowing in people, cats, and dogs.",
+      "hazardousParts": ["Leaves", "Stems"],
+      "sources": [
+        {
+          "name": "NC State Extension Plant Toolbox",
+          "url": "https://plants.ces.ncsu.edu/plants/spathiphyllum/"
+        },
+        {
+          "name": "ASPCA lily safety guide",
+          "url": "https://www.aspca.org/news/which-lilies-are-toxic-pets"
+        }
+      ]
+    },
+    {
+      "taxonScopes": ["Convallaria"],
+      "humanStatus": "TOXIC",
+      "catStatus": "HIGHLY_TOXIC",
+      "dogStatus": "HIGHLY_TOXIC",
+      "summary": "Lily-of-the-valley contains cardiac glycosides. Ingestion can affect heart rhythm and blood pressure and may cause vomiting, disorientation, seizures, or coma in people and pets.",
+      "hazardousParts": ["All plant parts", "Berries"],
+      "sources": [
+        {
+          "name": "NC State Extension Plant Toolbox",
+          "url": "https://plants.ces.ncsu.edu/plants/convallaria-majalis/"
+        },
+        {
+          "name": "ASPCA Animal Poison Control",
+          "url": "https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/lily-valley"
+        }
+      ]
+    },
+    {
+      "taxonScopes": ["Zantedeschia"],
+      "humanStatus": "TOXIC",
+      "catStatus": "TOXIC",
+      "dogStatus": "TOXIC",
+      "summary": "Calla lilies contain calcium oxalate crystals. Ingestion can cause severe burning and swelling of the mouth and throat, drooling, vomiting, and difficulty swallowing in people and pets.",
+      "hazardousParts": ["All plant parts", "Sap"],
+      "sources": [
+        {
+          "name": "NC State Extension Plant Toolbox",
+          "url": "https://plants.ces.ncsu.edu/plants/zantedeschia/"
+        },
+        {
+          "name": "ASPCA Animal Poison Control",
+          "url": "https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/calla-lily"
+        }
+      ]
+    },
+    {
+      "taxonScopes": ["Monstera"],
+      "humanStatus": "TOXIC",
+      "catStatus": "TOXIC",
+      "dogStatus": "TOXIC",
+      "summary": "Monstera leaves and stems contain insoluble calcium oxalate crystals. Chewing them can cause burning and swelling of the mouth, drooling, vomiting, and difficulty swallowing in people, cats, and dogs.",
+      "hazardousParts": ["Leaves", "Stems", "Sap", "Unripe fruit"],
+      "sources": [
+        {
+          "name": "NC State Extension Plant Toolbox",
+          "url": "https://plants.ces.ncsu.edu/plants/monstera-deliciosa/"
+        },
+        {
+          "name": "ASPCA Animal Poison Control",
+          "url": "https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/ceriman"
+        }
+      ]
+    },
+    {
+      "taxonScopes": ["Epipremnum"],
+      "humanStatus": "TOXIC",
+      "catStatus": "TOXIC",
+      "dogStatus": "TOXIC",
+      "summary": "Pothos contains insoluble calcium oxalate crystals. Chewing the plant can cause painful mouth irritation, drooling, vomiting, and difficulty swallowing in people, cats, and dogs.",
+      "hazardousParts": ["All plant parts", "Sap"],
+      "sources": [
+        {
+          "name": "NC State Extension Plant Toolbox",
+          "url": "https://plants.ces.ncsu.edu/plants/epipremnum-aureum/"
+        },
+        {
+          "name": "ASPCA Animal Poison Control",
+          "url": "https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/devils-ivy"
+        }
+      ]
+    },
+    {
+      "scientificNames": ["Dracaena trifasciata", "Sansevieria trifasciata"],
+      "humanStatus": "CAUTION",
+      "catStatus": "TOXIC",
+      "dogStatus": "TOXIC",
+      "summary": "Snake plant contains saponins. It is considered low-severity for people, but ingestion can cause nausea, vomiting, or diarrhea; cats and dogs may also drool and become lethargic.",
+      "hazardousParts": ["Leaves", "Sap"],
+      "sources": [
+        {
+          "name": "NC State Extension Plant Toolbox",
+          "url": "https://plants.ces.ncsu.edu/plants/dracaena-trifasciata/"
+        },
+        {
+          "name": "ASPCA Animal Poison Control",
+          "url": "https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/snake-plant"
+        }
+      ]
+    },
+    {
+      "scientificNames": ["Aloe vera", "Aloe barbadensis"],
+      "humanStatus": "CAUTION",
+      "catStatus": "TOXIC",
+      "dogStatus": "TOXIC",
+      "summary": "Aloe leaf latex and whole-leaf material contain compounds that can cause gastrointestinal symptoms. The inner gel is treated differently in some uses, so do not use this profile as an edibility guide; cats and dogs should not ingest the plant.",
+      "hazardousParts": ["Leaf latex", "Whole leaves", "Sap"],
+      "sources": [
+        {
+          "name": "NC State Extension Plant Toolbox",
+          "url": "https://plants.ces.ncsu.edu/plants/aloe-vera/common-name/aloe-vera/"
+        },
+        {
+          "name": "ASPCA Animal Poison Control",
+          "url": "https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/aloe"
+        }
+      ]
+    }
+  ]
+}

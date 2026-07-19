@@ -473,6 +473,12 @@
       "sourceReference": "https://plants.ces.ncsu.edu/plants/narcissus-pseudonarcissus/"
     },
     {
+      "scientificNames": ["Lilium"],
+      "light": 8,
+      "soilHumidity": 5,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/lilium/common-name/lily/"
+    },
+    {
       "scientificNames": ["Lilium candidum"],
       "light": 7,
       "soilHumidity": 6,

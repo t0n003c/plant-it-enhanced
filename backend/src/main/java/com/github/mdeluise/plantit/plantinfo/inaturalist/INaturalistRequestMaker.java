@@ -12,7 +12,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalCommonName;
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfo;
@@ -41,6 +43,8 @@ public class INaturalistRequestMaker {
     private static final int MAXIMUM_CANDIDATES = 30;
     private static final int CANDIDATE_MULTIPLIER = 3;
     private static final int MAXIMUM_GBIF_VERIFICATIONS = 7;
+    private static final Set<String> SUPPORTED_RANKS = Set.of(
+        "genus", "species", "hybrid", "subspecies", "variety");
     private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(8);
     private static final String PLANTAE_TAXON_ID = "47126";
     private static final String PHOTO_PAGE = "https://www.inaturalist.org/photos/";
@@ -102,7 +106,7 @@ public class INaturalistRequestMaker {
                                             Math.max(MINIMUM_CANDIDATES, size * CANDIDATE_MULTIPLIER));
         final String encodedSearchTerm = URLEncoder.encode(providerSearchTerm, StandardCharsets.UTF_8);
         String url = String.format(
-            "%s/v1/taxa/autocomplete?q=%s&rank=species,hybrid,subspecies,variety&taxon_id=%s" +
+            "%s/v1/taxa/autocomplete?q=%s&rank=genus,species,hybrid,subspecies,variety&taxon_id=%s" +
                 "&is_active=true&per_page=%s&locale=%s",
             baseEndpoint, encodedSearchTerm, PLANTAE_TAXON_ID, candidateCount,
             URLEncoder.encode(effectiveLocale, StandardCharsets.UTF_8)
@@ -203,8 +207,7 @@ public class INaturalistRequestMaker {
 
 
     private boolean isSupportedRank(String rank) {
-        return "species".equalsIgnoreCase(rank) || "hybrid".equalsIgnoreCase(rank) ||
-                   "subspecies".equalsIgnoreCase(rank) || "variety".equalsIgnoreCase(rank);
+        return rank != null && SUPPORTED_RANKS.contains(rank.toLowerCase(Locale.ROOT));
     }
 
 

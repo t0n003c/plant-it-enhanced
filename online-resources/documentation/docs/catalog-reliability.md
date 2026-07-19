@@ -7,16 +7,16 @@ that happen to expose a gap.
 
 | Tier | Entries | Search | Care | Images |
 | --- | ---: | --- | --- | --- |
-| Cultivated | 82 | Accepted names, synonyms, and reviewed aliases | Reviewed light and soil moisture required | External availability monitored |
+| Cultivated | 83 | Accepted names, synonyms, and reviewed aliases | Reviewed light and soil moisture required | External availability monitored |
 | North American trail | 90 | The same identity checks plus trail metadata | Household care intentionally not required | External availability monitored |
 
-All 172 identities and more than 800 reviewed name queries run through the production search code
-during a release. The cultivated tier must remain 82-of-82 for required care fields. Sanitized
+All 173 identities and more than 800 reviewed name queries run through the production search code
+during a release. The cultivated tier must remain 83-of-83 for required care fields. Sanitized
 recorded responses also exercise the production iNaturalist, GBIF, Trefle, Perenual, and Pl@ntNet
 deserializers without calling the network.
 
-A scheduled, retrying, rate-limited workflow checks all 172 reviewed plants against live
-iNaturalist image and GBIF taxonomy services. Ten stable manifest entries form a faster
+A scheduled, retrying, rate-limited workflow checks all 173 reviewed plants against live
+iNaturalist image and GBIF taxonomy services. Eleven stable manifest entries form a faster
 representative canary set. Trefle and Pl@ntNet credential checks run when those repository secrets
 are configured. The audit does not upload photos or spend Pl@ntNet identification quota for every
 catalog entry.

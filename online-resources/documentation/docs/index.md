@@ -15,6 +15,8 @@ private hiking journal in one AMD64/ARM64 container image.
 - Optionally select a closer regional flora from a coarsened, opt-in field location.
 - Compare attributable trail lookalikes and source-backed habitat/elevation evidence.
 - Review where each care value came from and how confident the source is.
+- Review separately sourced safety guidance for people, cats, and dogs without treating unknown as
+  safe.
 - Track owned plants, care events, reminders, snoozes, and upcoming work.
 - Save private trail observations offline, group them into hikes, and retry interrupted sync safely.
 - Keep MySQL, Redis, uploads, provider keys, exact coordinates, and original photos on your server.

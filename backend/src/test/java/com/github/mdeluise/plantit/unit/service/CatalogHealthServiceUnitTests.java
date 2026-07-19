@@ -34,9 +34,9 @@ class CatalogHealthServiceUnitTests {
         final CatalogHealthSnapshot result = service.get();
 
         Assertions.assertTrue(result.healthy());
-        Assertions.assertEquals(172, result.totals().reviewedEntries());
-        Assertions.assertEquals(82, result.totals().curatedCareProfiles());
-        Assertions.assertEquals(10, result.totals().liveCanaries());
+        Assertions.assertEquals(173, result.totals().reviewedEntries());
+        Assertions.assertEquals(83, result.totals().curatedCareProfiles());
+        Assertions.assertEquals(11, result.totals().liveCanaries());
         Assertions.assertTrue(result.policyIssues().isEmpty());
         final CatalogHealthSnapshot.TierCoverage cultivated = result.tiers().stream()
             .filter(tier -> "CURATED_CULTIVATED".equals(tier.name()))
@@ -46,8 +46,8 @@ class CatalogHealthServiceUnitTests {
             .filter(tier -> "NORTH_AMERICAN_TRAIL".equals(tier.name()))
             .findFirst()
             .orElseThrow();
-        Assertions.assertEquals(82, cultivated.entries());
-        Assertions.assertEquals(82, cultivated.careCompleteEntries());
+        Assertions.assertEquals(83, cultivated.entries());
+        Assertions.assertEquals(83, cultivated.careCompleteEntries());
         Assertions.assertEquals(100, cultivated.careCoveragePercent());
         Assertions.assertEquals(90, trail.entries());
         Assertions.assertEquals(0, trail.careRequiredEntries());

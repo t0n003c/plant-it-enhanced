@@ -64,6 +64,12 @@
       "requiresImage": true
     },
     {
+      "query": "lily",
+      "providerTerm": "Lilium",
+      "acceptedScientificNames": ["Lilium"],
+      "requiresImage": true
+    },
+    {
       "query": "white trillium",
       "providerTerm": "Trillium grandiflorum",
       "acceptedScientificNames": ["Trillium grandiflorum"],

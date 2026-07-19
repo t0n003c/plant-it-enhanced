@@ -66,7 +66,7 @@ class INaturalistRequestMakerUnitTests {
         final List<BotanicalInfo> results = requestMaker.search("snake plant", 5);
 
         Assertions.assertTrue(naturalistQuery.get().contains("q=snake+plant"));
-        Assertions.assertTrue(naturalistQuery.get().contains("rank=species,hybrid,subspecies,variety"));
+        Assertions.assertTrue(naturalistQuery.get().contains("rank=genus,species,hybrid,subspecies,variety"));
         Assertions.assertTrue(naturalistQuery.get().contains("locale=en"));
         Assertions.assertTrue(naturalistQuery.get().contains("preferred_place_id=1"));
         Assertions.assertEquals(1, results.size());
@@ -124,7 +124,7 @@ class INaturalistRequestMakerUnitTests {
 
         final List<BotanicalInfo> results = createRequestMaker().search("strawberry", 5);
 
-        Assertions.assertTrue(naturalistQuery.get().contains("rank=species,hybrid,subspecies,variety"));
+        Assertions.assertTrue(naturalistQuery.get().contains("rank=genus,species,hybrid,subspecies,variety"));
         Assertions.assertEquals(5, results.size());
         final BotanicalInfo result = results.get(0);
         Assertions.assertEquals("Fragaria ananassa", result.getSpecies());
@@ -191,6 +191,68 @@ class INaturalistRequestMakerUnitTests {
         Assertions.assertTrue(results.get(0).getSynonyms().contains("ginger root"));
         Assertions.assertEquals("https://static.inaturalist.org/photos/247973845/medium.jpeg",
                                 results.get(0).getImage().getUrl());
+    }
+
+
+    @Test
+    @DisplayName("Should enrich a broad lily query with the reviewed true-lily genus photo")
+    void shouldEnrichReviewedGenus() {
+        final AtomicReference<String> naturalistQuery = new AtomicReference<>();
+        server.createContext("/v1/taxa/autocomplete", exchange -> {
+            naturalistQuery.set(exchange.getRequestURI().getRawQuery());
+            respond(exchange, """
+                {
+                  "results": [{
+                    "id": 48928,
+                    "name": "Lilium",
+                    "rank": "genus",
+                    "iconic_taxon_name": "Plantae",
+                    "preferred_common_name": "true lilies",
+                    "matched_term": "Lilium",
+                    "observations_count": 179442,
+                    "default_photo": {
+                      "id": 210060579,
+                      "license_code": "cc-by-nc",
+                      "attribution": "(c) Example Lily Photographer, CC BY-NC",
+                      "medium_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/210060579/medium.jpg",
+                      "square_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/210060579/square.jpg"
+                    }
+                  }]
+                }
+                """);
+        });
+        server.createContext("/v2/species/match", exchange -> respond(exchange, """
+            {
+              "usage": {
+                "key": "2752977",
+                "canonicalName": "Lilium",
+                "rank": "GENUS"
+              },
+              "classification": [
+                {"rank": "FAMILY", "name": "Liliaceae"},
+                {"rank": "GENUS", "name": "Lilium"}
+              ],
+              "diagnostics": {"confidence": 96}
+            }
+            """));
+        server.start();
+        final TrustedCommonNameIndex trustedCommonNameIndex = Mockito.mock(TrustedCommonNameIndex.class);
+        Mockito.when(trustedCommonNameIndex.resolveProviderSearchTerm("lily")).thenReturn("Lilium");
+
+        final List<BotanicalInfo> results = createRequestMaker(trustedCommonNameIndex).search("lily", 5);
+
+        Assertions.assertTrue(naturalistQuery.get().contains("q=Lilium"));
+        Assertions.assertTrue(naturalistQuery.get().contains(
+            "rank=genus,species,hybrid,subspecies,variety"));
+        Assertions.assertEquals(1, results.size());
+        Assertions.assertEquals("Lilium", results.get(0).getSpecies());
+        Assertions.assertEquals("2752977", results.get(0).getCanonicalTaxonKey());
+        Assertions.assertEquals("Liliaceae", results.get(0).getFamily());
+        Assertions.assertEquals(
+            "https://inaturalist-open-data.s3.amazonaws.com/photos/210060579/medium.jpg",
+            results.get(0).getImage().getUrl());
+        Assertions.assertEquals("https://www.inaturalist.org/photos/210060579",
+                                results.get(0).getImage().getSourceUrl());
     }
 
 
