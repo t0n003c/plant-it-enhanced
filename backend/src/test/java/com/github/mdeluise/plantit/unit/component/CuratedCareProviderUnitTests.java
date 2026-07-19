@@ -40,7 +40,7 @@ class CuratedCareProviderUnitTests {
     @Test
     @DisplayName("Should expose deterministic catalog field coverage")
     void shouldExposeFieldCoverage() {
-        Assertions.assertEquals(87, provider.profileCount());
+        Assertions.assertEquals(88, provider.profileCount());
         Assertions.assertTrue(provider.availableFields("Lilium").containsAll(
             List.of("light", "soilHumidity")));
         Assertions.assertTrue(provider.availableFields("Zingiber officinale").containsAll(
