@@ -11,7 +11,11 @@ the scientific identity stays `Capsicum annuum`.
 
 Search waits only briefly while someone types, submits immediately from the keyboard, and shows
 compact progress without replacing already rendered cards. Opening Search no longer starts an
-arbitrary provider request, and plant names remain visible while remote photos load.
+arbitrary provider request, and plant names remain visible while remote photos load. Result photos
+use a stable centered 4:3 frame that preserves the whole image instead of cropping portrait or
+landscape specimens to fill the card. Identity, match evidence, and the Details action sit below
+the photo; a reviewed household hazard is visible before the details page is opened. Search stays
+in a bounded centered column on wide browsers while remaining full-width on mobile.
 
 When configured, iNaturalist expands common-name discovery, GBIF verifies accepted taxonomy, and
 FloraCodex provides a final fallback. Provider records that resolve to the same accepted taxon are

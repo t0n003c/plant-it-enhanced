@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.16.3 - 2026-07-18 - Photo-first search discovery
+
+- Replace cropped search imagery with a stable, centered 4:3 frame that uses `BoxFit.contain`,
+  keeping the full provider photo visible across portrait, landscape, mobile, and desktop layouts.
+- Keep the same photo dimensions while an image loads or falls back, removing the result-card jump
+  caused by viewport-height constraints and differently sized placeholder widgets.
+- Move plant identity and match evidence below the photo so labels no longer obscure the specimen,
+  and add an explicit **Details** action to every result.
+- Surface the strongest reviewed household-safety status directly on result cards while preserving
+  the separate human, cat, and dog explanation in plant details.
+- Center search controls and result cards in a bounded responsive column on wide web screens while
+  retaining full-width mobile cards.
+- Record privacy-aware camera health checks, source-backed issue triage, and honest light estimates
+  as future product phases inspired by photo-first plant applications.
+- Release the backend, web app, and Helm metadata as 0.16.3; no migration or environment change is
+  required.
+
 ## 0.16.2 - 2026-07-18 - Lily coverage and reviewed household safety
 
 - Treat the everyday query `lily` as the true-lily genus `Lilium`, allow reviewed genus results

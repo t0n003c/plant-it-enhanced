@@ -41,6 +41,8 @@ Plant-it helps you remember the last time you did a treatment of your plants, wh
 * See why a search result matched and its match confidence
 * Keep the searched everyday name visible for multi-purpose species, such as Thai chili versus
   bell pepper, while preserving the shared scientific identity
+* See the entire provider photo in a stable, centered search frame with identity, match evidence,
+  reviewed safety warnings, and an explicit details action below it
 * See attributable iNaturalist photos for image-less search results without replacing your own photos
 * Take guided whole-plant, leaf, and flower photos, compare the top matches, and add the plant
 * Optionally use a coarsened field location to select a closer Pl@ntNet regional flora while exact

@@ -3,17 +3,16 @@ import 'dart:typed_data';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cached_network_image_platform_interface/cached_network_image_platform_interface.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:plant_it/commons.dart';
 import 'package:plant_it/dto/species_dto.dart';
 import 'package:plant_it/environment.dart';
 import 'package:plant_it/plant_add/add_plant_page.dart';
+import 'package:plant_it/search/search_result_photo.dart';
 import 'package:plant_it/search/species_details_page.dart';
 import 'package:plant_it/search/tag.dart';
 import 'package:plant_it/species_image_url.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:plant_it/theme.dart';
-import 'package:skeletonizer/skeletonizer.dart';
 
 class SearchResultCard extends StatefulWidget {
   final SpeciesDTO species;
@@ -36,78 +35,288 @@ class SearchResultCard extends StatefulWidget {
 }
 
 class _SearchResultCardState extends State<SearchResultCard> {
+  static const AssetImage _missingImage =
+      AssetImage('assets/images/no-image.png');
+
   Future<Uint8List>? _identificationImageBytes;
 
   String? get _url =>
       resolveSpeciesImageUrl(widget.species, widget.env.http.backendUrl);
 
-  Widget _buildPlantLabels(BuildContext context) {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.identificationImage != null) {
+      _identificationImageBytes = widget.identificationImage!.readAsBytes();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_identificationImageBytes != null) {
+      return FutureBuilder<Uint8List>(
+        future: _identificationImageBytes,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return _buildResultCard(
+              context,
+              imageProvider: _missingImage,
+              loading: true,
+            );
+          }
+          return _buildResultCard(
+            context,
+            imageProvider: MemoryImage(snapshot.data!),
+            showAddAction: true,
+          );
+        },
+      );
+    }
+
+    return CachedNetworkImage(
+      imageUrl: _url ?? missingSpeciesImageUrl(widget.env.http.backendUrl),
+      httpHeaders: {
+        'Key': widget.env.http.key!,
+      },
+      imageRenderMethodForWeb: ImageRenderMethodForWeb.HttpGet,
+      fadeInDuration: const Duration(milliseconds: 180),
+      fadeOutDuration: const Duration(milliseconds: 80),
+      placeholder: (context, url) => _buildResultCard(
+        context,
+        imageProvider: _missingImage,
+        loading: true,
+      ),
+      errorWidget: (context, url, error) => _buildResultCard(
+        context,
+        imageProvider: _missingImage,
+      ),
+      imageBuilder: (context, imageProvider) => _buildResultCard(
+        context,
+        imageProvider: imageProvider,
+      ),
+    );
+  }
+
+  Widget _buildResultCard(
+    BuildContext context, {
+    required ImageProvider<Object> imageProvider,
+    bool loading = false,
+    bool showAddAction = false,
+  }) {
+    final String photoLabel = _displayName(context);
+    return Material(
+      color: const Color(0xFF182C25),
+      borderRadius: BorderRadius.circular(14),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => _openDetails(context),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SearchResultPhotoFrame(
+              imageProvider: imageProvider,
+              semanticLabel: photoLabel,
+              loading: loading,
+              overlay: showAddAction
+                  ? Positioned(
+                      top: 12,
+                      right: 12,
+                      child: FilledButton.icon(
+                        key: const Key('addIdentificationCandidateAction'),
+                        onPressed: () => _openAddPlant(context),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: const Color(0xFFC7F9CC),
+                          foregroundColor: const Color(0xFF10231C),
+                        ),
+                        icon: const Icon(Icons.add),
+                        label: Text(AppLocalizations.of(context).addPlant),
+                      ),
+                    )
+                  : null,
+            ),
+            _buildPlantSummary(context),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlantSummary(BuildContext context) {
     final Locale locale = Localizations.localeOf(context);
     final String? commonName = widget.species.searchDisplayCommonNameFor(
       locale.languageCode,
       region: locale.countryCode,
     );
     final bool hasCommonName = commonName != null && commonName.isNotEmpty;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (widget.species.creator == "USER")
-          TagChip(
-            tag: AppLocalizations.of(context).custom.toUpperCase(),
-          ),
-        if (widget.species.identificationConfidence != null)
-          TagChip(
-            tag:
-                '${widget.species.identificationProvider ?? 'AI'} ${(widget.species.identificationConfidence! * 100).round()}%',
-          ),
-        if (widget.species.identificationProject != null)
-          TagChip(
-            tag: AppLocalizations.of(context).identificationRegionalFlora(
-              widget.species.identificationProjectTitle ??
-                  widget.species.identificationProject!,
-            ),
-          ),
-        if (widget.species.searchMatchReason != null &&
-            widget.species.searchMatchConfidence != null)
-          TagChip(
-            tag: AppLocalizations.of(context).searchMatchLabel(
-              _searchMatchReason(context, widget.species.searchMatchReason!),
-              (widget.species.searchMatchConfidence! * 100).round(),
-            ),
-          ),
-        if (widget.species.catalogTags.contains('NORTH_AMERICAN_TRAIL'))
-          TagChip(tag: AppLocalizations.of(context).trailPlant),
-        if (widget.species.catalogTags.contains('CONTACT_HAZARD'))
-          TagChip(
-            tag: AppLocalizations.of(context).avoidPlantContact,
-            backgroundColor: const Color(0xFFFFD166),
-            foregroundColor: const Color(0xFF2B2100),
-          ),
-        Text(
-          hasCommonName ? commonName : widget.species.scientificName,
-          softWrap: false,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(color: Colors.white),
-        ),
-        if (hasCommonName)
+    final List<Widget> tags = _buildTags(context);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14, 12, 10, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (tags.isNotEmpty) ...[
+            Wrap(spacing: 6, runSpacing: 6, children: tags),
+            const SizedBox(height: 10),
+          ],
           Text(
-            widget.species.scientificName,
-            softWrap: false,
+            hasCommonName ? commonName : widget.species.scientificName,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: Colors.grey,
-              fontStyle: FontStyle.italic,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+          if (hasCommonName) ...[
+            const SizedBox(height: 2),
+            Text(
+              widget.species.scientificName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Color(0xFFB7C9C0),
+                fontStyle: FontStyle.italic,
+              ),
             ),
+          ],
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  widget.species.family ?? '',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(color: Color(0xFF9FB2A9)),
+                ),
+              ),
+              TextButton.icon(
+                key: const ValueKey('open-plant-details'),
+                onPressed: () => _openDetails(context),
+                style: TextButton.styleFrom(
+                  foregroundColor: const Color(0xFFC7F9CC),
+                ),
+                iconAlignment: IconAlignment.end,
+                icon: const Icon(Icons.arrow_forward, size: 18),
+                label: Text(AppLocalizations.of(context).details),
+              ),
+            ],
           ),
-        if (widget.species.family != null)
-          Text(
-            widget.species.family!,
-            softWrap: false,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(color: Colors.grey),
-          ),
-      ],
+        ],
+      ),
     );
+  }
+
+  List<Widget> _buildTags(BuildContext context) {
+    final List<Widget> tags = [];
+    if (widget.species.creator == 'USER') {
+      tags.add(
+        TagChip(tag: AppLocalizations.of(context).custom.toUpperCase()),
+      );
+    }
+    if (widget.species.identificationConfidence != null) {
+      tags.add(
+        TagChip(
+          tag:
+              '${widget.species.identificationProvider ?? 'AI'} ${(widget.species.identificationConfidence! * 100).round()}%',
+        ),
+      );
+    }
+    if (widget.species.identificationProject != null) {
+      tags.add(
+        TagChip(
+          tag: AppLocalizations.of(context).identificationRegionalFlora(
+            widget.species.identificationProjectTitle ??
+                widget.species.identificationProject!,
+          ),
+        ),
+      );
+    }
+    if (widget.species.searchMatchReason != null &&
+        widget.species.searchMatchConfidence != null) {
+      tags.add(
+        TagChip(
+          tag: AppLocalizations.of(context).searchMatchLabel(
+            _searchMatchReason(context, widget.species.searchMatchReason!),
+            (widget.species.searchMatchConfidence! * 100).round(),
+          ),
+        ),
+      );
+    }
+    if (widget.species.catalogTags.contains('NORTH_AMERICAN_TRAIL')) {
+      tags.add(TagChip(tag: AppLocalizations.of(context).trailPlant));
+    }
+    if (widget.species.catalogTags.contains('CONTACT_HAZARD')) {
+      tags.add(
+        TagChip(
+          tag: AppLocalizations.of(context).avoidPlantContact,
+          backgroundColor: const Color(0xFFFFD166),
+          foregroundColor: const Color(0xFF2B2100),
+        ),
+      );
+    }
+    final Widget? safetyTag = _buildSafetyTag(context);
+    if (safetyTag != null) tags.add(safetyTag);
+    return tags;
+  }
+
+  Widget? _buildSafetyTag(BuildContext context) {
+    if (!widget.species.safety.reviewed) return null;
+    const Map<String, int> severity = {
+      'UNKNOWN': 0,
+      'NON_TOXIC': 1,
+      'CAUTION': 2,
+      'TOXIC': 3,
+      'HIGHLY_TOXIC': 4,
+    };
+    final List<String> statuses = [
+      widget.species.safety.humanStatus,
+      widget.species.safety.catStatus,
+      widget.species.safety.dogStatus,
+    ];
+    final String status = statuses.reduce(
+      (current, candidate) =>
+          (severity[candidate] ?? 0) > (severity[current] ?? 0)
+              ? candidate
+              : current,
+    );
+    if (status == 'UNKNOWN' ||
+        (status == 'NON_TOXIC' &&
+            !statuses.every((value) => value == 'NON_TOXIC'))) {
+      return null;
+    }
+
+    final String statusLabel = switch (status) {
+      'NON_TOXIC' => AppLocalizations.of(context).safetyNonToxic,
+      'CAUTION' => AppLocalizations.of(context).safetyCaution,
+      'TOXIC' => AppLocalizations.of(context).safetyToxic,
+      'HIGHLY_TOXIC' => AppLocalizations.of(context).safetyHighlyToxic,
+      _ => AppLocalizations.of(context).safetyUnknown,
+    };
+    final (Color, Color) colors = switch (status) {
+      'HIGHLY_TOXIC' || 'TOXIC' => (
+          const Color(0xFFFFDAD6),
+          const Color(0xFF410002)
+        ),
+      'CAUTION' => (const Color(0xFFFFE08A), const Color(0xFF332600)),
+      _ => (const Color(0xFFC7F9CC), const Color(0xFF10231C)),
+    };
+    return TagChip(
+      tag: '${AppLocalizations.of(context).safetyAtHome}: $statusLabel',
+      backgroundColor: colors.$1,
+      foregroundColor: colors.$2,
+    );
+  }
+
+  String _displayName(BuildContext context) {
+    final Locale locale = Localizations.localeOf(context);
+    return widget.species.searchDisplayCommonNameFor(
+          locale.languageCode,
+          region: locale.countryCode,
+        ) ??
+        widget.species.scientificName;
   }
 
   String _searchMatchReason(BuildContext context, String reason) {
@@ -128,248 +337,14 @@ class _SearchResultCardState extends State<SearchResultCard> {
     };
   }
 
-  @override
-  void initState() {
-    super.initState();
-    if (widget.identificationImage != null) {
-      _identificationImageBytes = widget.identificationImage!.readAsBytes();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_identificationImageBytes != null) {
-      return FutureBuilder<Uint8List>(
-        future: _identificationImageBytes,
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const SizedBox(
-              height: 280,
-              child: Center(child: CircularProgressIndicator()),
-            );
-          }
-          return _buildLocalImageCard(context, snapshot.data!);
-        },
-      );
-    }
-    return CachedNetworkImage(
-      imageUrl: _url ?? missingSpeciesImageUrl(widget.env.http.backendUrl),
-      httpHeaders: {
-        "Key": widget.env.http.key!,
-      },
-      imageRenderMethodForWeb: ImageRenderMethodForWeb.HttpGet,
-      fadeInDuration: const Duration(milliseconds: 180),
-      fadeOutDuration: const Duration(milliseconds: 80),
-      placeholder: (context, url) => Stack(
-        children: [
-          Skeletonizer(
-            effect: skeletonizerEffect,
-            enabled: true,
-            child: Container(
-              constraints: BoxConstraints(
-                minHeight: MediaQuery.of(context).size.height * .4,
-                maxWidth: MediaQuery.of(context).size.height * .4,
-              ),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                image: const DecorationImage(
-                  image: AssetImage("assets/images/no-image.png"),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 10,
-            left: 10,
-            right: 10,
-            child: _buildPlantLabels(context),
-          ),
-        ],
-      ),
-      errorWidget: (context, url, error) {
-        return GestureDetector(
-          onTap: () => goToPageSlidingUp(
-            context,
-            SpeciesDetailsPage(
-              species: widget.species,
-              env: widget.env,
-              updateSpeciesLocally: widget.updateSpeciesLocally,
-              identificationImage: widget.identificationImage,
-            ),
-          ),
-          child: Stack(
-            children: [
-              Container(
-                constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context).size.height * .4,
-                  minHeight: MediaQuery.of(context).size.height * .4,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color.fromRGBO(24, 44, 37, 1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: AspectRatio(
-                  aspectRatio: 1,
-                  child: Padding(
-                    padding: const EdgeInsets.all(100),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        image: DecorationImage(
-                          image: AssetImage("assets/images/no-image.png"),
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 10,
-                left: 10,
-                right: 10,
-                child: _buildPlantLabels(context),
-              ),
-            ],
-          ),
-        );
-      },
-      imageBuilder: (context, imageProvider) {
-        return GestureDetector(
-          onTap: () => goToPageSlidingUp(
-            context,
-            SpeciesDetailsPage(
-              species: widget.species,
-              env: widget.env,
-              updateSpeciesLocally: widget.updateSpeciesLocally,
-              identificationImage: widget.identificationImage,
-            ),
-          ),
-          child: Stack(
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color:
-                      _url == null ? const Color.fromRGBO(24, 44, 37, 1) : null,
-                ),
-                constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context).size.height * .4,
-                  minHeight: MediaQuery.of(context).size.height * .4,
-                ),
-                child: AspectRatio(
-                  aspectRatio: 1,
-                  child: Padding(
-                    padding: EdgeInsets.all(_url == null ? 100 : 0),
-                    child: Container(
-                      padding: EdgeInsets.all(_url == null ? 100 : 0),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        image: DecorationImage(
-                          image: imageProvider,
-                          fit: _url == null ? BoxFit.contain : BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              // Add a gradient overlay to the bottom
-              if (_url != null)
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: Container(
-                    height: 80, // Adjust the height as needed
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.vertical(
-                        bottom: Radius.circular(
-                            10), // Match the container's borderRadius
-                      ),
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.black.withOpacity(0.0),
-                          Colors.black.withOpacity(0.9),
-                        ],
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                      ),
-                    ),
-                  ),
-                ),
-              Positioned(
-                bottom: 10,
-                left: 10,
-                right: 10,
-                child: _buildPlantLabels(context),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildLocalImageCard(BuildContext context, Uint8List imageBytes) {
-    return GestureDetector(
-      onTap: () => goToPageSlidingUp(
-        context,
-        SpeciesDetailsPage(
-          species: widget.species,
-          env: widget.env,
-          updateSpeciesLocally: widget.updateSpeciesLocally,
-          identificationImage: widget.identificationImage,
-        ),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(10),
-        child: SizedBox(
-          height: MediaQuery.of(context).size.height * .4,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Image.memory(imageBytes, fit: BoxFit.cover),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: Container(
-                  height: 100,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.transparent,
-                        Colors.black.withOpacity(.9),
-                      ],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                    ),
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 10,
-                left: 10,
-                right: 10,
-                child: _buildPlantLabels(context),
-              ),
-              Positioned(
-                top: 10,
-                right: 10,
-                child: FilledButton.icon(
-                  key: const Key('addIdentificationCandidateAction'),
-                  onPressed: () => _openAddPlant(context),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFFC7F9CC),
-                    foregroundColor: const Color(0xFF10231C),
-                  ),
-                  icon: const Icon(Icons.add),
-                  label: Text(AppLocalizations.of(context).addPlant),
-                ),
-              ),
-            ],
-          ),
-        ),
+  void _openDetails(BuildContext context) {
+    goToPageSlidingUp(
+      context,
+      SpeciesDetailsPage(
+        species: widget.species,
+        env: widget.env,
+        updateSpeciesLocally: widget.updateSpeciesLocally,
+        identificationImage: widget.identificationImage,
       ),
     );
   }
