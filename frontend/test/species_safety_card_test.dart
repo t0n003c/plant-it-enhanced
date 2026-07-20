@@ -76,6 +76,12 @@ void main() {
       ),
       findsOneWidget,
     );
+    expect(
+      find.textContaining('There is no reviewed pet-health benefit'),
+      findsNothing,
+    );
+    expect(find.text('No veterinary treatment claim'), findsNothing);
+    expect(find.text('No treatment claim'), findsNothing);
     expect(find.text('Medicine'), findsNothing);
     expect(tester.takeException(), isNull);
   });
@@ -149,10 +155,27 @@ SpeciesDTO _thaiChiliWithoutPetBenefit() {
         PlantBenefitEntryDTO(
           audience: 'PET',
           category: 'FOOD',
-          title: '',
-          summary: '',
+          title: 'Not a pet dietary supplement',
+          summary:
+              'There is no reviewed pet-health benefit for feeding bell or hot peppers in this catalog.',
           caution:
               'Avoid spicy, seasoned, salted, or prepared human foods. Contact a veterinarian for feeding or exposure questions.',
+        ),
+        PlantBenefitEntryDTO(
+          audience: 'PET',
+          category: 'MEDICINE',
+          title: 'No veterinary treatment claim',
+          summary:
+              'This catalog does not recommend Capsicum as a veterinary medicine or treatment.',
+          caution: 'Do not use peppers or pepper extracts to treat a pet.',
+        ),
+        PlantBenefitEntryDTO(
+          audience: 'HUMAN',
+          category: 'MEDICINE',
+          title: 'No treatment claim',
+          summary:
+              'This catalog does not recommend Capsicum as medicine or as a treatment for any condition.',
+          caution: 'Do not replace medical care or prescribed treatment.',
         ),
       ],
       reviewed: true,
