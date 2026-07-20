@@ -63,18 +63,20 @@ class _SpeciesDetailsTabState extends State<SpeciesDetailsTab> {
                     )
                   ],
           ),
-          InfoGroup(
-            title: AppLocalizations.of(context).safetyAtHome,
-            children: [
-              _PlantSafetyCard(safety: widget.species.safety),
-            ],
-          ),
-          InfoGroup(
-            title: AppLocalizations.of(context).benefitsAtHome,
-            children: [
-              _PlantBenefitsCard(benefits: widget.species.benefits),
-            ],
-          ),
+          if (_hasSafetyInformation(widget.species.safety))
+            InfoGroup(
+              title: AppLocalizations.of(context).safetyAtHome,
+              children: [
+                _PlantSafetyCard(safety: widget.species.safety),
+              ],
+            ),
+          if (_hasBenefitInformation(widget.species.benefits))
+            InfoGroup(
+              title: AppLocalizations.of(context).benefitsAtHome,
+              children: [
+                _PlantBenefitsCard(benefits: widget.species.benefits),
+              ],
+            ),
           InfoGroup(
             title: AppLocalizations.of(context).care,
             children: widget.isLoading
@@ -295,6 +297,25 @@ class _SpeciesDetailsTabState extends State<SpeciesDetailsTab> {
         return AppLocalizations.of(context).moderateWaterGuidance;
     }
   }
+
+  bool _hasSafetyInformation(PlantSafetyInfoDTO safety) {
+    return safety.humanStatus != 'UNKNOWN' ||
+        safety.catStatus != 'UNKNOWN' ||
+        safety.dogStatus != 'UNKNOWN' ||
+        safety.summary?.trim().isNotEmpty == true ||
+        safety.hazardousParts.isNotEmpty ||
+        safety.sources.isNotEmpty;
+  }
+
+  bool _hasBenefitInformation(PlantBenefitInfoDTO benefits) {
+    return benefits.entries.any(
+          (entry) =>
+              entry.title.trim().isNotEmpty ||
+              entry.summary.trim().isNotEmpty ||
+              entry.caution?.trim().isNotEmpty == true,
+        ) ||
+        benefits.sources.isNotEmpty;
+  }
 }
 
 class _PlantSafetyCard extends StatelessWidget {
@@ -305,6 +326,26 @@ class _PlantSafetyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
+    final List<({IconData icon, String label, String status})> statuses = [
+      if (safety.humanStatus != 'UNKNOWN')
+        (
+          icon: Icons.person_outline,
+          label: localizations.humanSafety,
+          status: safety.humanStatus,
+        ),
+      if (safety.catStatus != 'UNKNOWN')
+        (
+          icon: Icons.pets_outlined,
+          label: localizations.catSafety,
+          status: safety.catStatus,
+        ),
+      if (safety.dogStatus != 'UNKNOWN')
+        (
+          icon: Icons.pets,
+          label: localizations.dogSafety,
+          status: safety.dogStatus,
+        ),
+    ];
     return Card(
       color: const Color(0xFF102B23),
       margin: const EdgeInsets.only(top: 8),
@@ -313,44 +354,36 @@ class _PlantSafetyCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final double tileWidth = constraints.maxWidth >= 520
-                    ? (constraints.maxWidth - 16) / 3
-                    : constraints.maxWidth;
-                return Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    _SafetyStatusTile(
-                      width: tileWidth,
-                      icon: Icons.person_outline,
-                      label: localizations.humanSafety,
-                      status: safety.humanStatus,
-                    ),
-                    _SafetyStatusTile(
-                      width: tileWidth,
-                      icon: Icons.pets_outlined,
-                      label: localizations.catSafety,
-                      status: safety.catStatus,
-                    ),
-                    _SafetyStatusTile(
-                      width: tileWidth,
-                      icon: Icons.pets,
-                      label: localizations.dogSafety,
-                      status: safety.dogStatus,
-                    ),
-                  ],
-                );
-              },
-            ),
-            const SizedBox(height: 14),
-            Text(
-              safety.reviewed && safety.summary?.trim().isNotEmpty == true
-                  ? safety.summary!
-                  : localizations.safetyUnknownDescription,
-              style: const TextStyle(color: Colors.white, height: 1.4),
-            ),
+            if (statuses.isNotEmpty)
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final double tileWidth = constraints.maxWidth >= 520
+                      ? (constraints.maxWidth - 16) / 3
+                      : constraints.maxWidth;
+                  return Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: statuses
+                        .map(
+                          (status) => _SafetyStatusTile(
+                            width: tileWidth,
+                            icon: status.icon,
+                            label: status.label,
+                            status: status.status,
+                          ),
+                        )
+                        .toList(),
+                  );
+                },
+              ),
+            if (statuses.isNotEmpty &&
+                safety.summary?.trim().isNotEmpty == true)
+              const SizedBox(height: 14),
+            if (safety.summary?.trim().isNotEmpty == true)
+              Text(
+                safety.summary!,
+                style: const TextStyle(color: Colors.white, height: 1.4),
+              ),
             if (safety.hazardousParts.isNotEmpty) ...[
               const SizedBox(height: 12),
               Text(
@@ -395,29 +428,12 @@ class _PlantSafetyCard extends StatelessWidget {
                 ),
               ),
             ],
-            if (safety.sources.isNotEmpty) ...[
-              const SizedBox(height: 14),
-              Text(
-                localizations.safetySources,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
+            if (safety.sources.isNotEmpty)
+              _ReviewedSourcesExpansionTile<PlantSafetySourceDTO>(
+                key: const Key('safetyReviewedSources'),
+                title: localizations.safetySources,
+                sources: safety.sources,
               ),
-              const SizedBox(height: 4),
-              Wrap(
-                spacing: 8,
-                runSpacing: 4,
-                children: safety.sources.map((source) {
-                  final Uri? uri = Uri.tryParse(source.url);
-                  return TextButton.icon(
-                    onPressed: uri == null ? null : () => launchUrl(uri),
-                    icon: const Icon(Icons.open_in_new, size: 16),
-                    label: Text(source.name),
-                  );
-                }).toList(),
-              ),
-            ],
             if (safety.matchedTaxon?.trim().isNotEmpty == true) ...[
               const SizedBox(height: 8),
               Text(
@@ -475,11 +491,6 @@ class _PlantBenefitsCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (benefits.entries.isEmpty)
-              Text(
-                localizations.benefitUnknownDescription,
-                style: const TextStyle(color: Colors.white, height: 1.4),
-              ),
             ...grouped.entries
                 .where((group) => group.value.isNotEmpty)
                 .map((group) => _BenefitAudienceSection(
@@ -488,29 +499,12 @@ class _PlantBenefitsCard extends StatelessWidget {
                           : localizations.petBenefits,
                       entries: group.value,
                     )),
-            if (benefits.sources.isNotEmpty) ...[
-              const SizedBox(height: 14),
-              Text(
-                localizations.benefitSources,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
+            if (benefits.sources.isNotEmpty)
+              _ReviewedSourcesExpansionTile<PlantBenefitSourceDTO>(
+                key: const Key('benefitReviewedSources'),
+                title: localizations.benefitSources,
+                sources: benefits.sources,
               ),
-              const SizedBox(height: 4),
-              Wrap(
-                spacing: 8,
-                runSpacing: 4,
-                children: benefits.sources.map((source) {
-                  final Uri? uri = Uri.tryParse(source.url);
-                  return TextButton.icon(
-                    onPressed: uri == null ? null : () => launchUrl(uri),
-                    icon: const Icon(Icons.open_in_new, size: 16),
-                    label: Text(source.name),
-                  );
-                }).toList(),
-              ),
-            ],
             if (benefits.matchedTaxon?.trim().isNotEmpty == true) ...[
               const SizedBox(height: 8),
               Text(
@@ -574,19 +568,28 @@ class _BenefitAudienceSection extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      '${_categoryLabel(localizations, entry.category)} · ${entry.title}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                    if (entry.title.trim().isNotEmpty ||
+                        entry.category.trim().isNotEmpty)
+                      Text(
+                        [
+                          _categoryLabel(localizations, entry.category),
+                          entry.title.trim(),
+                        ].where((value) => value.isNotEmpty).join(' · '),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      entry.summary,
-                      style:
-                          const TextStyle(color: Colors.white70, height: 1.35),
-                    ),
+                    if (entry.summary.trim().isNotEmpty) ...[
+                      const SizedBox(height: 3),
+                      Text(
+                        entry.summary,
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          height: 1.35,
+                        ),
+                      ),
+                    ],
                     if (entry.caution?.trim().isNotEmpty == true) ...[
                       const SizedBox(height: 3),
                       Text(
@@ -610,6 +613,68 @@ class _BenefitAudienceSection extends StatelessWidget {
       'MEDICINE' => localizations.medicineBenefitCategory,
       _ => category,
     };
+  }
+}
+
+class _ReviewedSourcesExpansionTile<T> extends StatelessWidget {
+  final String title;
+  final List<T> sources;
+
+  const _ReviewedSourcesExpansionTile({
+    super.key,
+    required this.title,
+    required this.sources,
+  });
+
+  String _sourceName(T source) {
+    return switch (source) {
+      PlantSafetySourceDTO value => value.name,
+      PlantBenefitSourceDTO value => value.name,
+      _ => '',
+    };
+  }
+
+  String _sourceUrl(T source) {
+    return switch (source) {
+      PlantSafetySourceDTO value => value.url,
+      PlantBenefitSourceDTO value => value.url,
+      _ => '',
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ExpansionTile(
+      initiallyExpanded: false,
+      tilePadding: EdgeInsets.zero,
+      childrenPadding: EdgeInsets.zero,
+      iconColor: Colors.white70,
+      collapsedIconColor: Colors.white70,
+      title: Text(
+        title,
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      children: [
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 4,
+            children: sources.map((source) {
+              final Uri? uri = Uri.tryParse(_sourceUrl(source));
+              return TextButton.icon(
+                onPressed: uri == null ? null : () => launchUrl(uri),
+                icon: const Icon(Icons.open_in_new, size: 16),
+                label: Text(_sourceName(source)),
+              );
+            }).toList(),
+          ),
+        ),
+      ],
+    );
   }
 }
 
