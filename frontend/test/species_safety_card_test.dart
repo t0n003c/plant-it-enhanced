@@ -22,33 +22,61 @@ void main() {
     );
 
     expect(find.text('Safety at home'), findsOneWidget);
-    expect(find.text('People'), findsOneWidget);
     expect(find.text('Cats'), findsOneWidget);
     expect(find.text('Dogs'), findsOneWidget);
     expect(find.text('Highly toxic'), findsOneWidget);
     expect(find.text('No known toxicity'), findsOneWidget);
     expect(find.text('Possible exposure?'), findsOneWidget);
-    expect(find.text('ASPCA Animal Poison Control'), findsOneWidget);
+    expect(find.text('ASPCA Animal Poison Control'), findsNothing);
     expect(find.textContaining('not an edibility guide'), findsOneWidget);
     expect(find.text('Food and medicine notes'), findsOneWidget);
     expect(find.text('For people'), findsOneWidget);
     expect(find.text('Food · Edible fruit'), findsOneWidget);
     expect(find.textContaining('Nutrition information'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('safetyReviewedSources')));
+    await tester.pumpAndSettle();
+    expect(find.text('ASPCA Animal Poison Control'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('benefitReviewedSources')),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.byKey(const Key('benefitReviewedSources')));
+    await tester.pumpAndSettle();
+    expect(find.text('Example source'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('shows an honest unknown state for an unreviewed plant',
+  testWidgets('hides empty safety and benefit sections for an unreviewed plant',
       (tester) async {
     await tester.pumpWidget(_detailsApp(_unknownPlant()));
+
+    expect(find.text('Safety at home'), findsNothing);
+    expect(find.text('Food and medicine notes'), findsNothing);
+    expect(find.text('Unknown'), findsNothing);
+    expect(find.text('Possible exposure?'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('keeps pet caution when there is no reviewed pet benefit',
+      (tester) async {
+    await tester.pumpWidget(_detailsApp(_thaiChiliWithoutPetBenefit()));
     await tester.scrollUntilVisible(
-      find.text('Safety at home'),
+      find.text('Food and medicine notes'),
       300,
       scrollable: find.byType(Scrollable).first,
     );
 
-    expect(find.text('Unknown'), findsNWidgets(3));
-    expect(find.textContaining('No reviewed safety profile'), findsOneWidget);
-    expect(find.text('Possible exposure?'), findsNothing);
+    expect(find.text('For pets'), findsOneWidget);
+    expect(
+      find.text(
+        'Avoid spicy, seasoned, salted, or prepared human foods. Contact a veterinarian for feeding or exposure questions.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Medicine'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 }
@@ -98,8 +126,36 @@ SpeciesDTO _lily() {
           caution: 'Not medical advice.',
         ),
       ],
+      sources: [
+        PlantBenefitSourceDTO(
+          name: 'Example source',
+          url: 'https://example.com/benefits',
+        ),
+      ],
       reviewed: true,
       matchedTaxon: 'Example taxon',
+    ),
+  );
+}
+
+SpeciesDTO _thaiChiliWithoutPetBenefit() {
+  return SpeciesDTO(
+    scientificName: 'Capsicum annuum',
+    preferredCommonName: 'Thai chili',
+    care: SpeciesCareInfoDTO.fromJson(<String, dynamic>{}),
+    creator: 'TRUSTED_NAME_INDEX',
+    benefits: const PlantBenefitInfoDTO(
+      entries: [
+        PlantBenefitEntryDTO(
+          audience: 'PET',
+          category: 'FOOD',
+          title: '',
+          summary: '',
+          caution:
+              'Avoid spicy, seasoned, salted, or prepared human foods. Contact a veterinarian for feeding or exposure questions.',
+        ),
+      ],
+      reviewed: true,
     ),
   );
 }
