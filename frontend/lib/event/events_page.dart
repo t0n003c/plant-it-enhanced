@@ -35,7 +35,10 @@ class _EventsPageState extends State<EventsPage> {
       } else if (_activeIndex == 1) {
         return ReminderSection(env: widget.env);
       } else {
-        return EventsDoneSection(env: widget.env);
+        return EventsDoneSection(
+          env: widget.env,
+          includeUpcomingCareTasks: true,
+        );
       }
     }
 

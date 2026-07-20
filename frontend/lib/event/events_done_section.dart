@@ -6,6 +6,7 @@ import 'package:plant_it/commons.dart';
 import 'package:plant_it/environment.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:plant_it/event/event_card.dart';
+import 'package:plant_it/event/upcoming_care_tasks_section.dart';
 import 'package:plant_it/change_notifiers.dart';
 import 'package:provider/provider.dart';
 
@@ -86,7 +87,13 @@ class _FilterWidgetState extends State<FilterWidget> {
 
 class EventsDoneSection extends StatefulWidget {
   final Environment env;
-  const EventsDoneSection({super.key, required this.env});
+  final bool includeUpcomingCareTasks;
+
+  const EventsDoneSection({
+    super.key,
+    required this.env,
+    this.includeUpcomingCareTasks = false,
+  });
 
   @override
   State<StatefulWidget> createState() => _EventsDoneSectionState();
@@ -165,6 +172,10 @@ class _EventsDoneSectionState extends State<EventsDoneSection> {
     return CustomScrollView(
       physics: ClampingScrollPhysics(),
       slivers: <Widget>[
+        if (widget.includeUpcomingCareTasks)
+          SliverToBoxAdapter(
+            child: UpcomingCareTasksSection(env: widget.env),
+          ),
         SliverToBoxAdapter(
           child: FilterWidget(
             onSelectedEventsChanged: (x) {

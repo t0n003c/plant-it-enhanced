@@ -6,6 +6,7 @@ import 'package:mockito/mockito.dart';
 import 'package:plant_it/app_http_client.dart';
 import 'package:plant_it/environment.dart';
 import 'package:plant_it/event/event_card.dart';
+import 'package:plant_it/event/care_task_card.dart';
 import 'package:plant_it/event/events_done_section.dart';
 import 'package:plant_it/logger/logger.dart';
 import 'package:plant_it/toast/toast_manager.dart';
@@ -134,6 +135,42 @@ void main() {
     // Assert and verify
     verify(http.get("diary/entry?pageNo=0&pageSize=10")).called(1);
     expect(find.byType(EventCard), findsExactly(2));
+  });
+
+  testWidgets('Events tab also shows pending care tasks', (tester) async {
+    when(http.get("care-tasks?days=7")).thenAnswer((_) => Future.value(
+          Response('''
+[
+  {
+    "reminderId": 7,
+    "plantId": 42,
+    "plantName": "foo",
+    "action": "WATERING",
+    "dueAt": "2026-07-19T12:00:00Z",
+    "actionAt": "2026-07-19T12:00:00Z",
+    "status": "DUE_TODAY"
+  }
+]
+''', 200),
+        ));
+    when(http.get("diary/entry?pageNo=0&pageSize=10")).thenAnswer(
+      (_) => Future.value(Response('{"content":[]}', 200)),
+    );
+
+    await tester.pumpWidget(
+      LocalizationsInjector(
+        navigatorObserver: navigatorObserver,
+        child: EventsDoneSection(
+          env: env,
+          includeUpcomingCareTasks: true,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(CareTaskCard), findsOneWidget);
+    expect(find.text('foo'), findsOneWidget);
+    expect(find.byType(EventCard), findsNothing);
   });
 
   // TODO how to insert the event/plant value in the fields?
