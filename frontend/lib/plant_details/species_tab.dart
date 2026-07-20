@@ -308,12 +308,7 @@ class _SpeciesDetailsTabState extends State<SpeciesDetailsTab> {
   }
 
   bool _hasBenefitInformation(PlantBenefitInfoDTO benefits) {
-    return benefits.entries.any(
-          (entry) =>
-              entry.title.trim().isNotEmpty ||
-              entry.summary.trim().isNotEmpty ||
-              entry.caution?.trim().isNotEmpty == true,
-        ) ||
+    return benefits.entries.any(_shouldShowBenefitEntry) ||
         benefits.sources.isNotEmpty;
   }
 }
