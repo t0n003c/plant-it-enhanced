@@ -22,15 +22,19 @@ class ReminderOccurrenceDTO {
   });
 
   factory ReminderOccurrenceDTO.fromJson(Map<String, dynamic> json) {
+    final dynamic rawDate = json['date'] ?? json['start'];
+    final dynamic rawFrequency = json['reminderFrequency'] ?? json['frequency'];
     return ReminderOccurrenceDTO(
       id: json['id'],
-      reminderId: json['targetId'],
-      date: DateTime.parse(json['start']),
-      reminderFrequency: FrequencyDTO.fromJson(json['frequency']),
-      lastNotified: json["lastNotified"] != null
+      reminderId: json['reminderId'] ?? json['targetId'],
+      date: rawDate == null ? null : DateTime.parse(rawDate),
+      reminderFrequency: rawFrequency == null
+          ? null
+          : FrequencyDTO.fromJson(rawFrequency as Map<String, dynamic>),
+      lastNotified: json['lastNotified'] != null
           ? DateTime.parse(json['lastNotified'])
           : null,
-      reminderAction: json['action'],
+      reminderAction: json['reminderAction'] ?? json['action'],
       reminderTargetId: json['reminderTargetId'],
       reminderTargetInfoPersonalName: json['reminderTargetInfoPersonalName'],
     );
