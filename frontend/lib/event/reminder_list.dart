@@ -5,7 +5,14 @@ import 'package:plant_it/dto/reminder_occurrence.dart';
 
 class ReminderList extends StatelessWidget {
   final List<ReminderOccurrenceDTO> occurrences;
-  const ReminderList({super.key, required this.occurrences});
+  final Future<void> Function(ReminderOccurrenceDTO occurrence)?
+      onOccurrenceTap;
+
+  const ReminderList({
+    super.key,
+    required this.occurrences,
+    this.onOccurrenceTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -15,6 +22,9 @@ class ReminderList extends StatelessWidget {
         children: occurrences
             .map((e) => _ReminderOccurenceCard(
                   occurrence: e,
+                  onTap: onOccurrenceTap == null
+                      ? null
+                      : () => onOccurrenceTap!(e),
                 ))
             .toList(),
       ),
@@ -24,7 +34,12 @@ class ReminderList extends StatelessWidget {
 
 class _ReminderOccurenceCard extends StatelessWidget {
   final ReminderOccurrenceDTO occurrence;
-  const _ReminderOccurenceCard({required this.occurrence});
+  final VoidCallback? onTap;
+
+  const _ReminderOccurenceCard({
+    required this.occurrence,
+    this.onTap,
+  });
 
   String _formatFrequency(BuildContext context, FrequencyDTO frequency) {
     return localizedFrequency(context, frequency.quantity, frequency.unit);
@@ -44,38 +59,44 @@ class _ReminderOccurenceCard extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10.0),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      occurrence.reminderTargetInfoPersonalName!,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      _formatFrequency(context, occurrence.reminderFrequency!),
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: Color.fromARGB(255, 180, 180, 180),
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        occurrence.reminderTargetInfoPersonalName ?? '',
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    )
-                  ],
+                      Text(
+                        _formatFrequency(
+                            context, occurrence.reminderFrequency!),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Color.fromARGB(255, 180, 180, 180),
+                        ),
+                      )
+                    ],
+                  ),
                 ),
-              ),
-              Opacity(
-                opacity: .5,
-                child: Icon(
-                  typeIcons[occurrence.reminderAction],
-                  size: 40,
-                  color: Colors.white,
+                Opacity(
+                  opacity: .5,
+                  child: Icon(
+                    onTap == null
+                        ? typeIcons[occurrence.reminderAction]
+                        : Icons.edit_outlined,
+                    size: 40,
+                    color: Colors.white,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

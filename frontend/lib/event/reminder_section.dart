@@ -5,6 +5,7 @@ import 'package:avatar_stack/avatar_stack.dart';
 import 'package:avatar_stack/positions.dart';
 import 'package:calendar_view/calendar_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 import 'package:plant_it/app_exception.dart';
 import 'package:plant_it/commons.dart';
@@ -12,8 +13,10 @@ import 'package:plant_it/dto/reminder_dto.dart';
 import 'package:plant_it/dto/reminder_occurrence.dart';
 import 'package:plant_it/environment.dart';
 import 'package:plant_it/event/reminder_list.dart';
+import 'package:plant_it/reminders/reminder_edit.dart';
 import 'package:plant_it/change_notifiers.dart';
 import 'package:provider/provider.dart';
+import 'package:plant_it/toast/toast_manager.dart';
 
 class ReminderSection extends StatefulWidget {
   final Environment env;
@@ -100,16 +103,12 @@ class _ReminderSectionState extends State<ReminderSection> {
     final responseBody = json.decode(response.body);
     final List<CalendarEventData> toAdd = [];
     for (var element in responseBody["content"]) {
+      final ReminderOccurrenceDTO occurrence =
+          ReminderOccurrenceDTO.fromJson(element as Map<String, dynamic>);
       toAdd.add(CalendarEventData(
         title: "",
-        date: DateTime.parse(element["date"]),
-        event: ReminderOccurrenceDTO(
-          reminderAction: element["reminderAction"],
-          reminderTargetInfoPersonalName:
-              element["reminderTargetInfoPersonalName"],
-          reminderFrequency:
-              FrequencyDTO.fromJson(element["reminderFrequency"]),
-        ),
+        date: occurrence.date!,
+        event: occurrence,
       ));
     }
     if (!mounted) return;
@@ -169,6 +168,10 @@ class _ReminderSectionState extends State<ReminderSection> {
                     ),
                     ReminderList(
                       occurrences: occurrences,
+                      onOccurrenceTap: (occurrence) async {
+                        Navigator.of(ctx).pop();
+                        await _editOccurrence(occurrence);
+                      },
                     ),
                   ],
                 ),
@@ -176,6 +179,52 @@ class _ReminderSectionState extends State<ReminderSection> {
             ),
           );
         });
+  }
+
+  Future<void> _editOccurrence(ReminderOccurrenceDTO occurrence) async {
+    final int? reminderId = occurrence.reminderId;
+    if (reminderId == null) {
+      _showEditError();
+      return;
+    }
+    try {
+      final response = await widget.env.http.get('reminder');
+      if (response.statusCode != 200) {
+        throw AppException('Failed to load reminder');
+      }
+      final List<dynamic> body = json.decode(utf8.decode(response.bodyBytes));
+      ReminderDTO? reminder;
+      for (final item in body) {
+        final candidate = ReminderDTO.fromJson(item as Map<String, dynamic>);
+        if (candidate.id == reminderId) {
+          reminder = candidate;
+          break;
+        }
+      }
+      if (!mounted || reminder == null) {
+        _showEditError();
+        return;
+      }
+      final dynamic updated = await goToPageSlidingUp(
+        context,
+        EditReminder(env: widget.env, reminder: reminder),
+      );
+      if (updated == true && mounted) {
+        _fetchReminderOccurrences(_lastStartMonthDateFetched);
+      }
+    } catch (error, stackTrace) {
+      widget.env.logger.error(error, stackTrace);
+      _showEditError();
+    }
+  }
+
+  void _showEditError() {
+    if (!mounted) return;
+    widget.env.toastManager.showToast(
+      context,
+      ToastNotificationType.error,
+      AppLocalizations.of(context).generalError,
+    );
   }
 
   @override
