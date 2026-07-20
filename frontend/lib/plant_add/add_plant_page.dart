@@ -31,36 +31,56 @@ class AddPlantPage extends StatefulWidget {
 class _AddPlantPageState extends State<AddPlantPage> {
   late final PlantDTO _toCreate;
   late Future<String> _initialPlantName;
+  bool _nameInitializationStarted = false;
   bool _createSuggestedWateringReminder = true;
+  bool _isCreating = false;
+
+  String _defaultPlantName() {
+    final Locale locale = Localizations.localeOf(context);
+    return widget.species.searchDisplayCommonNameFor(
+          locale.languageCode,
+          region: locale.countryCode,
+        ) ??
+        widget.species.preferredCommonNameFor(
+          locale.languageCode,
+          region: locale.countryCode,
+        ) ??
+        widget.species.scientificName;
+  }
 
   Future<String> _getAndSetInitialPlantName() async {
     final String scientificName = widget.species.scientificName;
+    final String defaultName = _defaultPlantName();
     if (widget.species.id == null) {
-      _toCreate.info.personalName = scientificName;
-      return scientificName;
+      _toCreate.info.personalName = defaultName;
+      return defaultName;
     }
     try {
       final response = await widget.env.http
           .get("botanical-info/${widget.species.id}/_count");
       if (response.statusCode != 200) {
-        final responseBody = json.decode(utf8.decode(response.bodyBytes));
-        widget.env.logger.error(
-            "Error while getting plant name: ${responseBody["message"]}");
-        if (!mounted) return Future.value(scientificName);
-        throw AppException(AppLocalizations.of(context).generalError);
+        widget.env.logger.warning(
+          "Could not get plant name count for $scientificName; using $defaultName",
+        );
+        _toCreate.info.personalName = defaultName;
+        return defaultName;
       }
-      final String name =
-          "$scientificName${response.body == "0" ? "" : " ${response.body}"}";
+      final int count = int.tryParse(response.body.trim()) ?? 0;
+      final String name = "$defaultName${count == 0 ? "" : " $count"}";
       _toCreate.info.personalName = name;
       return name;
     } catch (e, st) {
       widget.env.logger.error(e, st);
-      throw AppException.withInnerException(e as Exception);
+      _toCreate.info.personalName = defaultName;
+      return defaultName;
     }
   }
 
-  void _createPlant() async {
+  Future<void> _createPlant() async {
+    if (_isCreating) return;
+    setState(() => _isCreating = true);
     try {
+      await _initialPlantName;
       int speciesId = widget.species.id ?? -1;
       SpeciesDTO? updatedSpecies;
       if (widget.species.id == null) {
@@ -79,20 +99,10 @@ class _AddPlantPageState extends State<AddPlantPage> {
         throw AppException(AppLocalizations.of(context).errorCreatingPlant);
       }
       final PlantDTO createdPlant = PlantDTO.fromJson(responseBody);
-      widget.env.plants.add(createdPlant);
-      if (widget.identificationImage != null && createdPlant.id != null) {
-        final imageResponse = await widget.env.http.uploadImage(
-          widget.identificationImage!,
-          createdPlant.id!,
-        );
-        if (imageResponse.statusCode != 200) {
-          widget.env.logger.warning(
-            'Plant was created, but its identification photo could not be saved',
-          );
-        }
-      }
-      if (_createSuggestedWateringReminder && createdPlant.id != null) {
-        await _createSuggestedReminder(createdPlant.id!);
+      final PlantDTO savedPlant = await _saveIdentificationImage(createdPlant);
+      widget.env.plants.add(savedPlant);
+      if (_createSuggestedWateringReminder && savedPlant.id != null) {
+        await _createSuggestedReminder(savedPlant.id!);
       }
       widget.env.logger.info("Plant successfully created");
       if (!mounted) return;
@@ -101,8 +111,79 @@ class _AddPlantPageState extends State<AddPlantPage> {
       Navigator.pop(context, updatedSpecies);
     } catch (e, st) {
       widget.env.logger.error(e, st);
-      throw AppException.withInnerException(e as Exception);
+      if (mounted) {
+        final String message = e is AppException
+            ? e.cause
+            : AppLocalizations.of(context).generalError;
+        widget.env.toastManager.showToast(
+          context,
+          ToastNotificationType.error,
+          message,
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isCreating = false);
     }
+  }
+
+  Future<PlantDTO> _saveIdentificationImage(PlantDTO plant) async {
+    final XFile? image = widget.identificationImage;
+    if (image == null || plant.id == null) return plant;
+
+    try {
+      final imageResponse = await widget.env.http.uploadImage(image, plant.id!);
+      if (imageResponse.statusCode != 200) {
+        widget.env.logger.warning(
+          'Plant was created, but its identification photo upload failed '
+          '(${imageResponse.statusCode})',
+        );
+        return plant;
+      }
+
+      final String? imageId = _imageIdFromResponse(imageResponse.body);
+      if (imageId == null) {
+        widget.env.logger.warning(
+          'Plant photo upload returned no image identifier',
+        );
+        return plant;
+      }
+
+      final avatarResponse = await widget.env.http.post(
+        'image/plant/${plant.id}/$imageId',
+        {},
+      );
+      if (avatarResponse.statusCode != 200) {
+        widget.env.logger.warning(
+          'Plant photo was uploaded, but could not be linked as the avatar '
+          '(${avatarResponse.statusCode})',
+        );
+        return plant;
+      }
+      final decoded = json.decode(utf8.decode(avatarResponse.bodyBytes));
+      if (decoded is Map<String, dynamic>) {
+        return PlantDTO.fromJson(decoded);
+      }
+    } catch (error, stackTrace) {
+      widget.env.logger.warning(
+        'Plant was created, but its identification photo could not be saved: $error',
+      );
+      widget.env.logger.debug(stackTrace);
+    }
+    return plant;
+  }
+
+  String? _imageIdFromResponse(String body) {
+    final String trimmed = body.trim();
+    if (trimmed.isEmpty) return null;
+    try {
+      final decoded = json.decode(trimmed);
+      if (decoded is String && decoded.trim().isNotEmpty) {
+        return decoded.trim();
+      }
+    } catch (_) {
+      // Older servers may return the identifier as plain text.
+    }
+    return trimmed.replaceAll(RegExp(r'^"|"$'), '');
   }
 
   Future<void> _createSuggestedReminder(int plantId) async {
@@ -139,7 +220,8 @@ class _AddPlantPageState extends State<AddPlantPage> {
       return _refreshCareGuide(SpeciesDTO.fromJson(responseBody));
     } catch (e, st) {
       widget.env.logger.error(e, st);
-      throw AppException.withInnerException(e as Exception);
+      if (e is AppException) rethrow;
+      throw AppException(e.toString());
     }
   }
 
@@ -168,6 +250,14 @@ class _AddPlantPageState extends State<AddPlantPage> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_nameInitializationStarted) return;
+    _nameInitializationStarted = true;
+    _initialPlantName = _getAndSetInitialPlantName();
+  }
+
+  @override
   void initState() {
     super.initState();
     _toCreate = PlantDTO(info: PlantInfoDTO());
@@ -175,17 +265,20 @@ class _AddPlantPageState extends State<AddPlantPage> {
     _toCreate.info.lightExposure = 'MEDIUM';
     _toCreate.info.potMaterial = 'PLASTIC';
     _toCreate.info.hasDrainage = true;
-    _initialPlantName = _getAndSetInitialPlantName();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        onPressed: _createPlant,
-        child: const Icon(
-          Icons.add_outlined,
-        ),
+        onPressed: _isCreating ? null : _createPlant,
+        child: _isCreating
+            ? const SizedBox(
+                height: 24,
+                width: 24,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const Icon(Icons.add_outlined),
       ),
       body: FutureBuilder<String>(
         future: _initialPlantName,
