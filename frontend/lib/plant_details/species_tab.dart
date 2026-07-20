@@ -477,11 +477,11 @@ class _PlantBenefitsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
+    final visibleEntries = benefits.entries.where(_shouldShowBenefitEntry);
     final grouped = <String, List<PlantBenefitEntryDTO>>{
       'HUMAN':
-          benefits.entries.where((entry) => entry.audience == 'HUMAN').toList(),
-      'PET':
-          benefits.entries.where((entry) => entry.audience == 'PET').toList(),
+          visibleEntries.where((entry) => entry.audience == 'HUMAN').toList(),
+      'PET': visibleEntries.where((entry) => entry.audience == 'PET').toList(),
     };
     return Card(
       color: const Color(0xFF172554),
@@ -568,8 +568,9 @@ class _BenefitAudienceSection extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (entry.title.trim().isNotEmpty ||
-                        entry.category.trim().isNotEmpty)
+                    if (!_isNoInformationBenefit(entry) &&
+                        (entry.title.trim().isNotEmpty ||
+                            entry.category.trim().isNotEmpty))
                       Text(
                         [
                           _categoryLabel(localizations, entry.category),
@@ -580,7 +581,8 @@ class _BenefitAudienceSection extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                    if (entry.summary.trim().isNotEmpty) ...[
+                    if (!_isNoInformationBenefit(entry) &&
+                        entry.summary.trim().isNotEmpty) ...[
                       const SizedBox(height: 3),
                       Text(
                         entry.summary,
@@ -614,6 +616,33 @@ class _BenefitAudienceSection extends StatelessWidget {
       _ => category,
     };
   }
+}
+
+bool _shouldShowBenefitEntry(PlantBenefitEntryDTO entry) {
+  if (!_isNoInformationBenefit(entry)) return true;
+
+  // A food-related negative claim can still carry useful feeding or exposure
+  // guidance. Keep the caution while hiding the empty benefit claim itself.
+  return entry.category == 'FOOD' && entry.caution?.trim().isNotEmpty == true;
+}
+
+bool _isNoInformationBenefit(PlantBenefitEntryDTO entry) {
+  final String text = '${entry.title} ${entry.summary}'.toLowerCase();
+  if (text.contains('no reviewed') &&
+      (text.contains('benefit') || text.contains('health'))) {
+    return true;
+  }
+  if (text.contains('not a pet dietary supplement')) return true;
+
+  if (entry.category == 'MEDICINE' &&
+      (text.contains('no treatment claim') ||
+          text.contains('not a medicine') ||
+          text.contains('not a treatment') ||
+          text.contains('does not recommend') ||
+          text.contains('do not replace medical care'))) {
+    return true;
+  }
+  return false;
 }
 
 class _ReviewedSourcesExpansionTile<T> extends StatelessWidget {
