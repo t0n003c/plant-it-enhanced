@@ -150,36 +150,39 @@ class _LightCheckPageState extends State<LightCheckPage> {
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 const SizedBox(height: 16),
-                DropdownButtonFormField<PlantDTO>(
-                  key: const ValueKey<String>('light-check-plant'),
-                  value: _plant,
-                  isExpanded: true,
-                  decoration: InputDecoration(
-                    labelText: localizations.plantOptional,
-                    prefixIcon: const Icon(Icons.local_florist_outlined),
-                    suffixIcon: _loadingSpecies
-                        ? const Padding(
-                            padding: EdgeInsets.all(14),
-                            child: SizedBox.square(
-                              dimension: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                if (widget.initialPlant == null)
+                  DropdownButtonFormField<PlantDTO>(
+                    key: const ValueKey<String>('light-check-plant'),
+                    value: _plant,
+                    isExpanded: true,
+                    decoration: InputDecoration(
+                      labelText: localizations.plantOptional,
+                      prefixIcon: const Icon(Icons.local_florist_outlined),
+                      suffixIcon: _loadingSpecies
+                          ? const Padding(
+                              padding: EdgeInsets.all(14),
+                              child: SizedBox.square(
+                                dimension: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            )
+                          : null,
+                    ),
+                    items: widget.env.plants
+                        .map(
+                          (plant) => DropdownMenuItem<PlantDTO>(
+                            value: plant,
+                            child: Text(
+                              plant.info.personalName ?? plant.species ?? '',
+                              overflow: TextOverflow.ellipsis,
                             ),
-                          )
-                        : null,
-                  ),
-                  items: widget.env.plants
-                      .map(
-                        (plant) => DropdownMenuItem<PlantDTO>(
-                          value: plant,
-                          child: Text(
-                            plant.info.personalName ?? plant.species ?? '',
-                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: _selectPlant,
-                ),
+                        )
+                        .toList(),
+                    onChanged: _selectPlant,
+                  ),
                 if (_species?.care.lightRequirement != null) ...[
                   const SizedBox(height: 10),
                   _RequirementCard(

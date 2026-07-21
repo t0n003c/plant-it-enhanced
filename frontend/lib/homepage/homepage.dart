@@ -5,7 +5,6 @@ import 'package:plant_it/environment.dart';
 import 'package:plant_it/homepage/homepage_header.dart';
 import 'package:plant_it/homepage/plant_list.dart';
 import 'package:plant_it/event/recent_events.dart';
-import 'package:plant_it/homepage/care_tools_card.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
@@ -57,30 +56,7 @@ class _HomePageState extends State<HomePage> {
             ),
             PlantList(env: widget.env),
             const SizedBox(height: 20),
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final Widget careTools = HomeCareToolsCard(env: widget.env);
-                final Widget recentEvents = RecentEvents(env: widget.env);
-                if (constraints.maxWidth < 820) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      careTools,
-                      const SizedBox(height: 22),
-                      recentEvents,
-                    ],
-                  );
-                }
-                return Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(child: careTools),
-                    const SizedBox(width: 20),
-                    Expanded(child: recentEvents),
-                  ],
-                );
-              },
-            ),
+            RecentEvents(env: widget.env),
             const SizedBox(height: 110),
           ],
         ),

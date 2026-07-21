@@ -36,7 +36,7 @@ class CareToolsPage extends StatelessWidget {
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 const SizedBox(height: 18),
-                _CareToolCard(
+                CareToolCard(
                   key: const ValueKey<String>('care-tool-health'),
                   icon: Icons.health_and_safety_outlined,
                   title: localizations.plantHealthCheck,
@@ -52,7 +52,7 @@ class CareToolsPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
-                _CareToolCard(
+                CareToolCard(
                   key: const ValueKey<String>('care-tool-light'),
                   icon: Icons.wb_sunny_outlined,
                   title: localizations.lightPlacementCheck,
@@ -95,14 +95,14 @@ class CareToolsPage extends StatelessWidget {
   }
 }
 
-class _CareToolCard extends StatelessWidget {
+class CareToolCard extends StatelessWidget {
   final IconData icon;
   final String title;
   final String description;
   final String actionLabel;
   final VoidCallback onPressed;
 
-  const _CareToolCard({
+  const CareToolCard({
     super.key,
     required this.icon,
     required this.title,
