@@ -394,6 +394,7 @@ class _LightCheckPageState extends State<LightCheckPage> {
     return switch (value) {
       WindowDistance.near => localizations.nearWindow,
       WindowDistance.middle => localizations.middleFromWindow,
+      WindowDistance.aboutTenFeet => localizations.aboutTenFeetFromWindow,
       WindowDistance.far => localizations.farFromWindow,
     };
   }
@@ -404,6 +405,7 @@ class _LightCheckPageState extends State<LightCheckPage> {
   ) {
     return switch (value) {
       WindowObstruction.open => localizations.openWindowView,
+      WindowObstruction.clear => localizations.clearWindowView,
       WindowObstruction.filtered => localizations.filteredWindowView,
       WindowObstruction.blocked => localizations.blockedWindowView,
     };

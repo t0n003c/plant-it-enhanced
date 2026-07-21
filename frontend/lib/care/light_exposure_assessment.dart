@@ -1,8 +1,8 @@
 enum NaturalLightDuration { none, underTwoHours, twoToFourHours, overFourHours }
 
-enum WindowDistance { near, middle, far }
+enum WindowDistance { near, middle, aboutTenFeet, far }
 
-enum WindowObstruction { open, filtered, blocked }
+enum WindowObstruction { open, clear, filtered, blocked }
 
 enum EstimatedLightLevel { low, moderate, high }
 
@@ -52,10 +52,12 @@ class LightExposureAssessment {
     score += switch (input.distance) {
       WindowDistance.near => 2,
       WindowDistance.middle => 0,
+      WindowDistance.aboutTenFeet => -1,
       WindowDistance.far => -2,
     };
     score += switch (input.obstruction) {
       WindowObstruction.open => 1,
+      WindowObstruction.clear => 1,
       WindowObstruction.filtered => 0,
       WindowObstruction.blocked => -2,
     };

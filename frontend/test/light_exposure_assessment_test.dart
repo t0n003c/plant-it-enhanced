@@ -29,6 +29,21 @@ void main() {
     expect(result.match, LightPlacementMatch.suitable);
   });
 
+  test('models an indoor plant about ten feet from a clear window', () {
+    final result = LightExposureAssessment.evaluate(
+      const LightExposureInput(
+        directLight: NaturalLightDuration.twoToFourHours,
+        distance: WindowDistance.aboutTenFeet,
+        obstruction: WindowObstruction.clear,
+      ),
+      requiredLevel: 'MEDIUM',
+    );
+
+    expect(result.score, 4);
+    expect(result.estimatedLevel, EstimatedLightLevel.moderate);
+    expect(result.match, LightPlacementMatch.suitable);
+  });
+
   test('compares estimated and reviewed requirements in both directions', () {
     final tooLow = LightExposureAssessment.evaluate(
       const LightExposureInput(
