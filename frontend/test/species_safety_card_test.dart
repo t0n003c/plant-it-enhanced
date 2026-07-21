@@ -146,6 +146,7 @@ void main() {
           family: 'Rosaceae',
           genus: 'Fragaria',
           species: 'Fragaria ananassa',
+          synonyms: const ['garden strawberry', 'pineapple strawberry'],
           care: SpeciesCareInfoDTO.fromJson(<String, dynamic>{}),
           imageSource: 'INATURALIST',
           imageSourceUrl: 'https://www.inaturalist.org/photos/74966564',
@@ -159,6 +160,9 @@ void main() {
 
     expect(find.text('Info'), findsOneWidget);
     expect(find.text('Scientific classification'), findsOneWidget);
+    expect(find.byKey(const Key('synonymsInfoRow')), findsOneWidget);
+    expect(
+        find.text('garden strawberry, pineapple strawberry'), findsOneWidget);
     expect(find.byKey(const Key('imageCredit')), findsOneWidget);
     expect(find.text('© cinema · CC-BY-NC'), findsOneWidget);
     expect(find.text('iNaturalist'), findsNothing);
