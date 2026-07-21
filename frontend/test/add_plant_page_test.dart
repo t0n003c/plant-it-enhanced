@@ -51,6 +51,11 @@ void main() {
 
     expect(httpClient.uploadCount, 1);
     expect(httpClient.postedUrls, contains('image/plant/7/image-123'));
+    expect(
+      (httpClient.postedBodies.first['info']
+          as Map<String, dynamic>)['currencySymbol'],
+      '\$',
+    );
     expect(environment.plants, hasLength(1));
     expect(environment.plants.single.info.personalName, 'Rose');
     expect(environment.plants.single.avatarImageId, 'image-123');
@@ -91,6 +96,7 @@ SpeciesDTO _identifiedRose() {
 
 class _AddPlantHttpClient extends AppHttpClient {
   final List<String> postedUrls = [];
+  final List<Map<String, dynamic>> postedBodies = [];
   int uploadCount = 0;
 
   _AddPlantHttpClient() {
@@ -106,6 +112,7 @@ class _AddPlantHttpClient extends AppHttpClient {
   @override
   Future<http.Response> post(String url, Map<String, dynamic>? body) async {
     postedUrls.add(url);
+    postedBodies.add(body ?? {});
     if (url == 'plant') {
       return http.Response(jsonEncode(_plantJson()), 200);
     }
