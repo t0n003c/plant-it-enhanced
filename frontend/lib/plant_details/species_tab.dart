@@ -99,8 +99,6 @@ class _SpeciesDetailsTabState extends State<SpeciesDetailsTab> {
                           context,
                           widget.species.care.lightRequirement!,
                         ),
-                        provenance:
-                            widget.species.care.fieldProvenance['light'],
                       ),
                     if (widget.species.care.waterRequirement != null)
                       _CareGuidanceCard(
@@ -113,20 +111,6 @@ class _SpeciesDetailsTabState extends State<SpeciesDetailsTab> {
                         guidance: _waterGuidance(
                           context,
                           widget.species.care.waterRequirement!,
-                        ),
-                        provenance:
-                            widget.species.care.fieldProvenance['soilHumidity'],
-                      ),
-                    if (widget.species.care.lightRequirement != null ||
-                        widget.species.care.waterRequirement != null)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: Text(
-                          AppLocalizations.of(context).careGuidanceDisclaimer,
-                          style: const TextStyle(
-                            color: Colors.grey,
-                            fontStyle: FontStyle.italic,
-                          ),
                         ),
                       ),
                     _buildAdditionalCareMetrics(context),
@@ -502,13 +486,6 @@ class _PlantSafetyCard extends StatelessWidget {
                 title: localizations.safetySources,
                 sources: safety.sources,
               ),
-            if (safety.matchedTaxon?.trim().isNotEmpty == true) ...[
-              const SizedBox(height: 8),
-              Text(
-                localizations.safetyReviewedFor(safety.matchedTaxon!),
-                style: const TextStyle(color: Colors.white70, fontSize: 12),
-              ),
-            ],
             if (safety.lastVerifiedAt != null) ...[
               const SizedBox(height: 4),
               Text(
@@ -520,16 +497,6 @@ class _PlantSafetyCard extends StatelessWidget {
                 style: const TextStyle(color: Colors.white70, fontSize: 12),
               ),
             ],
-            const SizedBox(height: 10),
-            Text(
-              localizations.safetyDisclaimer,
-              style: const TextStyle(
-                color: Color(0xFFD1D5DB),
-                fontSize: 12,
-                fontStyle: FontStyle.italic,
-                height: 1.35,
-              ),
-            ),
           ],
         ),
       ),
@@ -573,13 +540,6 @@ class _PlantBenefitsCard extends StatelessWidget {
                 title: localizations.benefitSources,
                 sources: benefits.sources,
               ),
-            if (benefits.matchedTaxon?.trim().isNotEmpty == true) ...[
-              const SizedBox(height: 8),
-              Text(
-                localizations.benefitReviewedFor(benefits.matchedTaxon!),
-                style: const TextStyle(color: Colors.white70, fontSize: 12),
-              ),
-            ],
             if (benefits.lastVerifiedAt != null) ...[
               const SizedBox(height: 4),
               Text(
@@ -873,14 +833,12 @@ class _CareGuidanceCard extends StatelessWidget {
   final String title;
   final String level;
   final String guidance;
-  final CareFieldProvenanceDTO? provenance;
 
   const _CareGuidanceCard({
     required this.icon,
     required this.title,
     required this.level,
     required this.guidance,
-    this.provenance,
   });
 
   @override
@@ -911,19 +869,6 @@ class _CareGuidanceCard extends StatelessWidget {
                     guidance,
                     style: const TextStyle(color: Colors.white70),
                   ),
-                  if (provenance?.source != null) ...[
-                    const SizedBox(height: 6),
-                    Text(
-                      provenance!.confidence == null
-                          ? provenance!.source!
-                          : '${provenance!.source} · '
-                              '${(provenance!.confidence! * 100).round()}%',
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
                 ],
               ),
             ),
