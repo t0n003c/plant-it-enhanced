@@ -9,12 +9,14 @@ class SpeciesDetailsTab extends StatefulWidget {
   final bool isLoading;
   final VoidCallback? onRefreshCare;
   final bool refreshingCare;
+  final bool showImageCredit;
   const SpeciesDetailsTab({
     super.key,
     required this.species,
     required this.isLoading,
     this.onRefreshCare,
     this.refreshingCare = false,
+    this.showImageCredit = false,
   });
 
   @override
@@ -31,10 +33,17 @@ class _SpeciesDetailsTabState extends State<SpeciesDetailsTab> {
             height: 20,
           ),
           InfoGroup(
-            title: AppLocalizations.of(context).scientificClassification,
+            title: AppLocalizations.of(context).info,
             children: widget.isLoading
-                ? generateSkeleton(3, widget.isLoading)
+                ? generateSkeleton(5, widget.isLoading)
                 : [
+                    Text(
+                      AppLocalizations.of(context).scientificClassification,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
                     SimpleInfoEntry(
                         title: AppLocalizations.of(context).family,
                         value: widget.species.family),
@@ -50,17 +59,12 @@ class _SpeciesDetailsTabState extends State<SpeciesDetailsTab> {
                         title: AppLocalizations.of(context).catalogVariant,
                         value: widget.species.catalogVariant,
                       ),
-                  ],
-          ),
-          InfoGroup(
-            title: AppLocalizations.of(context).info,
-            children: widget.isLoading
-                ? generateSkeleton(1, widget.isLoading)
-                : [
                     FullWidthInfoEntry(
                       title: AppLocalizations.of(context).synonyms,
                       value: widget.species.synonyms?.join(", "),
-                    )
+                    ),
+                    if (widget.showImageCredit && _hasImageCredit)
+                      _buildImageCredit(context),
                   ],
           ),
           if (_hasSafetyInformation(widget.species.safety))
@@ -114,38 +118,7 @@ class _SpeciesDetailsTabState extends State<SpeciesDetailsTab> {
                         ),
                       ),
                     _buildAdditionalCareMetrics(context),
-                    SimpleInfoEntry(
-                      title: AppLocalizations.of(context).light,
-                      value: widget.species.care.light == null
-                          ? null
-                          : AppLocalizations.of(context)
-                              .nOutOf(widget.species.care.light ?? 0, 10),
-                    ),
-                    SimpleInfoEntry(
-                      title: AppLocalizations.of(context).soilMoisture,
-                      value: widget.species.care.soilHumidity == null
-                          ? null
-                          : AppLocalizations.of(context)
-                              .nOutOf(widget.species.care.soilHumidity!, 10),
-                    ),
-                    SimpleInfoEntry(
-                      title: AppLocalizations.of(context).careDataSource,
-                      value: _careSourceLabel(context),
-                    ),
-                    ...widget.species.care.fieldProvenance.entries.map(
-                      (entry) => SimpleInfoEntry(
-                        title: _careFieldLabel(context, entry.key),
-                        value: _provenanceLabel(context, entry.value),
-                      ),
-                    ),
-                    SimpleInfoEntry(
-                      title: AppLocalizations.of(context).careDataLastVerified,
-                      value: widget.species.care.lastVerifiedAt == null
-                          ? null
-                          : MaterialLocalizations.of(context).formatMediumDate(
-                              widget.species.care.lastVerifiedAt!.toLocal(),
-                            ),
-                    ),
+                    _buildCareDetails(context),
                     if (widget.onRefreshCare != null)
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -171,6 +144,93 @@ class _SpeciesDetailsTabState extends State<SpeciesDetailsTab> {
           )
         ],
       ),
+    );
+  }
+
+  Widget _buildCareDetails(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+    final String? careSource = _careSourceLabel(context);
+    final bool hasDetails = widget.species.care.light != null ||
+        widget.species.care.soilHumidity != null ||
+        careSource != null ||
+        widget.species.care.fieldProvenance.isNotEmpty ||
+        widget.species.care.lastVerifiedAt != null;
+    if (!hasDetails) return const SizedBox.shrink();
+
+    return ExpansionTile(
+      key: const Key('careDetailsExpansion'),
+      initiallyExpanded: false,
+      title: Text(localizations.careDetails),
+      children: [
+        SimpleInfoEntry(
+          title: localizations.light,
+          value: widget.species.care.light == null
+              ? null
+              : localizations.nOutOf(widget.species.care.light!, 10),
+        ),
+        SimpleInfoEntry(
+          title: localizations.soilMoisture,
+          value: widget.species.care.soilHumidity == null
+              ? null
+              : localizations.nOutOf(widget.species.care.soilHumidity!, 10),
+        ),
+        SimpleInfoEntry(
+          title: localizations.careDataSource,
+          value: careSource,
+        ),
+        ...widget.species.care.fieldProvenance.entries.map(
+          (entry) => SimpleInfoEntry(
+            title: _careFieldLabel(context, entry.key),
+            value: _provenanceLabel(context, entry.value),
+          ),
+        ),
+        SimpleInfoEntry(
+          title: localizations.careDataLastVerified,
+          value: widget.species.care.lastVerifiedAt == null
+              ? null
+              : MaterialLocalizations.of(context).formatMediumDate(
+                  widget.species.care.lastVerifiedAt!.toLocal(),
+                ),
+        ),
+      ],
+    );
+  }
+
+  bool get _hasImageCredit =>
+      (widget.species.imageAttribution?.trim().isNotEmpty ?? false) ||
+      (widget.species.imageSource?.trim().isNotEmpty ?? false);
+
+  Widget _buildImageCredit(BuildContext context) {
+    final String attribution = widget.species.imageAttribution?.trim() ?? '';
+    final String source = switch (widget.species.imageSource) {
+      'INATURALIST' => 'iNaturalist',
+      'FLORA_CODEX' => 'FloraCodex',
+      final String value when value.isNotEmpty => value,
+      _ => '',
+    };
+    final String license = widget.species.imageLicenseCode?.trim() ?? '';
+    final RegExpMatch? creatorMatch = RegExp(
+      r'\(c\)\s*([^,]+)',
+      caseSensitive: false,
+    ).firstMatch(attribution);
+    final String creator = creatorMatch?.group(1)?.trim() ?? attribution;
+    final String credit = [
+      if (creator.isNotEmpty) '© $creator',
+      if (license.isNotEmpty) license.toUpperCase(),
+      if (creator.isEmpty && license.isEmpty) source,
+    ].join(' · ');
+    final String sourceUrl = widget.species.imageSourceUrl?.trim() ?? '';
+    final Uri? sourceUri = sourceUrl.isEmpty ? null : Uri.tryParse(sourceUrl);
+
+    return ListTile(
+      key: const Key('imageCredit'),
+      contentPadding: EdgeInsets.zero,
+      dense: true,
+      leading: const Icon(Icons.photo_camera_outlined, size: 20),
+      title: Text(credit),
+      trailing:
+          sourceUri == null ? null : const Icon(Icons.open_in_new, size: 18),
+      onTap: sourceUri == null ? null : () => launchUrl(sourceUri),
     );
   }
 
@@ -893,7 +953,7 @@ class _CareMetricCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: Theme.of(context).colorScheme.surfaceContainerHigh,
+      color: const Color.fromRGBO(24, 44, 37, 1),
       margin: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.all(14),
@@ -907,10 +967,16 @@ class _CareMetricCard extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 3),
-                  Text(value),
+                  Text(
+                    value,
+                    style: const TextStyle(color: Colors.white70),
+                  ),
                 ],
               ),
             ),
