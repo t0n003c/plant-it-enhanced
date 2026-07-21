@@ -137,15 +137,69 @@ void main() {
     expect(find.textContaining('88%'), findsNothing);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('combines info and keeps image credit compact', (tester) async {
+    await tester.pumpWidget(
+      _detailsApp(
+        SpeciesDTO(
+          scientificName: 'Fragaria ananassa',
+          family: 'Rosaceae',
+          genus: 'Fragaria',
+          species: 'Fragaria ananassa',
+          care: SpeciesCareInfoDTO.fromJson(<String, dynamic>{}),
+          imageSource: 'INATURALIST',
+          imageSourceUrl: 'https://www.inaturalist.org/photos/74966564',
+          imageLicenseCode: 'cc-by-nc',
+          imageAttribution: '(c) cinema, some rights reserved (CC BY-NC)',
+          creator: 'TRUSTED_NAME_INDEX',
+        ),
+        showImageCredit: true,
+      ),
+    );
+
+    expect(find.text('Info'), findsOneWidget);
+    expect(find.text('Scientific classification'), findsOneWidget);
+    expect(find.byKey(const Key('imageCredit')), findsOneWidget);
+    expect(find.text('© cinema · CC-BY-NC'), findsOneWidget);
+    expect(find.text('iNaturalist'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('collapses secondary care details by default', (tester) async {
+    await tester.pumpWidget(
+      _detailsApp(
+        SpeciesDTO(
+          scientificName: 'Example plant',
+          care: SpeciesCareInfoDTO(
+            light: 7,
+            soilHumidity: 5,
+            source: 'CURATED_CATALOG',
+          ),
+          creator: 'TRUSTED_NAME_INDEX',
+        ),
+      ),
+    );
+
+    final expansionTile = tester.widget<ExpansionTile>(
+      find.byKey(const Key('careDetailsExpansion')),
+    );
+    expect(expansionTile.initiallyExpanded, isFalse);
+    expect(find.text('Care details'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }
 
-Widget _detailsApp(SpeciesDTO species) {
+Widget _detailsApp(SpeciesDTO species, {bool showImageCredit = false}) {
   return MaterialApp(
     theme: theme,
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
     home: Scaffold(
-      body: SpeciesDetailsTab(species: species, isLoading: false),
+      body: SpeciesDetailsTab(
+        species: species,
+        isLoading: false,
+        showImageCredit: showImageCredit,
+      ),
     ),
   );
 }

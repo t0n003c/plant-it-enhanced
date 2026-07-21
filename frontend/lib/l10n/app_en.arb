@@ -144,6 +144,7 @@
   "moderateWaterGuidance": "Water when the upper soil begins to dry, then drain away excess water.",
   "highWaterGuidance": "Keep the soil evenly moist while avoiding standing water and root saturation.",
   "careDataSource": "Care data source",
+  "careDetails": "Care details",
   "careDataLastVerified": "Care data checked",
   "careDataProvidedByTrefle": "Trefle (general reference data)",
   "careDataProvidedByCuratedCatalog": "Plant-it curated catalog (Extension-sourced)",
