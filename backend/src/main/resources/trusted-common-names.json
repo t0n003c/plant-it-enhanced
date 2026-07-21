@@ -418,7 +418,15 @@
     {
       "scientificName": "Fragaria ananassa",
       "scientificSynonyms": ["Fragaria x ananassa", "Fragaria × ananassa"],
-      "commonNames": ["Strawberry", "garden strawberry", "cultivated strawberry", "pineapple strawberry"]
+      "commonNames": ["Strawberry", "garden strawberry", "cultivated strawberry", "pineapple strawberry"],
+      "image": {
+        "url": "https://inaturalist-open-data.s3.amazonaws.com/photos/74966564/medium.jpg",
+        "fallbackUrl": "https://inaturalist-open-data.s3.amazonaws.com/photos/74966564/square.jpg",
+        "source": "INATURALIST",
+        "sourceUrl": "https://www.inaturalist.org/photos/74966564",
+        "licenseCode": "cc-by-nc",
+        "attribution": "(c) cinema, some rights reserved (CC BY-NC), uploaded by cinema"
+      }
     },
     {
       "scientificName": "Helianthus annuus",

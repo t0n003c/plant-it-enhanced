@@ -119,6 +119,12 @@ class TrustedCommonNameIndexUnitTests {
         Assertions.assertNull(sunflower.getImage().getId());
         Assertions.assertTrue(sunflower.getImage().getUrl().contains("323768723/medium.jpg"));
 
+        final BotanicalInfo strawberry = index.search("strawberry", 1).get(0);
+        Assertions.assertEquals("Fragaria ananassa", strawberry.getSpecies());
+        Assertions.assertNotNull(strawberry.getImage());
+        Assertions.assertNull(strawberry.getImage().getId());
+        Assertions.assertTrue(strawberry.getImage().getUrl().contains("74966564/medium.jpg"));
+
         final BotanicalInfo bellPepper = index.search("bell pepper", 1).get(0);
         final BotanicalInfo thaiChili = index.search("thai chili", 1).get(0);
         Assertions.assertEquals("Bell pepper", bellPepper.getPreferredCommonName());

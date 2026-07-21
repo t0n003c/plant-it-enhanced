@@ -129,6 +129,7 @@ class _SpeciesDetailsTabState extends State<SpeciesDetailsTab> {
                           ),
                         ),
                       ),
+                    _buildAdditionalCareMetrics(context),
                     SimpleInfoEntry(
                       title: AppLocalizations.of(context).light,
                       value: widget.species.care.light == null
@@ -137,37 +138,12 @@ class _SpeciesDetailsTabState extends State<SpeciesDetailsTab> {
                               .nOutOf(widget.species.care.light ?? 0, 10),
                     ),
                     SimpleInfoEntry(
-                      title: AppLocalizations.of(context).humidity,
-                      value: widget.species.care.humidity == null
-                          ? null
-                          : AppLocalizations.of(context)
-                              .nOutOf(widget.species.care.humidity ?? 0, 10),
-                    ),
-                    SimpleInfoEntry(
                       title: AppLocalizations.of(context).soilMoisture,
                       value: widget.species.care.soilHumidity == null
                           ? null
                           : AppLocalizations.of(context)
                               .nOutOf(widget.species.care.soilHumidity!, 10),
                     ),
-                    SimpleInfoEntry(
-                        title: AppLocalizations.of(context).maxTemp,
-                        value: widget.species.care.maxTemp == null
-                            ? null
-                            : AppLocalizations.of(context)
-                                .temp(widget.species.care.maxTemp ?? 0)),
-                    SimpleInfoEntry(
-                        title: AppLocalizations.of(context).minTemp,
-                        value: widget.species.care.minTemp == null
-                            ? null
-                            : AppLocalizations.of(context)
-                                .temp(widget.species.care.minTemp ?? 0)),
-                    SimpleInfoEntry(
-                        title: AppLocalizations.of(context).maxPh,
-                        value: widget.species.care.phMax?.toString()),
-                    SimpleInfoEntry(
-                        title: AppLocalizations.of(context).minPh,
-                        value: widget.species.care.phMin?.toString()),
                     SimpleInfoEntry(
                       title: AppLocalizations.of(context).careDataSource,
                       value: _careSourceLabel(context),
@@ -212,6 +188,103 @@ class _SpeciesDetailsTabState extends State<SpeciesDetailsTab> {
         ],
       ),
     );
+  }
+
+  Widget _buildAdditionalCareMetrics(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+    final List<Widget> metrics = [];
+    if (widget.species.care.humidity != null) {
+      metrics.add(
+        _CareMetricCard(
+          icon: Icons.air_outlined,
+          title: localizations.humidity,
+          value: localizations.nOutOf(widget.species.care.humidity!, 10),
+        ),
+      );
+    }
+    if (widget.species.care.minTemp != null ||
+        widget.species.care.maxTemp != null) {
+      metrics.add(
+        _CareMetricCard(
+          icon: Icons.thermostat_outlined,
+          title: _rangeTitle(
+            localizations.minTemp,
+            localizations.maxTemp,
+            widget.species.care.minTemp,
+            widget.species.care.maxTemp,
+          ),
+          value: _temperatureRange(context),
+        ),
+      );
+    }
+    if (widget.species.care.phMin != null ||
+        widget.species.care.phMax != null) {
+      metrics.add(
+        _CareMetricCard(
+          icon: Icons.science_outlined,
+          title: _rangeTitle(
+            localizations.minPh,
+            localizations.maxPh,
+            widget.species.care.phMin,
+            widget.species.care.phMax,
+          ),
+          value: _phRange(context),
+        ),
+      );
+    }
+    if (metrics.isEmpty) return const SizedBox.shrink();
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double width = constraints.maxWidth >= 560
+            ? (constraints.maxWidth - 12) / 2
+            : constraints.maxWidth;
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: metrics
+                .map((metric) => SizedBox(width: width, child: metric))
+                .toList(),
+          ),
+        );
+      },
+    );
+  }
+
+  String _rangeTitle(
+    String minimumLabel,
+    String maximumLabel,
+    num? minimum,
+    num? maximum,
+  ) {
+    if (minimum != null && maximum != null) {
+      return '$minimumLabel / $maximumLabel';
+    }
+    return minimum != null ? minimumLabel : maximumLabel;
+  }
+
+  String _temperatureRange(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+    final List<String> values = [];
+    if (widget.species.care.minTemp != null) {
+      values.add(localizations.temp(widget.species.care.minTemp!));
+    }
+    if (widget.species.care.maxTemp != null) {
+      values.add(localizations.temp(widget.species.care.maxTemp!));
+    }
+    return values.join(' – ');
+  }
+
+  String _phRange(BuildContext context) {
+    final List<String> values = [];
+    if (widget.species.care.phMin != null) {
+      values.add(widget.species.care.phMin!.toString());
+    }
+    if (widget.species.care.phMax != null) {
+      values.add(widget.species.care.phMax!.toString());
+    }
+    return values.join(' – ');
   }
 
   String _requirementLabel(BuildContext context, String requirement) {
@@ -851,6 +924,48 @@ class _CareGuidanceCard extends StatelessWidget {
                       ),
                     ),
                   ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CareMetricCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String value;
+
+  const _CareMetricCard({
+    required this.icon,
+    required this.title,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Theme.of(context).colorScheme.surfaceContainerHigh,
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Row(
+          children: [
+            Icon(icon, color: Colors.lightGreenAccent),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(value),
                 ],
               ),
             ),

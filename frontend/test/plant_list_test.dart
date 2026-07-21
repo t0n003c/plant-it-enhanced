@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:plant_it/app_http_client.dart';
+import 'package:plant_it/change_notifiers.dart';
 import 'package:plant_it/dto/plant_dto.dart';
 import 'package:plant_it/environment.dart';
 import 'package:plant_it/homepage/plant_list.dart';
 import 'package:plant_it/theme.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -68,6 +70,26 @@ void main() {
     expect(find.byType(PageView), findsNothing);
     expect(find.byType(PlantCard), findsNWidgets(3));
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('refreshes when a newly added plant is announced', (tester) async {
+    final Environment env = await _environment([]);
+    final EventsNotifier notifier = EventsNotifier();
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider<EventsNotifier>.value(
+        value: notifier,
+        child: _app(PlantList(env: env)),
+      ),
+    );
+    expect(find.text('Your green-friend collection is empty'), findsOneWidget);
+
+    env.plants.add(_plant(9, 'New strawberry', 'Fragaria ananassa'));
+    notifier.notify();
+    await tester.pump();
+
+    expect(find.byType(PlantCard), findsOneWidget);
+    expect(find.bySemanticsLabel('New strawberry'), findsOneWidget);
   });
 }
 
