@@ -61,7 +61,7 @@ class PlantSafetyCatalogUnitTests {
         Assertions.assertEquals(PlantSafetyStatus.UNKNOWN, result.catStatus());
         Assertions.assertEquals(PlantSafetyStatus.UNKNOWN, result.dogStatus());
         Assertions.assertTrue(result.sources().isEmpty());
-        Assertions.assertEquals(9, catalog.profileCount());
+        Assertions.assertEquals(10, catalog.profileCount());
     }
 
 
@@ -83,5 +83,19 @@ class PlantSafetyCatalogUnitTests {
             Assertions.assertEquals(PlantSafetyStatus.TOXIC, result.dogStatus(), scientificName);
             Assertions.assertFalse(result.sources().isEmpty(), scientificName);
         });
+    }
+
+
+    @Test
+    @DisplayName("Should expose reviewed Ming aralia safety for people and pets")
+    void shouldCoverMingAralia() {
+        final PlantSafetyInfo result = catalog.find("Polyscias fruticosa");
+
+        Assertions.assertTrue(result.reviewed());
+        Assertions.assertEquals(PlantSafetyStatus.CAUTION, result.humanStatus());
+        Assertions.assertEquals(PlantSafetyStatus.CAUTION, result.catStatus());
+        Assertions.assertEquals(PlantSafetyStatus.CAUTION, result.dogStatus());
+        Assertions.assertEquals("Polyscias fruticosa", result.matchedTaxon());
+        Assertions.assertTrue(result.summary().contains("mouth irritation"));
     }
 }
