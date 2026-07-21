@@ -7,11 +7,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:plant_it/app_http_client.dart';
+import 'package:plant_it/change_notifiers.dart';
 import 'package:plant_it/dto/species_dto.dart';
 import 'package:plant_it/environment.dart';
 import 'package:plant_it/plant_add/add_plant_page.dart';
 import 'package:plant_it/theme.dart';
 import 'package:plant_it/toast/toast_manager.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -25,16 +27,19 @@ void main() {
     );
 
     await tester.pumpWidget(
-      MaterialApp(
-        theme: theme,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: AddPlantPage(
-          env: environment,
-          species: _identifiedRose(),
-          identificationImage: XFile.fromData(
-            _pixel,
-            name: 'identified.jpg',
+      ChangeNotifierProvider<EventsNotifier>(
+        create: (_) => EventsNotifier(),
+        child: MaterialApp(
+          theme: theme,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: AddPlantPage(
+            env: environment,
+            species: _identifiedRose(),
+            identificationImage: XFile.fromData(
+              _pixel,
+              name: 'identified.jpg',
+            ),
           ),
         ),
       ),

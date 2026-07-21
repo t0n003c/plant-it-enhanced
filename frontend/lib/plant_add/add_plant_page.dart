@@ -5,12 +5,14 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:plant_it/app_exception.dart';
 import 'package:plant_it/back_button.dart';
+import 'package:plant_it/change_notifiers.dart';
 import 'package:plant_it/dto/plant_dto.dart';
 import 'package:plant_it/dto/species_dto.dart';
 import 'package:plant_it/environment.dart';
 import 'package:plant_it/plant_add/add_plant_body.dart';
 import 'package:plant_it/plant_add/header.dart';
 import 'package:plant_it/toast/toast_manager.dart';
+import 'package:provider/provider.dart';
 
 class AddPlantPage extends StatefulWidget {
   final SpeciesDTO species;
@@ -78,6 +80,8 @@ class _AddPlantPageState extends State<AddPlantPage> {
 
   Future<void> _createPlant() async {
     if (_isCreating) return;
+    final EventsNotifier? eventsNotifier =
+        Provider.of<EventsNotifier?>(context, listen: false);
     setState(() => _isCreating = true);
     try {
       await _initialPlantName;
@@ -101,6 +105,7 @@ class _AddPlantPageState extends State<AddPlantPage> {
       final PlantDTO createdPlant = PlantDTO.fromJson(responseBody);
       final PlantDTO savedPlant = await _saveIdentificationImage(createdPlant);
       widget.env.plants.add(savedPlant);
+      eventsNotifier?.notify();
       if (_createSuggestedWateringReminder && savedPlant.id != null) {
         await _createSuggestedReminder(savedPlant.id!);
       }

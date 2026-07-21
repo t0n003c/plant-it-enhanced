@@ -85,6 +85,33 @@ void main() {
     expect(find.text('Medicine'), findsNothing);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('shows additional available care metrics', (tester) async {
+    await tester.pumpWidget(
+      _detailsApp(
+        SpeciesDTO(
+          scientificName: 'Example plant',
+          care: SpeciesCareInfoDTO(
+            humidity: 7,
+            minTemp: 12,
+            maxTemp: 28,
+            phMin: 5.5,
+            phMax: 6.5,
+          ),
+          creator: 'TRUSTED_NAME_INDEX',
+        ),
+      ),
+    );
+
+    expect(find.text('Humidity'), findsOneWidget);
+    expect(find.text('7 out of 10'), findsOneWidget);
+    expect(
+        find.text('Minimum temperature / Maximum temperature'), findsOneWidget);
+    expect(find.text('12 °C – 28 °C'), findsOneWidget);
+    expect(find.text('Minimum ph / Maximum ph'), findsOneWidget);
+    expect(find.text('5.5 – 6.5'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }
 
 Widget _detailsApp(SpeciesDTO species) {

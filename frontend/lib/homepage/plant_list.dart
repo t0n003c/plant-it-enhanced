@@ -5,11 +5,13 @@ import 'package:cached_network_image_platform_interface/cached_network_image_pla
 import 'package:flutter/material.dart';
 import 'package:plant_it/app_layout.dart';
 import 'package:plant_it/app_http_client.dart';
+import 'package:plant_it/change_notifiers.dart';
 import 'package:plant_it/commons.dart';
 import 'package:plant_it/dto/plant_dto.dart';
 import 'package:plant_it/environment.dart';
 import 'package:plant_it/plant_details/plant_details_page.dart';
 import 'package:plant_it/theme.dart';
+import 'package:provider/provider.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -31,11 +33,28 @@ class _PlantListState extends State<PlantList> {
   final TextEditingController _searchController = TextEditingController();
   List<PlantDTO> _filteredPlants = [];
   Timer? _debounce;
+  EventsNotifier? _eventsNotifier;
 
   @override
   void initState() {
     super.initState();
     _filteredPlants = List<PlantDTO>.from(widget.env.plants);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final EventsNotifier? nextNotifier =
+        Provider.of<EventsNotifier?>(context, listen: false);
+    if (identical(_eventsNotifier, nextNotifier)) return;
+    _eventsNotifier?.removeListener(_handlePlantsChanged);
+    _eventsNotifier = nextNotifier;
+    _eventsNotifier?.addListener(_handlePlantsChanged);
+  }
+
+  void _handlePlantsChanged() {
+    if (!mounted) return;
+    _applyFilter(_searchController.text);
   }
 
   @override
@@ -46,6 +65,7 @@ class _PlantListState extends State<PlantList> {
 
   @override
   void dispose() {
+    _eventsNotifier?.removeListener(_handlePlantsChanged);
     _debounce?.cancel();
     _pageController.dispose();
     _searchController.dispose();
