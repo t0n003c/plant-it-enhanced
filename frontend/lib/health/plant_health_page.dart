@@ -213,28 +213,30 @@ class _PlantHealthPageState extends State<PlantHealthPage> {
           style: Theme.of(context).textTheme.bodyLarge,
         ),
         const SizedBox(height: 16),
-        DropdownButtonFormField<PlantDTO>(
-          key: const ValueKey<String>('health-check-plant'),
-          value: _plant,
-          isExpanded: true,
-          decoration: InputDecoration(
-            labelText: localizations.plantOptional,
-            prefixIcon: const Icon(Icons.local_florist_outlined),
-          ),
-          items: widget.env.plants
-              .map(
-                (plant) => DropdownMenuItem<PlantDTO>(
-                  value: plant,
-                  child: Text(
-                    plant.info.personalName ?? plant.species ?? '',
-                    overflow: TextOverflow.ellipsis,
+        if (widget.initialPlant == null) ...[
+          DropdownButtonFormField<PlantDTO>(
+            key: const ValueKey<String>('health-check-plant'),
+            value: _plant,
+            isExpanded: true,
+            decoration: InputDecoration(
+              labelText: localizations.plantOptional,
+              prefixIcon: const Icon(Icons.local_florist_outlined),
+            ),
+            items: widget.env.plants
+                .map(
+                  (plant) => DropdownMenuItem<PlantDTO>(
+                    value: plant,
+                    child: Text(
+                      plant.info.personalName ?? plant.species ?? '',
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                ),
-              )
-              .toList(),
-          onChanged: (value) => setState(() => _plant = value),
-        ),
-        const SizedBox(height: 14),
+                )
+                .toList(),
+            onChanged: (value) => setState(() => _plant = value),
+          ),
+          const SizedBox(height: 14),
+        ],
         _HealthPhotoSlot(
           icon: Icons.yard_outlined,
           title: localizations.wholePlantView,

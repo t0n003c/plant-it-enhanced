@@ -8,6 +8,7 @@ import 'package:plant_it/dto/species_dto.dart';
 import 'package:plant_it/environment.dart';
 import 'package:plant_it/floating_tabbar.dart';
 import 'package:plant_it/plant_details/details_tab.dart';
+import 'package:plant_it/plant_details/care_tab.dart';
 import 'package:plant_it/plant_details/plant_details_bottom_bar.dart';
 import 'package:plant_it/plant_details/header.dart';
 import 'package:plant_it/plant_details/plant_tab.dart';
@@ -89,9 +90,14 @@ class _PlantDetailsPageState extends State<PlantDetailsPage> {
           env: widget.env,
           updatePlantLocally: _updatePlantLocally,
         ),
-      _ => SpeciesDetailsTab(
+      2 => SpeciesDetailsTab(
           species: species,
           isLoading: _isLoading,
+        ),
+      _ => PlantCareTab(
+          env: widget.env,
+          plant: _toShow,
+          species: _species,
         ),
     };
     return Scaffold(
@@ -126,6 +132,7 @@ class _PlantDetailsPageState extends State<PlantDetailsPage> {
                           AppLocalizations.of(context).activity, // or "Tasks"
                           AppLocalizations.of(context).plant,
                           AppLocalizations.of(context).species,
+                          AppLocalizations.of(context).care,
                         ],
                         onSelected: (index) =>
                             setState(() => _activeIndex = index),
