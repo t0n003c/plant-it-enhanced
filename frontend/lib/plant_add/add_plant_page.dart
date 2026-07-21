@@ -266,6 +266,7 @@ class _AddPlantPageState extends State<AddPlantPage> {
   void initState() {
     super.initState();
     _toCreate = PlantDTO(info: PlantInfoDTO());
+    _toCreate.info.currencySymbol = '\$';
     _toCreate.info.growingEnvironment = 'INDOOR';
     _toCreate.info.lightExposure = 'MEDIUM';
     _toCreate.info.potMaterial = 'PLASTIC';
