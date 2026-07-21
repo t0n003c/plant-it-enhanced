@@ -59,10 +59,12 @@ class _SpeciesDetailsTabState extends State<SpeciesDetailsTab> {
                         title: AppLocalizations.of(context).catalogVariant,
                         value: widget.species.catalogVariant,
                       ),
-                    FullWidthInfoEntry(
-                      title: AppLocalizations.of(context).synonyms,
-                      value: widget.species.synonyms?.join(", "),
-                    ),
+                    if (widget.species.synonyms?.isNotEmpty == true)
+                      _CompactInfoRow(
+                        key: const Key('synonymsInfoRow'),
+                        title: AppLocalizations.of(context).synonyms,
+                        value: widget.species.synonyms!.join(", "),
+                      ),
                     if (widget.showImageCredit && _hasImageCredit)
                       _buildImageCredit(context),
                   ],
@@ -982,6 +984,39 @@ class _CareMetricCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _CompactInfoRow extends StatelessWidget {
+  final String title;
+  final String value;
+
+  const _CompactInfoRow({
+    super.key,
+    required this.title,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              value,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.end,
+            ),
+          ),
+        ],
       ),
     );
   }
