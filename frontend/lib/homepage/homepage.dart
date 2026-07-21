@@ -52,7 +52,6 @@ class _HomePageState extends State<HomePage> {
           children: [
             HomePageHeader(
               username: widget.env.credentials.username,
-              plantCount: widget.env.plants.length,
             ),
             PlantList(env: widget.env),
             const SizedBox(height: 20),

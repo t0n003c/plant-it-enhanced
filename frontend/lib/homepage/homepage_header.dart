@@ -4,11 +4,9 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class HomePageHeader extends StatelessWidget {
   final String username;
-  final int plantCount;
   const HomePageHeader({
     super.key,
     required this.username,
-    this.plantCount = 0,
   });
 
   @override
@@ -50,19 +48,6 @@ class HomePageHeader extends StatelessWidget {
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           color: colors.onSurfaceVariant,
                         ),
-                  ),
-                  const SizedBox(height: 12),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: colors.surface.withOpacity(.58),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      '${AppLocalizations.of(context).plantCount}: $plantCount',
-                      style: Theme.of(context).textTheme.labelLarge,
-                    ),
                   ),
                 ],
               ),
