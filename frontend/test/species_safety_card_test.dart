@@ -28,7 +28,9 @@ void main() {
     expect(find.text('No known toxicity'), findsOneWidget);
     expect(find.text('Possible exposure?'), findsOneWidget);
     expect(find.text('ASPCA Animal Poison Control'), findsNothing);
-    expect(find.textContaining('not an edibility guide'), findsOneWidget);
+    expect(find.textContaining('not an edibility guide'), findsNothing);
+    expect(find.textContaining('Profile matched to'), findsNothing);
+    expect(find.textContaining('Notes matched to'), findsNothing);
     expect(find.text('Food and medicine notes'), findsOneWidget);
     expect(find.text('For people'), findsOneWidget);
     expect(find.text('Food · Edible fruit'), findsOneWidget);
@@ -110,6 +112,29 @@ void main() {
     expect(find.text('12 °C – 28 °C'), findsOneWidget);
     expect(find.text('Minimum ph / Maximum ph'), findsOneWidget);
     expect(find.text('5.5 – 6.5'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('keeps care cards focused on actionable guidance',
+      (tester) async {
+    await tester.pumpWidget(
+      _detailsApp(
+        SpeciesDTO(
+          scientificName: 'Example plant',
+          care: SpeciesCareInfoDTO(
+            lightRequirement: 'HIGH',
+            waterRequirement: 'MODERATE',
+          ),
+          creator: 'TRUSTED_NAME_INDEX',
+        ),
+      ),
+    );
+
+    expect(find.text('Sunlight · High'), findsOneWidget);
+    expect(find.text('watering · Moderate'), findsOneWidget);
+    expect(find.textContaining('General guidance only'), findsNothing);
+    expect(find.textContaining('CURATED_CATALOG'), findsNothing);
+    expect(find.textContaining('88%'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 }

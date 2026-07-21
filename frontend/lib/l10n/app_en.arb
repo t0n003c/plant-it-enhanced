@@ -148,7 +148,6 @@
   "careDataProvidedByTrefle": "Trefle (general reference data)",
   "careDataProvidedByCuratedCatalog": "Plant-it curated catalog (Extension-sourced)",
   "careDataProvidedByPerenual": "Perenual (watering and sunlight data)",
-  "careGuidanceDisclaimer": "General guidance only. Check the soil and your plant before watering.",
   "safetyAtHome": "Safety at home",
   "humanSafety": "People",
   "catSafety": "Cats",
@@ -163,19 +162,12 @@
   "safetyEmergencyTitle": "Possible exposure?",
   "safetyEmergencyMessage": "Contact your local poison control service, veterinarian, or emergency service now. Do not wait for symptoms when a highly toxic exposure is possible.",
   "safetySources": "Reviewed sources",
-  "safetyReviewedFor": "Profile matched to {taxon}",
-  "@safetyReviewedFor": {
-    "placeholders": {
-      "taxon": {"type": "String"}
-    }
-  },
   "safetyChecked": "Safety data checked {date}",
   "@safetyChecked": {
     "placeholders": {
       "date": {"type": "String"}
     }
   },
-  "safetyDisclaimer": "Reference guidance only—not medical or veterinary advice, and not an edibility guide. Even plants listed as non-toxic can cause stomach upset or other reactions.",
   "catalogVariant": "Result group",
   "benefitsAtHome": "Food and medicine notes",
   "humanBenefits": "For people",
@@ -185,12 +177,6 @@
   "enrichmentBenefitCategory": "Enrichment",
   "medicineBenefitCategory": "Medicine",
   "benefitSources": "Reviewed sources",
-  "benefitReviewedFor": "Notes matched to {taxon}",
-  "@benefitReviewedFor": {
-    "placeholders": {
-      "taxon": {"type": "String"}
-    }
-  },
   "benefitChecked": "Notes checked {date}",
   "@benefitChecked": {
     "placeholders": {
