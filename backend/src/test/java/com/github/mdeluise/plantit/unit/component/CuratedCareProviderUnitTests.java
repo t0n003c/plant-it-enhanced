@@ -28,7 +28,7 @@ class CuratedCareProviderUnitTests {
         final List<String> reportedPlants = List.of(
             "Monstera deliciosa", "Zea mays", "Helianthus annuus", "Lavandula angustifolia", "Rosa",
             "Fragaria ananassa", "Brassica oleracea", "Zingiber officinale", "Mentha × piperita",
-            "Daucus carota sativus", "Solanum tuberosum", "Solanum melongena");
+            "Daucus carota sativus", "Solanum tuberosum", "Solanum melongena", "Polyscias fruticosa");
 
         for (String scientificName : reportedPlants) {
             Assertions.assertTrue(provider.fetch(scientificName).isPresent(), scientificName);
@@ -40,7 +40,7 @@ class CuratedCareProviderUnitTests {
     @Test
     @DisplayName("Should expose deterministic catalog field coverage")
     void shouldExposeFieldCoverage() {
-        Assertions.assertEquals(88, provider.profileCount());
+        Assertions.assertEquals(89, provider.profileCount());
         Assertions.assertTrue(provider.availableFields("Lilium").containsAll(
             List.of("light", "soilHumidity")));
         Assertions.assertTrue(provider.availableFields("Zingiber officinale").containsAll(
@@ -77,7 +77,7 @@ class CuratedCareProviderUnitTests {
         Assertions.assertEquals("CURATED_CATALOG", result.getSource());
         Assertions.assertEquals(
             "https://plants.ces.ncsu.edu/plants/monstera-deliciosa/", result.getSourceReference());
-        Assertions.assertEquals(Instant.parse("2026-07-17T00:00:00Z"), result.getLastVerifiedAt());
+        Assertions.assertEquals(Instant.parse("2026-07-21T00:00:00Z"), result.getLastVerifiedAt());
     }
 
 
@@ -85,6 +85,7 @@ class CuratedCareProviderUnitTests {
     @DisplayName("Should support accepted taxonomic synonyms without fuzzy matching")
     void shouldSupportSynonymsWithoutFuzzyMatching() {
         Assertions.assertTrue(provider.fetch("Sansevieria trifasciata").isPresent());
+        Assertions.assertTrue(provider.fetch("Aralia fruticosa").isPresent());
         Assertions.assertTrue(provider.fetch("Rosmarinus officinalis").isPresent());
         Assertions.assertTrue(provider.fetch("Monstera").isEmpty());
         Assertions.assertTrue(provider.fetch("sunflower").isEmpty());

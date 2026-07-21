@@ -7,6 +7,7 @@ import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfoDTOConverter;
 import com.github.mdeluise.plantit.botanicalinfo.care.PlantCareInfoDTOConverter;
 import com.github.mdeluise.plantit.image.BotanicalInfoImage;
 import com.github.mdeluise.plantit.plantinfo.benefits.PlantBenefitCatalog;
+import com.github.mdeluise.plantit.plantinfo.care.CuratedCareProvider;
 import com.github.mdeluise.plantit.plantinfo.safety.PlantSafetyCatalog;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -90,11 +91,29 @@ class BotanicalInfoDTOConverterUnitTests {
     }
 
 
+    @Test
+    @DisplayName("Should overlay newly reviewed care onto an existing species record")
+    void shouldOverlayCuratedCareForExistingSpecies() {
+        final BotanicalInfo botanicalInfo = new BotanicalInfo();
+        botanicalInfo.setSpecies("Polyscias fruticosa");
+        botanicalInfo.setCreator(BotanicalInfoCreator.INATURALIST);
+
+        final BotanicalInfoDTO dto = createConverter().convertToDTO(botanicalInfo);
+
+        Assertions.assertEquals(6, dto.getPlantCareInfo().getLight());
+        Assertions.assertEquals(8, dto.getPlantCareInfo().getHumidity());
+        Assertions.assertEquals(5, dto.getPlantCareInfo().getSoilHumidity());
+        Assertions.assertEquals("CURATED_CATALOG", dto.getPlantCareInfo().getSource());
+    }
+
+
     private BotanicalInfoDTOConverter createConverter() {
         final ModelMapper modelMapper = new ModelMapper();
         return new BotanicalInfoDTOConverter(
             modelMapper,
             new PlantCareInfoDTOConverter(modelMapper),
+            new CuratedCareProvider(new org.springframework.core.io.ClassPathResource(
+                "plant-care-catalog.json")),
             new PlantSafetyCatalog(new org.springframework.core.io.ClassPathResource(
                 "plant-safety-catalog.json")),
             new PlantBenefitCatalog(new org.springframework.core.io.ClassPathResource(

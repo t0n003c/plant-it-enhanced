@@ -1,5 +1,5 @@
 {
-  "verifiedAt": "2026-07-18T00:00:00Z",
+  "verifiedAt": "2026-07-21T00:00:00Z",
   "profiles": [
     {
       "taxonScopes": ["Lilium"],
@@ -156,6 +156,24 @@
         {
           "name": "ASPCA Animal Poison Control",
           "url": "https://www.aspca.org/pet-care/aspca-poison-control/toxic-and-non-toxic-plants/aloe"
+        }
+      ]
+    },
+    {
+      "scientificNames": ["Polyscias fruticosa", "Aralia fruticosa", "Panax fruticosus"],
+      "humanStatus": "CAUTION",
+      "catStatus": "CAUTION",
+      "dogStatus": "CAUTION",
+      "summary": "Ming aralia and related Polyscias plants are low-severity poisonous plants. Ingestion may cause mouth irritation, nausea, vomiting, or other gastrointestinal upset, and sap may irritate skin. Cats and dogs may develop vomiting, diarrhea, loss of appetite, or depression after eating the plant.",
+      "hazardousParts": ["All plant parts", "Sap", "Flowers", "Fruits", "Leaves", "Roots"],
+      "sources": [
+        {
+          "name": "NC State Extension Plant Toolbox: Polyscias fruticosa",
+          "url": "https://plants.ces.ncsu.edu/plants/polyscias-fruticosa/"
+        },
+        {
+          "name": "NC State Extension Plant Toolbox: Polyscias",
+          "url": "https://plants.ces.ncsu.edu/plants/polyscias/"
         }
       ]
     }

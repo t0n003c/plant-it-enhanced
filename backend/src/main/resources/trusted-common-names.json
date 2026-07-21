@@ -151,6 +151,11 @@
       "commonNames": ["Dwarf umbrella tree", "umbrella plant", "Hawaiian elf", "dwarf schefflera"]
     },
     {
+      "scientificName": "Polyscias fruticosa",
+      "scientificSynonyms": ["Aralia fruticosa", "Panax fruticosus"],
+      "commonNames": ["Ming aralia", "Ming tree"]
+    },
+    {
       "scientificName": "Dracaena reflexa angustifolia",
       "scientificSynonyms": ["Dracaena reflexa var. angustifolia", "Dracaena marginata"],
       "commonNames": ["Madagascar dragon tree", "red-edged dracaena", "dragon blood tree", "marginata"]

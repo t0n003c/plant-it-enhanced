@@ -1,5 +1,5 @@
 {
-  "verifiedAt": "2026-07-17T00:00:00Z",
+  "verifiedAt": "2026-07-21T00:00:00Z",
   "profiles": [
     {
       "scientificNames": ["Monstera deliciosa"],
@@ -548,6 +548,13 @@
       "light": 9,
       "soilHumidity": 4,
       "sourceReference": "https://plants.ces.ncsu.edu/plants/echinacea-purpurea/"
+    },
+    {
+      "scientificNames": ["Polyscias fruticosa", "Aralia fruticosa", "Panax fruticosus"],
+      "light": 6,
+      "humidity": 8,
+      "soilHumidity": 5,
+      "sourceReference": "https://plants.ces.ncsu.edu/plants/polyscias-fruticosa/"
     }
   ]
 }
