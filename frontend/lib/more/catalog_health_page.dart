@@ -153,9 +153,21 @@ class _CatalogHealthPageState extends State<CatalogHealthPage> {
               ),
               _MetricTile(
                 width: width,
+                icon: Icons.travel_explore_outlined,
+                label: AppLocalizations.of(context).searchablePlants,
+                value: _integer(totals['searchableEntries']).toString(),
+              ),
+              _MetricTile(
+                width: width,
                 icon: Icons.manage_search,
                 label: AppLocalizations.of(context).reviewedPlantNames,
                 value: _integer(totals['reviewedQueries']).toString(),
+              ),
+              _MetricTile(
+                width: width,
+                icon: Icons.manage_search_outlined,
+                label: AppLocalizations.of(context).searchablePlantNames,
+                value: _integer(totals['searchableQueries']).toString(),
               ),
               _MetricTile(
                 width: width,
@@ -326,9 +338,12 @@ class _TierCoverageCard extends StatelessWidget {
     final int careCoverage = _integer(tier['careCoveragePercent']);
     final int careRequired = _integer(tier['careRequiredEntries']);
     final int imageRequired = _integer(tier['imageRequiredEntries']);
-    final String title = name == 'NORTH_AMERICAN_TRAIL'
-        ? AppLocalizations.of(context).trailCatalog
-        : AppLocalizations.of(context).cultivatedCatalog;
+    final String title = switch (name) {
+      'NORTH_AMERICAN_TRAIL' => AppLocalizations.of(context).trailCatalog,
+      'SEARCH_DISCOVERY' =>
+        AppLocalizations.of(context).searchDiscoveryCatalog,
+      _ => AppLocalizations.of(context).cultivatedCatalog,
+    };
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
       child: Padding(

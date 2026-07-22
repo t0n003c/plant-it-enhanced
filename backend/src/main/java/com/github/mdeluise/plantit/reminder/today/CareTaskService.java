@@ -9,10 +9,15 @@ import java.util.Optional;
 
 import com.github.mdeluise.plantit.diary.entry.DiaryEntry;
 import com.github.mdeluise.plantit.diary.entry.DiaryEntryService;
+import com.github.mdeluise.plantit.diary.entry.DiaryEntryType;
+import com.github.mdeluise.plantit.plant.care.CareScheduleSuggestion;
+import com.github.mdeluise.plantit.plant.care.CareScheduleSuggestionService;
 import com.github.mdeluise.plantit.reminder.Reminder;
 import com.github.mdeluise.plantit.reminder.ReminderRepository;
 import com.github.mdeluise.plantit.reminder.ReminderScheduleCalculator;
 import com.github.mdeluise.plantit.reminder.ReminderService;
+import com.github.mdeluise.plantit.reminder.frequency.Frequency;
+import com.github.mdeluise.plantit.reminder.frequency.Unit;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,15 +29,24 @@ public class CareTaskService {
     private final ReminderRepository reminderRepository;
     private final ReminderScheduleCalculator scheduleCalculator;
     private final DiaryEntryService diaryEntryService;
+    private final CareScheduleSuggestionService suggestionService;
 
 
     @Autowired
     public CareTaskService(ReminderService reminderService, ReminderRepository reminderRepository,
-                           ReminderScheduleCalculator scheduleCalculator, DiaryEntryService diaryEntryService) {
+                           ReminderScheduleCalculator scheduleCalculator, DiaryEntryService diaryEntryService,
+                           CareScheduleSuggestionService suggestionService) {
         this.reminderService = reminderService;
         this.reminderRepository = reminderRepository;
         this.scheduleCalculator = scheduleCalculator;
         this.diaryEntryService = diaryEntryService;
+        this.suggestionService = suggestionService;
+    }
+
+
+    public CareTaskService(ReminderService reminderService, ReminderRepository reminderRepository,
+                           ReminderScheduleCalculator scheduleCalculator, DiaryEntryService diaryEntryService) {
+        this(reminderService, reminderRepository, scheduleCalculator, diaryEntryService, null);
     }
 
 
@@ -63,6 +77,7 @@ public class CareTaskService {
         entry.setDate(scheduleCalculator.now());
         entry.setNote(note);
         diaryEntryService.save(entry);
+        adaptWateringReminder(reminder);
         clearTransientState(reminder);
         reminderRepository.save(reminder);
     }
@@ -139,5 +154,17 @@ public class CareTaskService {
     private void clearTransientState(Reminder reminder) {
         reminder.setSnoozedUntil(null);
         reminder.setLastNotified(null);
+    }
+
+
+    private void adaptWateringReminder(Reminder reminder) {
+        if (suggestionService == null || reminder.getAction() != DiaryEntryType.WATERING) {
+            return;
+        }
+        final CareScheduleSuggestion suggestion = suggestionService.suggest(reminder.getTarget());
+        final Frequency frequency = new Frequency();
+        frequency.setQuantity(suggestion.intervalDays());
+        frequency.setUnit(Unit.DAYS);
+        reminder.setFrequency(frequency);
     }
 }

@@ -9,8 +9,9 @@ public record CatalogHealthSnapshot(int schemaVersion, Instant checkedAt, boolea
                                     long activeGapCount, Map<CatalogGapType, Long> activeGapCounts,
                                     List<CatalogGapSummary> recentGaps, List<String> policyIssues) {
 
-    public record CatalogTotals(int reviewedEntries, int reviewedQueries, int curatedCareProfiles,
-                                int liveCanaries, int contactHazards) {
+    public record CatalogTotals(int reviewedEntries, int reviewedQueries, int searchableEntries,
+                                int searchableQueries, int curatedCareProfiles, int liveCanaries,
+                                int contactHazards) {
     }
 
 

@@ -3,7 +3,7 @@
   "tiers": [
     {
       "name": "CURATED_CULTIVATED",
-      "excludeTags": ["NORTH_AMERICAN_TRAIL"],
+      "excludeTags": ["NORTH_AMERICAN_TRAIL", "SEARCH_DISCOVERY"],
       "requiresImage": true,
       "requiredCareFields": ["light", "soilHumidity"]
     },
@@ -11,6 +11,12 @@
       "name": "NORTH_AMERICAN_TRAIL",
       "includeTags": ["NORTH_AMERICAN_TRAIL"],
       "requiresImage": true,
+      "requiredCareFields": []
+    },
+    {
+      "name": "SEARCH_DISCOVERY",
+      "includeTags": ["SEARCH_DISCOVERY"],
+      "requiresImage": false,
       "requiredCareFields": []
     }
   ],

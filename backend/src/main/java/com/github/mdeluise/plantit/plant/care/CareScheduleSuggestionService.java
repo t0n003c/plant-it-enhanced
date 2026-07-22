@@ -1,13 +1,19 @@
 package com.github.mdeluise.plantit.plant.care;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.OptionalDouble;
 
 import com.github.mdeluise.plantit.botanicalinfo.care.CareFieldProvenance;
 import com.github.mdeluise.plantit.botanicalinfo.care.PlantCareInfo;
+import com.github.mdeluise.plantit.diary.entry.DiaryEntry;
+import com.github.mdeluise.plantit.diary.entry.DiaryEntryRepository;
+import com.github.mdeluise.plantit.diary.entry.DiaryEntryType;
 import com.github.mdeluise.plantit.plant.Plant;
 import com.github.mdeluise.plantit.plant.info.PlantInfo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -40,7 +46,24 @@ public class CareScheduleSuggestionService {
     private static final double DEFAULT_CONFIDENCE = 0.45;
     private static final double UNATTRIBUTED_CARE_CONFIDENCE = 0.60;
     private static final double PROFILE_CONFIDENCE_BONUS = 0.05;
+    private static final double HISTORY_CONFIDENCE_BONUS = 0.05;
+    private static final double HISTORY_BLEND = 0.35;
     private static final double MAXIMUM_CONFIDENCE = 0.95;
+    private final DiaryEntryRepository diaryEntryRepository;
+
+
+    @Autowired
+    public CareScheduleSuggestionService(DiaryEntryRepository diaryEntryRepository) {
+        this.diaryEntryRepository = diaryEntryRepository;
+    }
+
+
+    /**
+     * Keeps isolated unit tests that only exercise the profile calculation independent from persistence.
+     */
+    public CareScheduleSuggestionService() {
+        this(null);
+    }
 
 
     public CareScheduleSuggestion suggest(Plant plant) {
@@ -55,10 +78,19 @@ public class CareScheduleSuggestionService {
         interval *= potFactor(profile, factors);
         interval *= drainageFactor(profile, factors);
         interval *= soilFactor(profile, factors);
+        final OptionalDouble observedInterval = recentWateringInterval(plant);
+        if (observedInterval.isPresent()) {
+            interval = interval * (1 - HISTORY_BLEND) + observedInterval.getAsDouble() * HISTORY_BLEND;
+            factors.add("RECENT_WATERING_HISTORY");
+        }
 
         final int roundedInterval = (int) Math.round(Math.max(
             MINIMUM_INTERVAL_DAYS, Math.min(MAXIMUM_INTERVAL_DAYS, interval)));
-        return new CareScheduleSuggestion(roundedInterval, confidence(care, profile), List.copyOf(factors));
+        return new CareScheduleSuggestion(
+            roundedInterval,
+            confidence(care, profile, observedInterval.isPresent()),
+            List.copyOf(factors)
+        );
     }
 
 
@@ -135,7 +167,7 @@ public class CareScheduleSuggestionService {
     }
 
 
-    private double confidence(PlantCareInfo care, PlantInfo profile) {
+    private double confidence(PlantCareInfo care, PlantInfo profile, boolean hasHistory) {
         final CareFieldProvenance provenance = care.getFieldProvenance().get(PlantCareInfo.SOIL_HUMIDITY_FIELD);
         double result;
         if (provenance != null && provenance.getConfidence() != null) {
@@ -146,7 +178,37 @@ public class CareScheduleSuggestionService {
         if (profile.getGrowingEnvironment() != null && profile.getLightExposure() != null) {
             result += PROFILE_CONFIDENCE_BONUS;
         }
+        if (hasHistory) {
+            result += HISTORY_CONFIDENCE_BONUS;
+        }
         return Math.min(MAXIMUM_CONFIDENCE, result);
+    }
+
+
+    private OptionalDouble recentWateringInterval(Plant plant) {
+        final List<DiaryEntry> entries = diaryEntryRepository == null || plant == null || plant.getId() == null
+                                          ? List.of()
+                                          : diaryEntryRepository.findTop4ByDiaryTargetAndTypeOrderByDateDesc(
+                                              plant, DiaryEntryType.WATERING);
+        if (entries == null || entries.size() < 2) {
+            return OptionalDouble.empty();
+        }
+        final List<Long> intervals = new ArrayList<>();
+        for (int index = 0; index < entries.size() - 1; index++) {
+            final Date newer = entries.get(index).getDate();
+            final Date older = entries.get(index + 1).getDate();
+            if (newer == null || older == null || !newer.after(older)) {
+                continue;
+            }
+            final long days = (newer.getTime() - older.getTime()) / (24L * 60L * 60L * 1000L);
+            if (days >= MINIMUM_INTERVAL_DAYS && days <= MAXIMUM_INTERVAL_DAYS) {
+                intervals.add(days);
+            }
+        }
+        if (intervals.isEmpty()) {
+            return OptionalDouble.empty();
+        }
+        return OptionalDouble.of(intervals.stream().mapToLong(Long::longValue).average().orElse(DEFAULT_INTERVAL_DAYS));
     }
 
 

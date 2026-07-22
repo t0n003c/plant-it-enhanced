@@ -36,6 +36,10 @@ public class CatalogHealthService {
 
     public CatalogHealthSnapshot get() {
         final List<CatalogEntry> entries = trustedNameIndex.catalogEntries();
+        final List<CatalogEntry> reviewedEntries = entries.stream()
+                                                         .filter(entry -> !entry.catalogTags().contains(
+                                                             TrustedCommonNameIndex.SEARCH_DISCOVERY_TAG))
+                                                         .toList();
         final Map<String, List<CatalogEntry>> entriesByTier = new LinkedHashMap<>();
         manifest.getTiers().forEach(policy -> entriesByTier.put(policy.name(), new ArrayList<>()));
         entries.forEach(entry -> entriesByTier.get(manifest.policyFor(entry.catalogTags()).name()).add(entry));
@@ -52,8 +56,10 @@ public class CatalogHealthService {
         final long activeGapCount = catalogGapService.activeGapCount();
         final Map<CatalogGapType, Long> gapCounts = catalogGapService.activeGapCounts();
         final CatalogTotals totals = new CatalogTotals(
+            reviewedEntries.size(),
+            queryCount(reviewedEntries),
             entries.size(),
-            trustedNameIndex.qualityExamples().size(),
+            queryCount(entries),
             curatedCareProvider.profileCount(),
             manifest.getLiveCanaries().size(),
             (int) entries.stream().filter(entry -> entry.catalogTags().contains(
@@ -70,6 +76,13 @@ public class CatalogHealthService {
             recentGaps,
             List.copyOf(policyIssues)
         );
+    }
+
+
+    private int queryCount(List<CatalogEntry> entries) {
+        return entries.stream()
+                      .mapToInt(entry -> 1 + entry.scientificSynonyms().size() + entry.commonNames().size())
+                      .sum();
     }
 
 

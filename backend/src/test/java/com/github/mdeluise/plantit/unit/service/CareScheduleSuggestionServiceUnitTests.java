@@ -1,15 +1,21 @@
 package com.github.mdeluise.plantit.unit.service;
 
 import java.time.Instant;
+import java.util.Date;
+import java.util.List;
 
 import com.github.mdeluise.plantit.botanicalinfo.BotanicalInfo;
 import com.github.mdeluise.plantit.botanicalinfo.care.PlantCareInfo;
+import com.github.mdeluise.plantit.diary.entry.DiaryEntry;
+import com.github.mdeluise.plantit.diary.entry.DiaryEntryRepository;
+import com.github.mdeluise.plantit.diary.entry.DiaryEntryType;
 import com.github.mdeluise.plantit.plant.Plant;
 import com.github.mdeluise.plantit.plant.care.CareScheduleSuggestion;
 import com.github.mdeluise.plantit.plant.care.CareScheduleSuggestionService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 @DisplayName("Unit tests for personalized care schedule suggestions")
 class CareScheduleSuggestionServiceUnitTests {
@@ -46,6 +52,33 @@ class CareScheduleSuggestionServiceUnitTests {
         Assertions.assertEquals(7, result.intervalDays());
         Assertions.assertEquals(0.45, result.confidence(), 0.001);
         Assertions.assertTrue(result.factors().contains("DEFAULT_BASELINE"));
+    }
+
+
+    @Test
+    @DisplayName("Should blend recent watering history into the next suggestion")
+    void shouldUseRecentWateringHistory() {
+        final DiaryEntryRepository repository = Mockito.mock(DiaryEntryRepository.class);
+        final CareScheduleSuggestionService historyService = new CareScheduleSuggestionService(repository);
+        final Plant plant = plantWithSoilMoisture(3);
+        plant.setId(42L);
+        final DiaryEntry newer = wateringEntry("2026-07-08T12:00:00Z");
+        final DiaryEntry older = wateringEntry("2026-07-04T12:00:00Z");
+        Mockito.when(repository.findTop4ByDiaryTargetAndTypeOrderByDateDesc(plant, DiaryEntryType.WATERING))
+               .thenReturn(List.of(newer, older));
+
+        final CareScheduleSuggestion result = historyService.suggest(plant);
+
+        Assertions.assertEquals(9, result.intervalDays());
+        Assertions.assertTrue(result.factors().contains("RECENT_WATERING_HISTORY"));
+    }
+
+
+    private DiaryEntry wateringEntry(String instant) {
+        final DiaryEntry entry = new DiaryEntry();
+        entry.setType(DiaryEntryType.WATERING);
+        entry.setDate(Date.from(Instant.parse(instant)));
+        return entry;
     }
 
 

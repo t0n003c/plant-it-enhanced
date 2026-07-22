@@ -23,6 +23,8 @@ import com.github.mdeluise.plantit.reminder.frequency.Unit;
 import com.github.mdeluise.plantit.reminder.today.CareTaskDTO;
 import com.github.mdeluise.plantit.reminder.today.CareTaskService;
 import com.github.mdeluise.plantit.reminder.today.CareTaskStatus;
+import com.github.mdeluise.plantit.plant.care.CareScheduleSuggestion;
+import com.github.mdeluise.plantit.plant.care.CareScheduleSuggestionService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -90,6 +92,29 @@ class CareTaskServiceUnitTests {
         Assertions.assertNull(reminder.getSnoozedUntil());
         Assertions.assertNull(reminder.getLastNotified());
         Mockito.verify(reminderRepository).save(reminder);
+    }
+
+
+    @Test
+    @DisplayName("Should adapt a watering reminder after completing care")
+    void shouldAdaptWateringReminderAfterCompletion() {
+        final CareScheduleSuggestionService suggestionService = Mockito.mock(CareScheduleSuggestionService.class);
+        Mockito.when(suggestionService.suggest(Mockito.any(Plant.class)))
+               .thenReturn(new CareScheduleSuggestion(5, 0.8, List.of("RECENT_WATERING_HISTORY")));
+        final CareTaskService adaptiveService = new CareTaskService(
+            reminderService,
+            reminderRepository,
+            new ReminderScheduleCalculator(Clock.fixed(NOW, CHICAGO)),
+            diaryEntryService,
+            suggestionService
+        );
+        final Reminder reminder = reminderAt(6, 0);
+        Mockito.when(reminderService.get(7L)).thenReturn(reminder);
+
+        adaptiveService.complete(7L, "Soil was dry");
+
+        Assertions.assertEquals(5, reminder.getFrequency().getQuantity());
+        Assertions.assertEquals(Unit.DAYS, reminder.getFrequency().getUnit());
     }
 
 

@@ -20,7 +20,7 @@ class CatalogQualityManifestUnitTests {
             new ClassPathResource("trusted-common-names.json"));
 
         Assertions.assertEquals(1, manifest.getSchemaVersion());
-        Assertions.assertEquals(2, manifest.getTiers().size());
+        Assertions.assertEquals(3, manifest.getTiers().size());
         Assertions.assertEquals(19, manifest.getLiveCanaries().size());
         index.catalogEntries().forEach(entry -> Assertions.assertNotNull(
             manifest.policyFor(entry.catalogTags())));
@@ -34,6 +34,7 @@ class CatalogQualityManifestUnitTests {
 
         final var cultivated = manifest.policyFor(Set.of());
         final var trail = manifest.policyFor(Set.of(TrustedCommonNameIndex.NORTH_AMERICAN_TRAIL_TAG));
+        final var discovery = manifest.policyFor(Set.of(TrustedCommonNameIndex.SEARCH_DISCOVERY_TAG));
 
         Assertions.assertEquals("CURATED_CULTIVATED", cultivated.name());
         Assertions.assertEquals(Set.of("light", "soilHumidity"), Set.copyOf(cultivated.requiredCareFields()));
@@ -41,6 +42,9 @@ class CatalogQualityManifestUnitTests {
         Assertions.assertEquals("NORTH_AMERICAN_TRAIL", trail.name());
         Assertions.assertTrue(trail.requiredCareFields().isEmpty());
         Assertions.assertTrue(trail.requiresImage());
+        Assertions.assertEquals("SEARCH_DISCOVERY", discovery.name());
+        Assertions.assertTrue(discovery.requiredCareFields().isEmpty());
+        Assertions.assertFalse(discovery.requiresImage());
     }
 
 

@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
 public class TrustedCommonNameIndex {
     public static final String NORTH_AMERICAN_TRAIL_TAG = "NORTH_AMERICAN_TRAIL";
     public static final String CONTACT_HAZARD_TAG = "CONTACT_HAZARD";
+    public static final String SEARCH_DISCOVERY_TAG = "SEARCH_DISCOVERY";
     private final List<TrustedNameEntry> entries;
 
 
