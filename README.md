@@ -82,12 +82,13 @@ available. Plant-it retains the provider's source page, license code, and attrib
 smaller square thumbnail if the preferred medium image cannot be loaded. Existing local and
 user-selected images always take precedence.
 
-The reviewed offline index contains 177 taxa and 863 accepted scientific-name, synonym,
-and everyday-name test queries and works without an API key. The cultivated tier contains 87 plants
-with reviewed light and soil-moisture guidance; the trail tier contains 90 North American plants
-whose household-care fields are intentionally not required. The web app sends its current language
-and region with each search. Exact everyday-name matches stay visible on the result card even when
-several cultivated forms share one scientific species. Search starts after a short 400 ms pause,
+The offline search index contains 2,000 plant identities and 4,514 searchable names and aliases
+and works without an API key. It keeps 180 reviewed identities as the trusted care and safety tier,
+including 90 cultivated profiles and 90 North American trail plants, plus 1,820 discovery-only
+identities prioritized from widely observed plant names. Discovery entries can be enriched from
+providers at search time, but are not presented as locally reviewed care or safety data. The web app
+sends its current language and region with each search. Exact everyday-name matches stay visible on
+the result card even when several cultivated forms share one scientific species. Search starts after a short 400 ms pause,
 can be submitted immediately from the keyboard, and keeps compact progress feedback visible without
 replacing the result layout.
 `PLANT_SEARCH_LOCALE` and `PLANT_SEARCH_REGION` are fallbacks for older clients. Outbound
@@ -99,7 +100,7 @@ to use Redis.
 One versioned manifest defines the support policy for every reviewed entry. Release tests search
 the complete local name corpus, enforce unique exact identities and complete cultivated-care
 requirements, and replay recorded response contracts for each external provider. A weekly,
-rate-limited GitHub audit checks all 177 reviewed plants against live iNaturalist image and GBIF
+rate-limited GitHub audit checks all 180 reviewed plants against live iNaturalist image and GBIF
 taxonomy endpoints; 17 stable manifest canaries provide a faster representative set. Repository
 secrets can also verify Trefle and Pl@ntNet.
 

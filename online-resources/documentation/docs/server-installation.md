@@ -97,8 +97,8 @@ running image's revision label:
 ./source/scripts/deploy-nas.sh "$PWD"
 ```
 
-After signing in, open **More → Catalog health**. Release 0.17.1 should report 177 reviewed plants,
-87 curated care profiles, 17 live canaries, and no release-policy issue. A search that returns no
+After signing in, open **More → Catalog health**. Release 0.17.1 should report 180 reviewed plants,
+2,000 searchable plants, 90 curated care profiles, 17 live canaries, and no release-policy issue. A search that returns no
 result, lacks a top-result image, or has no structured care will appear there only for the signed-in
 account and will resolve after a later successful request.
 

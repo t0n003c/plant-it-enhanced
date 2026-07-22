@@ -36,6 +36,8 @@ class CatalogHealthServiceUnitTests {
         Assertions.assertTrue(result.healthy());
         Assertions.assertEquals(180, result.totals().reviewedEntries());
         Assertions.assertEquals(874, result.totals().reviewedQueries());
+        Assertions.assertEquals(2000, result.totals().searchableEntries());
+        Assertions.assertEquals(4514, result.totals().searchableQueries());
         Assertions.assertEquals(89, result.totals().curatedCareProfiles());
         Assertions.assertEquals(19, result.totals().liveCanaries());
         Assertions.assertTrue(result.policyIssues().isEmpty());
@@ -53,5 +55,13 @@ class CatalogHealthServiceUnitTests {
         Assertions.assertEquals(90, trail.entries());
         Assertions.assertEquals(0, trail.careRequiredEntries());
         Assertions.assertEquals(100, trail.careCoveragePercent());
+        final CatalogHealthSnapshot.TierCoverage discovery = result.tiers().stream()
+            .filter(tier -> "SEARCH_DISCOVERY".equals(tier.name()))
+            .findFirst()
+            .orElseThrow();
+        Assertions.assertEquals(1820, discovery.entries());
+        Assertions.assertEquals(3640, discovery.reviewedQueries());
+        Assertions.assertEquals(0, discovery.imageRequiredEntries());
+        Assertions.assertEquals(0, discovery.careRequiredEntries());
     }
 }

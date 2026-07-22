@@ -23,10 +23,13 @@ merged instead of creating duplicate species.
 
 ### Catalog quality coverage
 
-The reviewed index is released as two explicit support tiers: 87 cultivated plants and 90 North
-American trail plants. All 863 accepted-name, synonym, and everyday-name queries are tested
-together. Cultivated entries must also have reviewed light and
-soil-moisture guidance; household care is intentionally not required for wild trail entries.
+The offline search index contains 2,000 identities and 4,514 searchable names. It has two reviewed
+support tiers—90 cultivated plants and 90 North American trail plants—plus 1,820 discovery-only
+identities selected from widely observed plant names. All 180 reviewed identities and their 874
+accepted-name, synonym, and everyday-name queries are tested together. Discovery entries are
+searchable and can be provider-enriched, but do not imply locally reviewed care or safety data.
+Cultivated entries must also have reviewed light and soil-moisture guidance; household care is
+intentionally not required for wild trail entries.
 
 Open **More → Catalog health** to see the current corpus totals, care coverage, representative
 provider-canary count, and recent gaps observed by your account. Plant-it stores only a sanitized
@@ -35,7 +38,7 @@ your self-hosted database and resolves automatically when a later request succee
 contain photos, notes, coordinates, API credentials, or provider response bodies.
 
 External photos are attributed live resources rather than bundled assets. A weekly, rate-limited
-audit checks all 177 reviewed identities for an expected iNaturalist image and accepted GBIF
+audit checks all 180 reviewed identities for an expected iNaturalist image and accepted GBIF
 taxonomy, while actual searches record local image gaps. Catalog Health therefore describes images
 as runtime-monitored rather than promising that every external photo is permanently available.
 
@@ -128,7 +131,9 @@ layout as the signed-in app.
 Log watering, fertilizing, biostimulating, pruning, repotting, and other events for one or more
 plants. Filter the chronological diary by plant or event type. Reminders can be enabled, disabled,
 edited, snoozed, skipped, or completed, with optional notification dispatchers configured by the
-self-hosting administrator.
+self-hosting administrator. After watering is completed from Today, the next watering interval
+blends the species profile, the plant's environment, and the recent watering history; plants with
+no usable history keep the conservative baseline schedule.
 
 ## Trail Journal
 

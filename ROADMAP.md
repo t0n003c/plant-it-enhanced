@@ -100,9 +100,11 @@ unless the user explicitly adds a cultivated plant to their collection.
 
 ## Next — Care that adapts
 
+- [x] Expand the offline search catalog to 2,000 identities with a clearly marked discovery tier,
+      while keeping care and safety claims limited to reviewed profiles.
 - [ ] Expand the reviewed offline care catalog toward 150–200 common plants, with Extension or
       similarly authoritative references for each profile.
-- [ ] Adjust suggested schedules using indoor/outdoor placement, light, pot, drainage, soil, and
+- [x] Adjust suggested schedules using indoor/outdoor placement, light, pot, drainage, soil, and
       completed-care history.
 - [ ] Optionally use local forecast data for outdoor watering advice without making weather a hard
       dependency.

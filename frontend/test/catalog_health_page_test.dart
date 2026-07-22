@@ -38,7 +38,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('The reviewed catalog is healthy'), findsOneWidget);
-    expect(find.text('176'), findsOneWidget);
+    expect(find.text('2000'), findsOneWidget);
     expect(find.text('Cultivated plants'), findsOneWidget);
     expect(find.byKey(const ValueKey('copy-catalog-health-report')),
         findsOneWidget);
@@ -49,6 +49,7 @@ void main() {
       300,
       scrollable: find.byType(Scrollable),
     );
+    expect(find.text('Search discovery'), findsOneWidget);
     expect(find.textContaining('No unresolved search'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -65,6 +66,8 @@ class _CatalogHealthHttpClient extends AppHttpClient {
         "totals": {
           "reviewedEntries": 176,
           "reviewedQueries": 853,
+          "searchableEntries": 2000,
+          "searchableQueries": 4514,
           "curatedCareProfiles": 86,
           "liveCanaries": 14,
           "contactHazards": 11
@@ -85,6 +88,16 @@ class _CatalogHealthHttpClient extends AppHttpClient {
             "entries": 90,
             "reviewedQueries": 400,
             "imageRequiredEntries": 90,
+            "careRequiredEntries": 0,
+            "careCompleteEntries": 0,
+            "searchCoveragePercent": 100,
+            "careCoveragePercent": 100
+          },
+          {
+            "name": "SEARCH_DISCOVERY",
+            "entries": 1820,
+            "reviewedQueries": 3640,
+            "imageRequiredEntries": 0,
             "careRequiredEntries": 0,
             "careCompleteEntries": 0,
             "searchCoveragePercent": 100,

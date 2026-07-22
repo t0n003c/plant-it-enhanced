@@ -1,5 +1,6 @@
 package com.github.mdeluise.plantit.diary.entry;
 
+import java.util.List;
 import java.util.Optional;
 
 import com.github.mdeluise.plantit.authentication.User;
@@ -11,6 +12,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface DiaryEntryRepository extends JpaRepository<DiaryEntry, Long> {
     Optional<DiaryEntry> findFirstByDiaryTargetAndTypeOrderByDateDesc(Plant target, DiaryEntryType type);
+
+    List<DiaryEntry> findTop4ByDiaryTargetAndTypeOrderByDateDesc(Plant target, DiaryEntryType type);
 
     Page<DiaryEntry> findAllByDiaryOwner(User user, Pageable pageable);
 
